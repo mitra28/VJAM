@@ -1,0 +1,7 @@
+{"metric":"RAMP_UP_SCORE", "api":"rest", "filepath":"src/metric_calculations.rs", "line":12}
+
+{"metric":"CORRECTNESS_SCORE", "api":"rest", "filepath":"metric_calculations.rs", "line":22}
+
+{"metric":"BUS_FACTOR_SCORE", "api":"rest", "filepath":"metric_calculations.rs", "line":30}
+
+{"metric":"LICENSE_SCORE", "api":"rest", "filepath":"metric_calculations.rs", "line":38}

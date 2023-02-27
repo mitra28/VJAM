@@ -1,0 +1,22 @@
+[package]
+name = "run"
+version = "0.1.0"
+authors = ["Kevin Loiselle", "Omar Tounsi", "Zach Liao", "Maximilian Manzhosov"]
+edition = "2021"
+
+[dependencies]
+reqwest = "0.11.14"
+serde = { version = "1.0.152", features = ["derive", "alloc"] }
+serde_json = { version = "1.0.93" }
+tokio = { version = "*", features = ["full"] }
+substring = "1.4.5"
+base64 = "0.21.0"
+async-recursion = "1.0.2"
+regex = "0.2"
+log = "0.4.11"
+env_logger = "0.7.1"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies.libc]
+version = "*"
