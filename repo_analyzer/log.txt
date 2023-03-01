@@ -1,0 +1,3 @@
+[INFO]: Logger successfully loaded!
+[INFO]: Logger successfully loaded!
+[INFO]: Logger successfully loaded!
