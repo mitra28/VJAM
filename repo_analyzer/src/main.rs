@@ -24,7 +24,6 @@ async fn main() -> Result<(), Box<dyn Error>> {
         println!("Incorrect number of arguments!");
         return Ok(());
     } else if args.len() == 1 {
-        run_help();
         return Ok(());
     }
 
@@ -165,8 +164,6 @@ async fn run_url(filename: &str) {
             }
         };
 
-        //println!("code len: {}", codebase_length);
-
         let opened_issues = match rest_api::github_get_open_issues(&owner , &package).await {
             Ok(opened_issues) => opened_issues,
             Err(_e) => {
@@ -174,8 +171,6 @@ async fn run_url(filename: &str) {
                 "0.0".to_owned()
             }
         };
-
-        //println!("open issues: {}", opened_issues);
 
         let license = match rest_api::github_get_license(&owner , &package).await {
             Ok(license) => license,
@@ -185,8 +180,6 @@ async fn run_url(filename: &str) {
             }
         };
 
-        //println!("license: {}", license);
-
         let number_of_forks = match rest_api::github_get_number_of_forks(&owner , &package).await {
             Ok(number_of_forks) => number_of_forks,
             Err(_e) => {
@@ -194,8 +187,6 @@ async fn run_url(filename: &str) {
                 "0.0".to_owned()
             }
         };
-
-        //println!("number_of_forks: {}", number_of_forks);
 
         let mut ru = metric_calculations::get_ramp_up_time(&codebase_length);
         if ru == -1.0 {
@@ -231,6 +222,3 @@ async fn run_url(filename: &str) {
     repos.display(); // will print RepoList to stdout in the desired format.
 }
 
-fn run_help() {
-    // Implement the run_help function here
-}
