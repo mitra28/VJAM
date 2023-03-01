@@ -224,11 +224,13 @@ async fn run_url(filename: &str) {
             l =  0.0;
             error!("Failed to get license from {}/{}", &owner, &package);
         }
-        let rm = metric_calculations::get_responsive_maintainer();
+        let mut rm = metric_calculations::get_responsive_maintainer();
+        if rm == -1.0 {
+            rm = 0.0;
+            error!("Failed to get number of forks from {}/{}", &owner, &package);
+        }
 
-
-
-        let metrics = [ru, c, bf, l]; // responsive maintainer is omitted
+        let metrics = [ru, c, bf, l, rm]; // responsive maintainer is omitted
         let o = metric_calculations::get_overall(&metrics);
 
         repos.add_repo(repo_list::Repo {url : repo_url, net_score : o, ramp_up : ru, correctness : c, bus_factor : bf, responsive_maintainer : rm, license : l});
