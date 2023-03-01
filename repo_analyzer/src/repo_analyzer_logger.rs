@@ -13,7 +13,6 @@ impl Logger {
     pub fn from_env_var(var: &str) -> Result<Self, String>{
         let res = env::var(var);
         if res.is_err() {
-            // println!("${} is not set in Enviromental Variables", var);
             return Err(res.err().unwrap().to_string())
         }
 
@@ -21,19 +20,6 @@ impl Logger {
     }
 
     pub fn new(log_file: &str) -> Result<Self, String> {
-        // check if file path exists
-        // find a better way to do this
-        // let p = Path::new(log_file);
-        // if !p.exists() {
-        //     File::create(log_file);
-        // }
-        // let file_res = if !p.exists() { File::create(log_file) } else { File::open(log_file) };
-        // if file_res.is_err() {
-        //     let word = if !p.exists() { "create" } else { "open" };
-        //     return Err(format!("Failed to {} file at {}", word, log_file));
-        // }
-        // let file = file_res.unwrap();
-
         let file_res = OpenOptions::new()
         .create(true)
         .append(true)

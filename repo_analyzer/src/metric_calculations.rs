@@ -2,6 +2,7 @@ fn normalize(value: f32, range: f32) -> f32 {
 
     value / range
 }
+
 fn min(n1: f32, n2: f32) -> f32 {
     if n1 > n2 {
         return n2;

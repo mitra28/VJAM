@@ -36,7 +36,6 @@ async fn main() -> Result<(), Box<dyn Error>> {
     } else {
         run_url(&args[1]).await;
     }
-
     Ok(())
 }
 
@@ -116,7 +115,6 @@ async fn run_url(filename: &str) {
         Ok(res) => { res }
         Err( _ ) => { repo_analyzer_logger::Logger::new("log.txt").unwrap() }
     };
-    //let mut logger = Logger::new("LOG").unwrap();
     logger.log_info("Logger successfully loaded!");
 
     let url_list = read_url_file::read_lines(filename); // returns urls as a list of strings
