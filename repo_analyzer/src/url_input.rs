@@ -17,7 +17,7 @@ pub fn is_valid(url: &str, regex: &Regex) -> bool {
 /// * Output: ```(String, Vec<String>) = ("npmjs", ["package", "request"]); ```
 ///
 /// * Input: <http://www.github.com/tensorflow/tensorflow>
-/// * Output: ```(String, Vec<String>) = ("github", ["tensorflow", "tensorflow_something"]). ```
+/// * Output: ```(String, Vec<String>) = ("github", ["tensorflow", "tensorflow_something"]); ```
 /// 
 pub fn get_data(url: &str) -> (String, Vec<String>) {
     let regular_expression = Regex::new(r"^https?://(www\.)?(npmjs|github)\.com/(.+)").unwrap();
