@@ -1,3 +1,5 @@
+//! Handles interaction with the npm and github REST APIs
+
 use std::{env};
 use std::str;
 use std::env::VarError;
@@ -7,14 +9,13 @@ use reqwest::header::HeaderMap;
 use base64::{ Engine, engine::general_purpose };
 
 
-///
 /// Returns the github link associated with the npmjs package
 ///
 /// # Arguments
 ///
-/// * 'url' - The full npmjs url you want the associated github link of
+/// * 'repository' - The full npmjs repository you want the associated github link of
+/// * '_owner' - Unused argument
 ///
-// Retrieves the GitHub link for a npmjs package
 pub async fn npmjs_get_repository_link(_owner: &str, repository: &str) -> Result<String, String> {
     // docs of the api to call to get the github link
     // https://api-docs.npms.io/#api-Package
@@ -83,6 +84,13 @@ pub async fn npmjs_get_repository_link(_owner: &str, repository: &str) -> Result
 }
 
 
+/// Returns the length of a codebase
+///
+/// # Arguments
+///
+/// * 'owner' - The owner of the repository
+/// * 'repository' - The github repository you want to pull from
+///
 pub async fn github_get_codebase_length(owner: &str, repository: &str) -> Result<String, String> {
     let response_res = github_get_response_body(owner, repository, None).await;
     if response_res.is_err() {
@@ -104,6 +112,13 @@ pub async fn github_get_codebase_length(owner: &str, repository: &str) -> Result
 }
 
 
+/// Returns the number of open issues of a codebase
+///
+/// # Arguments
+///
+/// * 'owner' - The owner of the repository
+/// * 'repository' - The github repository you want to pull from
+///
 pub async fn github_get_open_issues(owner: &str, repository: &str) -> Result<String, String> {
 
 
@@ -127,6 +142,13 @@ pub async fn github_get_open_issues(owner: &str, repository: &str) -> Result<Str
 
 }
 
+/// Returns the number of forks from a codebase
+///
+/// # Arguments
+///
+/// * 'owner' - The owner of the repository
+/// * 'repository' - The github repository you want to pull from
+///
 pub async fn github_get_number_of_forks(owner: &str, repository: &str) -> Result<String, String> {
 
     let response_res = github_get_response_body(owner, repository, None).await;
@@ -149,6 +171,13 @@ pub async fn github_get_number_of_forks(owner: &str, repository: &str) -> Result
 
 }
 
+/// Returns the license of a codebase
+///
+/// # Arguments
+///
+/// * 'owner' - The owner of the repository
+/// * 'repository' - The github repository you want to pull from
+///
 pub async fn github_get_license(owner: &str, repository: &str) -> Result<String, String> {
 
     let contents_path = format!("{}/contents", repository);

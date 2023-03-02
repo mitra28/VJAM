@@ -1,18 +1,24 @@
+//! This module is responsible for obtaining the domain and subdirectories of a passed in url
+//! See [get_data] for more information
+
+
 use regex::Regex;
 
-// Returns true if there was a match to the regex
+
+/// Checks to see if a passed in url matches a regex
 pub fn is_valid(url: &str, regex: &Regex) -> bool {
     regex.is_match(url)
 }
 
-/*
-Input: "https://www.npmjs.com/package/request"
-Output: (String, Vec<String>) = ("npmjs", ["package", "request"]); 
-
-Input: "http://www.github.com/tensorflow/tensorflow"
-Output: (String, Vec<String>) = ("github", ["tensorflow", "tensorflow_something"]). 
-*/
-// Parses a URL and returns its root domain and subdirectories
+/// Parses a URL and returns its root domain and subdirectories
+/// Example:
+/// 
+/// * Input: <https://www.npmjs.com/package/request>
+/// * Output: ```(String, Vec<String>) = ("npmjs", ["package", "request"]); ```
+///
+/// * Input: <http://www.github.com/tensorflow/tensorflow>
+/// * Output: ```(String, Vec<String>) = ("github", ["tensorflow", "tensorflow_something"]). ```
+/// 
 pub fn get_data(url: &str) -> (String, Vec<String>) {
     let regular_expression = Regex::new(r"^https?://(www\.)?(npmjs|github)\.com/(.+)").unwrap();
     if is_valid(url, &regular_expression) {
