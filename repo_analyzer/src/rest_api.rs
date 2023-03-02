@@ -10,12 +10,14 @@ use base64::{ Engine, engine::general_purpose };
 
 
 /// Returns the github link associated with the npmjs package
+
 ///
 /// # Arguments
 ///
 /// * 'repository' - The full npmjs repository you want the associated github link of
 /// * '_owner' - Unused argument
 ///
+
 pub async fn npmjs_get_repository_link(_owner: &str, repository: &str) -> Result<String, String> {
     // docs of the api to call to get the github link
     // https://api-docs.npms.io/#api-Package
@@ -45,7 +47,6 @@ pub async fn npmjs_get_repository_link(_owner: &str, repository: &str) -> Result
     }
 
     let json_obj: serde_json::Value = json_obj_res.unwrap();
-    // println!("{:#?}", json_obj);
     let json_collected_res = json_obj.get("collected");
     if json_collected_res.is_none() {
         return Err(format!("Failed to get repository link from npmjs package{}", repository));
@@ -72,14 +73,6 @@ pub async fn npmjs_get_repository_link(_owner: &str, repository: &str) -> Result
         return Err(format!("Failed to retrieve a Github link from npmjs package{}", repository));
     } 
 
-    // Retrieves the Github URL in the API's return json object "repository" field
-    // let t = json_obj.get("collected").unwrap()
-    //                         .get("metadata").unwrap()
-    //                         .get("links").unwrap()
-    //                         .get("repository").unwrap()
-    //                         .as_str().unwrap();
-
-    // println!("{}", t);
     Ok(repo_link_str.to_owned())
 }
 
@@ -97,8 +90,6 @@ pub async fn github_get_codebase_length(owner: &str, repository: &str) -> Result
         return Err(response_res.err().unwrap().to_string())
     }
     let response = response_res.unwrap();
-
-    // println!("{:#?}", response);
 
     let codebase_length_res = response.get("size");
     if codebase_length_res.is_none() {
@@ -202,133 +193,13 @@ pub async fn github_get_license(owner: &str, repository: &str) -> Result<String,
     Ok(license)
 }
 
-///
-/// # Info
-/// Returns a HashMap<String, String> with the following keys:
-///
-/// key
-///
-/// documentation_length:       The length of the documentation in lines (excluding blank lines).
-///
-/// codebase_length:            The length of the codebase in lines (excluding blank lines).
-///
-/// num_closed_bugs_month:      The number of closed bugs in the last month.
-///
-/// num_opened_issues_month:    The number of opened issues in the last month.
-///
-/// license:                    The name of the license the repository is using.
-///
-///
-/// # Arguments
-///
-/// * owner: &str -             The username of the owner of the target repository
-///
-/// * repository: &str -        The name of the repository
-///
-// pub async fn github_get_metrics(owner: &str, repository: &str) -> Result<HashMap<String, String>, String> {
-// // metrics:
-// // license - not done
-// // codebase_length - done
-// // readme - not done
-// // open_issues - done
-
-//     let mut metrics: HashMap<String, String> = HashMap::new();
-//     let commits_path = format!("{}/commits", repository);
-//     let contents_path = format!("{}/contents", repository);
-
-
-//     // get codebase length
-//     let response_res = github_get_response_body(owner, repository, None).await;
-//     if response_res.is_err() {
-//         return Err(response_res.err().unwrap().to_string())
-//     }
-//     let response = response_res.unwrap();
-
-
-//     let codebase_length_res = response.get("size");
-//     if codebase_length_res.is_none() {
-//         return Err(format!("Failed to get codebase size of {}/{}", owner, repository));
-//     }
-//     let codebase_length_val = codebase_length_res.unwrap().as_i64();
-//     if codebase_length_val.is_none() {
-//         return Err(format!("Failed to get codebase size of {}/{}", owner, repository));
-//     }
-//     metrics.insert(String::from("codebase_length"), format!("{}", codebase_length_val.unwrap()));
-
-
-//     // get # opened issues
-//     let open_issues_res = response.get("open_issues_count");
-//     if open_issues_res.is_none() {
-//         return Err(format!("Failed to get number of open issues of {}/{}", owner, repository));
-//     }
-
-//     let open_issues_val = open_issues_res.unwrap().as_i64();
-//     if open_issues_val.is_none() {
-//         return Err(format!("Failed to get number of open issues of {}/{}", owner, repository));
-//     }
-
-//     metrics.insert(String::from("open_issues"), format!("{}", open_issues_val.unwrap()));
-
-
-//     // get # commits
-//     let commits_response_res = github_get_response_body(owner, &commits_path, None).await;
-//     if commits_response_res.is_err() {
-//         return Err(commits_response_res.err().unwrap().to_string());
-//     }
-
-//     let commits_response = commits_response_res.unwrap();
-//     let commits_arr_res = commits_response.as_array();
-//     if commits_arr_res.is_none() {
-//         return Err(format!("Failed to get number of commits of {}/{}", owner, repository));
-//     }
-//     let commits_arr = commits_arr_res.unwrap();
-
-
-//     // get license / README
-//     let contents_response_res = github_get_response_body(owner, &contents_path, None).await;
-//     if contents_response_res.is_err() {
-//         return Err(contents_response_res.unwrap_err().to_string());
-//     }
-//     let contents_response = contents_response_res.unwrap();
-//     let contents_arr_res = contents_response.as_array();
-//     if contents_arr_res.is_none() {
-//         return Err(format!("Failed to get contents of Github repository: {}/{}", owner, repository));
-//     }
-
-//     let contents_arr = contents_arr_res.unwrap();
-
-//     let license_res = github_get_license_from_contents_response(owner, repository, contents_arr).await;
-//     if license_res.is_err() {
-//         return Err(license_res.err().unwrap().to_string())
-//     }
-//     let license_str = license_res.unwrap();
-//     let readme_res = github_get_readme_from_contents_response(owner, repository, contents_arr);
-//     if readme_res.is_err() {
-//         return Err(readme_res.err().unwrap().to_string());
-//     }
-//     let readme_str = readme_res.unwrap();
-//     // TODO: convert contents from base64 to ascii then find line count
-//     let readme_len = 0;
-
-//     metrics.insert(String::from("license"), String::from(license_str));
-//     metrics.insert(String::from("readme_len"), format!("{}", readme_len));
-
-//     Ok(metrics)
-// }
-
-
-///
 /// Returns the response body as a serde_json::Value
-///
-/// # Arguments
-///
 pub async fn github_get_response_body(owner: &str, repository: &str, headers: Option<HeaderMap>) -> Result<serde_json::Value, String> {
     let response_res = github_get_response(owner, repository, headers).await;
     if response_res.is_err() {
         return Err(response_res.err().unwrap().to_string());
     }
     let response = response_res.unwrap();
-    // println!("{:#?}", response);
     let response_text_res = response.text().await;
     if response_text_res.is_err() {
         return Err(response_text_res.err().unwrap().to_string())
@@ -344,29 +215,7 @@ pub async fn github_get_response_body(owner: &str, repository: &str, headers: Op
     Ok(response_json)
 }
 
-
-///
-/// Returns the StatusCode of a request to a Github repository
-///
-/// # Arguments
-///
-/// * 'owner'      :&str - The username of the owner of the repository
-/// * 'repository' :&str - The name of the repository
-///
-// pub async fn github_get_status(owner: &str, repository: &str) -> Result<StatusCode, String> {
-//     let response_res = github_get_response(owner, repository, None).await;
-//     if response_res.is_err() {
-//         return Err(response_res.err().unwrap().to_string());
-//     }
-//     Ok(response_res.unwrap().status().to_owned())
-// }
-
-
-///
 /// Returns the Response object from a github url
-///
-/// # Arguments
-///
 pub async fn github_get_response(owner: &str, repository: &str, headers: Option<HeaderMap>) -> Result<Response, String> {
     let mut owner_mut = String::from(owner);
     let mut repo_mut = String::from(repository);
@@ -397,13 +246,11 @@ pub async fn github_get_response(owner: &str, repository: &str, headers: Option<
     if headers.is_some() {
         request_builder = request_builder.headers(headers.unwrap());
     }
-    // std::thread::sleep(time::Duration::from_millis(10));
     let response_res = request_builder.send().await;
     if response_res.is_err() {
         return Err(response_res.err().unwrap().to_string());
     }
     let response = response_res.unwrap();
-    // println!("{:#?}", response);
     Ok(response)
 }
 
@@ -419,7 +266,6 @@ fn github_get_api_token() -> Result<String, VarError> {
     let name = "GITHUB_TOKEN";
     let res = env::var(name);
     if res.is_err() {
-        //println!("${} is not set in Enviromental Variables", name);
         return Err(res.err().unwrap())
     }
     Ok(res.unwrap())
@@ -429,10 +275,6 @@ fn github_get_api_token() -> Result<String, VarError> {
 // returns a blank string if no license is found
 async fn github_get_license_from_contents_response(owner: &str, repository: &str, content_arr: &Vec<serde_json::Value>) -> Result<String, String> {
     // this function assumes that the content_arr passed to it is an array of object which contain information on files in the repository
-
-    // println!("{:#?}",content_arr);
-    // println!("{}",owner);
-    // println!("{}",repository);
 
     // look for key words in file/dir names in base directory
     // eg.: 'license' or names of licenses
@@ -510,11 +352,6 @@ async fn github_get_license_from_contents_response(owner: &str, repository: &str
             license_file.push_str(path);
             break; // license file was found
         }
-
-        // STEP 1.4: If prev steps were unsuccessful, look for license names in files
-
-        // println!("{}", name);
-
     }
 
     //
@@ -524,7 +361,6 @@ async fn github_get_license_from_contents_response(owner: &str, repository: &str
         // STEP 2.1: if license name is located in a file, get the file contents, convert from base64, then find the license
 
         // get file contents
-        // println!("license file: {}", license_file);
         let path = format!("{}/contents/{}", repository, license_file);
         let contents_res = github_get_response_body(owner, &path, None).await;
         if contents_res.is_err() {
@@ -558,32 +394,9 @@ async fn github_get_license_from_contents_response(owner: &str, repository: &str
         let license_name = String::from(license_lines[0].trim());
         // println!("{}", license_name);
         return Ok(license_name.clone());
-
-    } else {
-        // STEP 2.2: if license name is in the file name, extract it.
-
-    }
+    } 
 
     // if the code reaches this line, a license was not found
-    // println!("{:#?}", content_arr);
     Ok("license not implemented yet".to_owned())
 }
 
-// returns a blank string if no license is found
-// fn github_get_readme_from_contents_response(_owner: &str, repository: &str, content_arr: &Vec<serde_json::Value>) -> Result<String, Box<dyn Error>> {
-
-//     // look for 'readme', 'readme.txt', or 'readme.md'
-//     //
-//     for file_val in content_arr {
-//         let _file_res = file_val.as_str();
-//     }
-
-
-//     Ok("readme not implemented yet".to_owned())
-// }
-
-//
-// fn errorlog(error: &str) -> Box<dyn Error> {
-//     println!("error");
-//     Err(Box::new())
-// }
