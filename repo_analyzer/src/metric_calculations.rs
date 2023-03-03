@@ -68,11 +68,16 @@ pub fn get_license(license: &str) -> f32 {
 }
 
 
-pub fn get_responsive_maintainer(opened_issues: &str) -> f32 {
+pub fn get_responsive_maintainer(opened_issues: &str, closed_issues: &str) -> f32 {
     let opened_issues = match opened_issues.parse::<f32>() {
         Ok(n) => n,
         Err(_) => -1.0
     };
+    let _closed_issues = match closed_issues.parse::<f32>() {
+        Ok(n) => n,
+        Err(_) => -1.0
+    };
+
     normalize(min(opened_issues, 2000.0), 2000.0)
 }
 
