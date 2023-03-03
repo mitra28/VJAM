@@ -5,8 +5,8 @@ use std::str;
 use std::env::VarError;
 use std::collections::HashMap;
 use std::result::{Result};
-use reqwest::Response;
-use reqwest::{Client, Response};
+use reqwest::{Client};
+use reqwest::{Response};
 use reqwest::header::HeaderMap;
 use base64::{ Engine, engine::general_purpose };
 
@@ -123,7 +123,7 @@ pub async fn github_get_open_issues(owner: &str, repository: &str,  response_res
 
 }
 
-pub async fn github_get_closed_issues(owner: &str, repo: &str) -> Result<String, String> {
+pub async fn github_get_closed_issues(owner: &str, repo: &str) -> Result<u32, String> {
 
     let token_res = github_get_api_token();
     if token_res.is_err() {
@@ -131,21 +131,18 @@ pub async fn github_get_closed_issues(owner: &str, repo: &str) -> Result<String,
     }
     let token = token_res.unwrap();
 
-    let client = reqwest::Client::new();
-    let res = client
+    let client = Client::new();
+    let res: Response = client
         .get(&format!(
             "https://api.github.com/repos/{}/{}/issues?state=closed",
             owner, repo
         ))
         .header("Authorization", format!("Bearer {}", token))
         .send()
-        .await;
+        .await
+        .map_err(|e| e.to_string())?;
 
-    let json = match res {
-        Ok(res) => res.json().await?,
-        Err(e) => return Err(e),
-    };
-
+    let json = res.json().await.map_err(|e| e.to_string())?;
     let count = json.as_array().map_or(0, |arr| arr.len()) as u32;
 
     Ok(count)
@@ -207,13 +204,13 @@ pub async fn github_get_license(owner: &str, repository: &str, response_res: Res
     println!("License_res : {:?}", license_res);
     if license_res.is_none() {
         return Err(format!("Failed to get license of {}/{}", owner, repository));
-    }else{
-        if license_res == Some(std::ptr::null()){
-
-        }else{
-        let license_name = license_res.expect("License not found").get("key").unwrap();
-        let my_str = license_name.as_str().expect("Invalid license name");
-        println!("License name: {}", my_str);
+    } else {
+        if license_res == None {
+            // do something here
+        } else {
+            let license_name = license_res.expect("License not found").get("key").unwrap();
+            let my_str = license_name.as_str().expect("Invalid license name");
+            println!("License name: {}", my_str);
         }
     }
 
