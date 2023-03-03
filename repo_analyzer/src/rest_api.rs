@@ -2,6 +2,7 @@ use std::{env};
 use std::str;
 use std::env::VarError;
 use std::result::{Result};
+use reqwest::Response;
 use reqwest::{Client, Response};
 use reqwest::header::HeaderMap;
 use base64::{ Engine, engine::general_purpose };
@@ -125,6 +126,34 @@ pub async fn github_get_open_issues(owner: &str, repository: &str) -> Result<Str
 
     Ok(format!("{}", open_issues_val.unwrap()))
 
+}
+
+pub async fn github_get_closed_issues(owner: &str, repo: &str) -> Result<String, String> {
+
+    let token_res = github_get_api_token();
+    if token_res.is_err() {
+        return Err(token_res.err().unwrap().to_string());
+    }
+    let token = token_res.unwrap();
+
+    let client = reqwest::Client::new();
+    let res = client
+        .get(&format!(
+            "https://api.github.com/repos/{}/{}/issues?state=closed",
+            owner, repo
+        ))
+        .header("Authorization", format!("Bearer {}", token))
+        .send()
+        .await;
+
+    let json = match res {
+        Ok(res) => res.json().await?,
+        Err(e) => return Err(e),
+    };
+
+    let count = json.as_array().map_or(0, |arr| arr.len()) as u32;
+
+    Ok(count)
 }
 
 pub async fn github_get_number_of_forks(owner: &str, repository: &str) -> Result<String, String> {
@@ -299,7 +328,7 @@ pub async fn github_get_response_body(owner: &str, repository: &str, headers: Op
         return Err(response_res.err().unwrap().to_string());
     }
     let response = response_res.unwrap();
-    // println!("{:#?}", response);
+    println!("{:#?}", response);
     let response_text_res = response.text().await;
     if response_text_res.is_err() {
         return Err(response_text_res.err().unwrap().to_string())

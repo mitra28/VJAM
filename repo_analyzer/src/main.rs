@@ -184,6 +184,16 @@ async fn run_url(filename: &str) {
 
         //println!("open issues: {}", opened_issues);
 
+        let closed_issues = match rest_api::github_get_closed_issues(&owner , &package).await {
+            Ok(closed_issues) => closed_issues,
+            Err(_e) => {
+                debug!("{}", _e);
+                "0.0".to_owned()
+            }
+        };
+
+        //println!("closed issues: {}", closed_issues);
+
         let license = match rest_api::github_get_license(&owner , &package).await {
             Ok(license) => license,
             Err(_e) => {
