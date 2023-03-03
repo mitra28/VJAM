@@ -224,7 +224,7 @@ async fn run_url(filename: &str) {
             l =  0.0;
             error!("Failed to get license from {}/{}", &owner, &package);
         }
-        let mut rm = metric_calculations::get_responsive_maintainer();
+        let mut rm = metric_calculations::get_responsive_maintainer(&opened_issues);
         if rm == -1.0 {
             rm = 0.0;
             error!("Failed to get number of forks from {}/{}", &owner, &package);
@@ -236,8 +236,8 @@ async fn run_url(filename: &str) {
         repos.add_repo(repo_list::Repo {url : repo_url, net_score : o, ramp_up : ru, correctness : c, bus_factor : bf, responsive_maintainer : rm, license : l});
     }
 
-    repos.sort_by_net_score(); // will sort the RepoList by trustworthiness.
-    repos.display(); // will print RepoList to stdout in the desired format.
+    repos.sort_by_net_score(); // will sort the RepoList by trustworthiness. 
+    repos.display(); // will print RepoList to stdout in the desired format. 
 }
 
 fn run_help() {

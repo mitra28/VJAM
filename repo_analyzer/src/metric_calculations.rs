@@ -54,8 +54,12 @@ pub fn get_license(license: &str) -> f32 {
     return has_license;
 }
 
-pub fn get_responsive_maintainer() -> f32 {
-    -1.0
+pub fn get_responsive_maintainer(opened_issues: &str) -> f32 {
+    let opened_issues = match opened_issues.parse::<f32>() {
+        Ok(n) => n,
+        Err(_) => -1.0
+    };
+    normalize(min(opened_issues, 2000.0), 2000.0)
 }
 
 pub fn get_overall(metrics: &[f32]) -> f32 {
