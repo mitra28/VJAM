@@ -8,6 +8,8 @@ mod rest_api;
 mod read_url_file;
 mod repo_analyzer_logger;
 
+use crate::rest_api::github_get_response_body;
+
 use std::error::Error;
 use std::process::Command;
 //use std::ptr::null;
@@ -156,8 +158,17 @@ async fn run_url(filename: &str) {
             package = git_data[1].to_owned();
 
         }
+        let r = github_get_response_body(&owner, &package, None).await;
+        if r.is_err() {
+            println!("ERROR ");
+            //return Err(response.err().unwrap().to_string());
+        }
+        let response = r.clone();
+        let response1 = r.clone();
+        let response2 = r.clone();
 
-        let codebase_length = match rest_api::github_get_codebase_length(&owner , &package).await {
+
+        let codebase_length = match rest_api::github_get_codebase_length(&owner , &package, r).await {
             Ok(codebase_length) => codebase_length,
             Err(_e) => {
                 logger.log_warning(&format!("{}", _e.as_str()));
@@ -166,8 +177,7 @@ async fn run_url(filename: &str) {
         };
 
         //println!("code len: {}", codebase_length);
-
-        let opened_issues = match rest_api::github_get_open_issues(&owner , &package).await {
+        let opened_issues = match rest_api::github_get_open_issues(&owner , &package, response).await {
             Ok(opened_issues) => opened_issues,
             Err(_e) => {
                 logger.log_warning(&format!("{}", _e.as_str()));
@@ -177,7 +187,7 @@ async fn run_url(filename: &str) {
 
         //println!("open issues: {}", opened_issues);
 
-        let license = match rest_api::github_get_license(&owner , &package).await {
+        let license = match rest_api::github_get_license(&owner , &package, response1).await {
             Ok(license) => license,
             Err(_e) => {
                 logger.log_warning(&format!("{}", _e.as_str()));
@@ -187,7 +197,7 @@ async fn run_url(filename: &str) {
 
         //println!("license: {}", license);
 
-        let number_of_forks = match rest_api::github_get_number_of_forks(&owner , &package).await {
+        let number_of_forks = match rest_api::github_get_number_of_forks(&owner , &package, response2).await {
             Ok(number_of_forks) => number_of_forks,
             Err(_e) => {
                 logger.log_warning(&format!("{}", _e.as_str()));

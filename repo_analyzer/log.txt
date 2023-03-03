@@ -1,0 +1,231 @@
+[INFO]: Logger successfully loaded!
+[WARNING]: Failed to get license from repository: cloudinary/cloudinary_npm
+[WARNING]: Failed to get codebase size of nullivex/nodist
+[WARNING]: Failed to get number of open issues of nullivex/nodist
+[WARNING]: Failed to get contents of Github repository: nullivex/nodist
+[WARNING]: Failed to get number of open issues of nullivex/nodist
+[WARNING]: Failed to get codebase size of lodash/lodash
+[WARNING]: Failed to get number of open issues of lodash/lodash
+[WARNING]: Failed to get contents of Github repository: lodash/lodash
+[WARNING]: Failed to get number of open issues of lodash/lodash
+[WARNING]: Failed to get codebase size of browserify/browserify
+[WARNING]: Failed to get number of open issues of browserify/browserify
+[WARNING]: Failed to get contents of Github repository: browserify/browserify
+[WARNING]: Failed to get number of open issues of browserify/browserify
+[INFO]: Logger successfully loaded!
+[WARNING]: Failed to get codebase size of cloudinary/cloudinary_npm
+[WARNING]: Failed to get number of open issues of cloudinary/cloudinary_npm
+[WARNING]: Failed to get contents of Github repository: cloudinary/cloudinary_npm
+[WARNING]: Failed to get number of open issues of cloudinary/cloudinary_npm
+[WARNING]: Failed to get codebase size of expressjs/express
+[WARNING]: Failed to get number of open issues of expressjs/express
+[WARNING]: Failed to get contents of Github repository: expressjs/express
+[WARNING]: Failed to get number of open issues of expressjs/express
+[WARNING]: Failed to get codebase size of nullivex/nodist
+[WARNING]: Failed to get number of open issues of nullivex/nodist
+[WARNING]: Failed to get contents of Github repository: nullivex/nodist
+[WARNING]: Failed to get number of open issues of nullivex/nodist
+[WARNING]: Failed to get codebase size of lodash/lodash
+[WARNING]: Failed to get number of open issues of lodash/lodash
+[WARNING]: Failed to get contents of Github repository: lodash/lodash
+[WARNING]: Failed to get number of open issues of lodash/lodash
+[WARNING]: Failed to get codebase size of browserify/browserify
+[WARNING]: Failed to get number of open issues of browserify/browserify
+[WARNING]: Failed to get contents of Github repository: browserify/browserify
+[WARNING]: Failed to get number of open issues of browserify/browserify
+[INFO]: Logger successfully loaded!
+[WARNING]: Failed to get codebase size of cloudinary/cloudinary_npm
+[WARNING]: Failed to get number of open issues of cloudinary/cloudinary_npm
+[WARNING]: Failed to get contents of Github repository: cloudinary/cloudinary_npm
+[WARNING]: Failed to get number of open issues of cloudinary/cloudinary_npm
+[WARNING]: Failed to get codebase size of expressjs/express
+[WARNING]: Failed to get number of open issues of expressjs/express
+[WARNING]: Failed to get contents of Github repository: expressjs/express
+[WARNING]: Failed to get number of open issues of expressjs/express
+[WARNING]: Failed to get codebase size of nullivex/nodist
+[WARNING]: Failed to get number of open issues of nullivex/nodist
+[WARNING]: Failed to get contents of Github repository: nullivex/nodist
+[WARNING]: Failed to get number of open issues of nullivex/nodist
+[WARNING]: Failed to get codebase size of lodash/lodash
+[WARNING]: Failed to get number of open issues of lodash/lodash
+[WARNING]: Failed to get contents of Github repository: lodash/lodash
+[WARNING]: Failed to get number of open issues of lodash/lodash
+[WARNING]: Failed to get codebase size of browserify/browserify
+[WARNING]: Failed to get number of open issues of browserify/browserify
+[WARNING]: Failed to get contents of Github repository: browserify/browserify
+[WARNING]: Failed to get number of open issues of browserify/browserify
+[INFO]: Logger successfully loaded!
+[WARNING]: Failed to get codebase size of cloudinary/cloudinary_npm
+[WARNING]: Failed to get number of open issues of cloudinary/cloudinary_npm
+[WARNING]: Failed to get contents of Github repository: cloudinary/cloudinary_npm
+[WARNING]: Failed to get number of open issues of cloudinary/cloudinary_npm
+[WARNING]: Failed to get codebase size of expressjs/express
+[WARNING]: Failed to get number of open issues of expressjs/express
+[WARNING]: Failed to get contents of Github repository: expressjs/express
+[WARNING]: Failed to get number of open issues of expressjs/express
+[WARNING]: Failed to get codebase size of nullivex/nodist
+[WARNING]: Failed to get number of open issues of nullivex/nodist
+[WARNING]: Failed to get contents of Github repository: nullivex/nodist
+[WARNING]: Failed to get number of open issues of nullivex/nodist
+[WARNING]: Failed to get codebase size of lodash/lodash
+[WARNING]: Failed to get number of open issues of lodash/lodash
+[WARNING]: Failed to get contents of Github repository: lodash/lodash
+[WARNING]: Failed to get number of open issues of lodash/lodash
+[WARNING]: Failed to get codebase size of browserify/browserify
+[WARNING]: Failed to get number of open issues of browserify/browserify
+[WARNING]: Failed to get contents of Github repository: browserify/browserify
+[WARNING]: Failed to get number of open issues of browserify/browserify
+[INFO]: Logger successfully loaded!
+[WARNING]: Failed to get codebase size of cloudinary/cloudinary_npm
+[WARNING]: Failed to get number of open issues of cloudinary/cloudinary_npm
+[WARNING]: Failed to get contents of Github repository: cloudinary/cloudinary_npm
+[WARNING]: Failed to get number of open issues of cloudinary/cloudinary_npm
+[WARNING]: Failed to get codebase size of expressjs/express
+[WARNING]: Failed to get number of open issues of expressjs/express
+[WARNING]: Failed to get contents of Github repository: expressjs/express
+[WARNING]: Failed to get number of open issues of expressjs/express
+[WARNING]: Failed to get codebase size of nullivex/nodist
+[WARNING]: Failed to get number of open issues of nullivex/nodist
+[WARNING]: Failed to get contents of Github repository: nullivex/nodist
+[WARNING]: Failed to get number of open issues of nullivex/nodist
+[WARNING]: Failed to get codebase size of lodash/lodash
+[WARNING]: Failed to get number of open issues of lodash/lodash
+[WARNING]: Failed to get contents of Github repository: lodash/lodash
+[WARNING]: Failed to get number of open issues of lodash/lodash
+[WARNING]: Failed to get codebase size of browserify/browserify
+[WARNING]: Failed to get number of open issues of browserify/browserify
+[WARNING]: Failed to get contents of Github repository: browserify/browserify
+[WARNING]: Failed to get number of open issues of browserify/browserify
+[INFO]: Logger successfully loaded!
+[WARNING]: Failed to get codebase size of cloudinary/cloudinary_npm
+[WARNING]: Failed to get number of open issues of cloudinary/cloudinary_npm
+[WARNING]: Failed to get contents of Github repository: cloudinary/cloudinary_npm
+[WARNING]: Failed to get number of open issues of cloudinary/cloudinary_npm
+[WARNING]: Failed to get codebase size of expressjs/express
+[WARNING]: Failed to get number of open issues of expressjs/express
+[WARNING]: Failed to get contents of Github repository: expressjs/express
+[WARNING]: Failed to get number of open issues of expressjs/express
+[WARNING]: Failed to get codebase size of nullivex/nodist
+[WARNING]: Failed to get number of open issues of nullivex/nodist
+[WARNING]: Failed to get contents of Github repository: nullivex/nodist
+[WARNING]: Failed to get number of open issues of nullivex/nodist
+[WARNING]: Failed to get codebase size of lodash/lodash
+[WARNING]: Failed to get number of open issues of lodash/lodash
+[WARNING]: Failed to get contents of Github repository: lodash/lodash
+[WARNING]: Failed to get number of open issues of lodash/lodash
+[WARNING]: Failed to get codebase size of browserify/browserify
+[WARNING]: Failed to get number of open issues of browserify/browserify
+[WARNING]: Failed to get contents of Github repository: browserify/browserify
+[WARNING]: Failed to get number of open issues of browserify/browserify
+[INFO]: Logger successfully loaded!
+[WARNING]: Failed to get codebase size of cloudinary/cloudinary_npm
+[WARNING]: Failed to get number of open issues of cloudinary/cloudinary_npm
+[WARNING]: Failed to get contents of Github repository: cloudinary/cloudinary_npm
+[WARNING]: Failed to get number of open issues of cloudinary/cloudinary_npm
+[INFO]: Logger successfully loaded!
+[WARNING]: Failed to get codebase size of cloudinary/cloudinary_npm
+[WARNING]: Failed to get number of open issues of cloudinary/cloudinary_npm
+[WARNING]: Failed to get contents of Github repository: cloudinary/cloudinary_npm
+[INFO]: Logger successfully loaded!
+[WARNING]: Failed to get license from repository: cloudinary/cloudinary_npm
+[INFO]: Logger successfully loaded!
+[WARNING]: Failed to get license from repository: cloudinary/cloudinary_npm
+[INFO]: Logger successfully loaded!
+[WARNING]: Failed to get license from repository: cloudinary/cloudinary_npm
+[INFO]: Logger successfully loaded!
+[WARNING]: Failed to get license from repository: cloudinary/cloudinary_npm
+[INFO]: Logger successfully loaded!
+[WARNING]: Failed to get license from repository: cloudinary/cloudinary_npm
+[INFO]: Logger successfully loaded!
+[WARNING]: Failed to get license from repository: cloudinary/cloudinary_npm
+[INFO]: Logger successfully loaded!
+[WARNING]: Failed to get license from repository: cloudinary/cloudinary_npm
+[INFO]: Logger successfully loaded!
+[WARNING]: Failed to get license from repository: cloudinary/cloudinary_npm
+[INFO]: Logger successfully loaded!
+[WARNING]: Failed to get license from repository: cloudinary/cloudinary_npm
+[INFO]: Logger successfully loaded!
+[WARNING]: Failed to get license from repository: cloudinary/cloudinary_npm
+[INFO]: Logger successfully loaded!
+[WARNING]: Failed to get license from repository: cloudinary/cloudinary_npm
+[INFO]: Logger successfully loaded!
+[WARNING]: unknown variant `id`, expected `Ok` or `Err` at line 1 column 5
+[WARNING]: unknown variant `id`, expected `Ok` or `Err` at line 1 column 5
+[WARNING]: expected value at line 1 column 1
+[WARNING]: unknown variant `id`, expected `Ok` or `Err` at line 1 column 5
+[INFO]: Logger successfully loaded!
+[WARNING]: unknown variant `id`, expected `Ok` or `Err` at line 1 column 5
+[WARNING]: unknown variant `message`, expected `Ok` or `Err` at line 1 column 10
+[WARNING]: unknown variant `message`, expected `Ok` or `Err` at line 1 column 10
+[WARNING]: unknown variant `message`, expected `Ok` or `Err` at line 1 column 10
+[INFO]: Logger successfully loaded!
+[WARNING]: Failed to get codebase size of cloudinary/cloudinary_npm
+[WARNING]: Failed to get number of open issues of cloudinary/cloudinary_npm
+[WARNING]: Unexpected response format from GitHub API
+[WARNING]: Failed to get number of open issues of cloudinary/cloudinary_npm
+[INFO]: Logger successfully loaded!
+[WARNING]: Failed to get codebase size of cloudinary/cloudinary_npm
+[WARNING]: Failed to get number of open issues of cloudinary/cloudinary_npm
+[WARNING]: Unexpected response format from GitHub API
+[WARNING]: Failed to get number of open issues of cloudinary/cloudinary_npm
+[INFO]: Logger successfully loaded!
+[WARNING]: Failed to get codebase size of cloudinary/cloudinary_npm
+[WARNING]: Failed to get number of open issues of cloudinary/cloudinary_npm
+[WARNING]: Unexpected response format from GitHub API
+[WARNING]: Failed to get number of open issues of cloudinary/cloudinary_npm
+[INFO]: Logger successfully loaded!
+[WARNING]: Failed to get codebase size of cloudinary/cloudinary_npm
+[WARNING]: Failed to get number of open issues of cloudinary/cloudinary_npm
+[WARNING]: Unexpected response format from GitHub API
+[WARNING]: Failed to get number of open issues of cloudinary/cloudinary_npm
+[INFO]: Logger successfully loaded!
+[WARNING]: Failed to get codebase size of cloudinary/cloudinary_npm
+[WARNING]: Failed to get number of open issues of cloudinary/cloudinary_npm
+[WARNING]: Unexpected response format from GitHub API
+[WARNING]: Failed to get number of open issues of cloudinary/cloudinary_npm
+[INFO]: Logger successfully loaded!
+[WARNING]: Unexpected response format from GitHub API
+[INFO]: Logger successfully loaded!
+[WARNING]: Unexpected response format from GitHub API
+[INFO]: Logger successfully loaded!
+[WARNING]: Unexpected response format from GitHub API
+[INFO]: Logger successfully loaded!
+[WARNING]: Unexpected response format from GitHub API
+[INFO]: Logger successfully loaded!
+[WARNING]: Unexpected response format from GitHub API
+[INFO]: Logger successfully loaded!
+[WARNING]: Unexpected response format from GitHub API
+[INFO]: Logger successfully loaded!
+[WARNING]: Unexpected response format from GitHub API
+[INFO]: Logger successfully loaded!
+[WARNING]: Unexpected response format from GitHub API
+[INFO]: Logger successfully loaded!
+[WARNING]: Unexpected response format from GitHub API
+[INFO]: Logger successfully loaded!
+[WARNING]: Unexpected response format from GitHub API
+[INFO]: Logger successfully loaded!
+[WARNING]: Unexpected response format from GitHub API
+[INFO]: Logger successfully loaded!
+[WARNING]: Unexpected response format from GitHub API
+[INFO]: Logger successfully loaded!
+[WARNING]: Unexpected response format from GitHub API
+[INFO]: Logger successfully loaded!
+[WARNING]: Unexpected response format from GitHub API
+[INFO]: Logger successfully loaded!
+[WARNING]: Unexpected response format from GitHub API
+[INFO]: Logger successfully loaded!
+[WARNING]: Unexpected response format from GitHub API
+[INFO]: Logger successfully loaded!
+[WARNING]: Unexpected response format from GitHub API
+[INFO]: Logger successfully loaded!
+[WARNING]: Unexpected response format from GitHub API
+[INFO]: Logger successfully loaded!
+[WARNING]: Unexpected response format from GitHub API
+[INFO]: Logger successfully loaded!
+[WARNING]: Unexpected response format from GitHub API
+[INFO]: Logger successfully loaded!
+[WARNING]: Unexpected response format from GitHub API
+[INFO]: Logger successfully loaded!
+[INFO]: Logger successfully loaded!
+[INFO]: Logger successfully loaded!
+[INFO]: Logger successfully loaded!

@@ -1,6 +1,7 @@
 use std::{env};
 use std::str;
 use std::env::VarError;
+use std::collections::HashMap;
 use std::result::{Result};
 use reqwest::{Client, Response};
 use reqwest::header::HeaderMap;
@@ -83,11 +84,13 @@ pub async fn npmjs_get_repository_link(_owner: &str, repository: &str) -> Result
 }
 
 
-pub async fn github_get_codebase_length(owner: &str, repository: &str) -> Result<String, String> {
-    let response_res = github_get_response_body(owner, repository, None).await;
+pub async fn github_get_codebase_length(owner: &str, repository: &str, response_res:  Result<serde_json::Value, String>) -> Result<String, String> {
+    //let response_res = github_get_response_body(owner, repository, None).await;
+    /*
     if response_res.is_err() {
         return Err(response_res.err().unwrap().to_string())
     }
+    */
     let response = response_res.unwrap();
 
     // println!("{:#?}", response);
@@ -104,10 +107,10 @@ pub async fn github_get_codebase_length(owner: &str, repository: &str) -> Result
 }
 
 
-pub async fn github_get_open_issues(owner: &str, repository: &str) -> Result<String, String> {
+pub async fn github_get_open_issues(owner: &str, repository: &str,  response_res: Result<serde_json::Value, String>) -> Result<String, String> {
 
 
-    let response_res = github_get_response_body(owner, repository, None).await;
+    //let response_res = github_get_response_body(owner, repository, None).await;
     if response_res.is_err() {
         return Err(response_res.err().unwrap().to_string())
     }
@@ -127,12 +130,15 @@ pub async fn github_get_open_issues(owner: &str, repository: &str) -> Result<Str
 
 }
 
-pub async fn github_get_number_of_forks(owner: &str, repository: &str) -> Result<String, String> {
+pub async fn github_get_number_of_forks(owner: &str, repository: &str, response_res: Result<serde_json::Value, String>) -> Result<String, String> {
+    println!("Getting fork information for {} / {}", owner, repository);
 
-    let response_res = github_get_response_body(owner, repository, None).await;
+    //let response_res = github_get_response_body(owner, repository, None).await;
+    /*
     if response_res.is_err() {
         return Err(response_res.err().unwrap().to_string())
     }
+    */
     let response = response_res.unwrap();
 
     let forks_res = response.get("forks");
@@ -149,20 +155,61 @@ pub async fn github_get_number_of_forks(owner: &str, repository: &str) -> Result
 
 }
 
-pub async fn github_get_license(owner: &str, repository: &str) -> Result<String, String> {
+pub async fn github_get_license(owner: &str, repository: &str, response_res: Result<serde_json::Value, String>) -> Result<String, String> {
+    //println!("Getting license information for {} / {}", owner, repository);
 
-    let contents_path = format!("{}/contents", repository);
-    let contents_response_res = github_get_response_body(owner, &contents_path, None).await;
+    //let contents_path = format!("{}/contents", repository);
+    /*
+    let contents_response_res = github_get_response_body(owner, repository, None).await;
+    println!("contents_response JSON : {:?}", contents_response_res);
+
     if contents_response_res.is_err() {
         return Err(contents_response_res.unwrap_err().to_string());
     }
-    let contents_response = contents_response_res.unwrap();
-    let contents_arr_res = contents_response.as_array();
-    if contents_arr_res.is_none() {
-        return Err(format!("Failed to get contents of Github repository: {}/{}", owner, repository));
+    */
+    //defining map of valid licenses
+    let mut valid_license = HashMap::new();
+    valid_license.insert("apache", 0.0);
+    valid_license.insert("mit", 1.0);
+    valid_license.insert("gpl", 1.0);
+    valid_license.insert("lgpl", 1.0);
+    valid_license.insert("ms-pl", 1.0);
+    valid_license.insert("epl", 0.0);
+    valid_license.insert("bsd", 1.0);
+    valid_license.insert("cddl", 0.0);
+
+
+    let contents_response = response_res.unwrap();
+    let license_res = contents_response.get("license");
+    println!("License_res : {:?}", license_res);
+    if license_res.is_none() {
+        return Err(format!("Failed to get license of {}/{}", owner, repository));
+    }else{
+        if license_res == Some(std::ptr::null()){
+
+        }else{
+        let license_name = license_res.expect("License not found").get("key").unwrap();
+        let my_str = license_name.as_str().expect("Invalid license name");
+        println!("License name: {}", my_str);
+        }
     }
 
-    let contents_arr = contents_arr_res.unwrap();
+    //works till here, checks to see if license exists in home page, if it does, it gives it a score based on that
+
+
+
+    /*let contents_arr_res = contents_response.as_array();
+    if contents_arr_res.is_none() {
+        return Err(format!("Failed to get contents of Github repository: {}/{}", owner, repository));
+    }*/
+    if !contents_response.is_array() {
+        return Err("Unexpected response format from GitHub API".to_string());
+    }
+
+    let contents_arr = contents_response.as_array().unwrap();
+    //let contents_arr = contents_arr_res.unwrap();
+    //println!("Contents response res: {:?}", contents_arr);
+
 
     let license_res = github_get_license_from_contents_response(owner, repository, contents_arr).await;
 
@@ -172,6 +219,9 @@ pub async fn github_get_license(owner: &str, repository: &str) -> Result<String,
     let license = license_res.unwrap();
     Ok(license)
 }
+
+
+
 
 ///
 /// # Info
@@ -295,12 +345,15 @@ pub async fn github_get_license(owner: &str, repository: &str) -> Result<String,
 ///
 pub async fn github_get_response_body(owner: &str, repository: &str, headers: Option<HeaderMap>) -> Result<serde_json::Value, String> {
     let response_res = github_get_response(owner, repository, headers).await;
+
     if response_res.is_err() {
         return Err(response_res.err().unwrap().to_string());
     }
     let response = response_res.unwrap();
+
     // println!("{:#?}", response);
     let response_text_res = response.text().await;
+
     if response_text_res.is_err() {
         return Err(response_text_res.err().unwrap().to_string())
     }
@@ -311,8 +364,10 @@ pub async fn github_get_response_body(owner: &str, repository: &str, headers: Op
         return Err(response_json_res.err().unwrap().to_string())
     }
     let response_json = response_json_res.unwrap();
+    //println!("response JSON : {:?}", response_json);
 
     Ok(response_json)
+    //return response_json;
 }
 
 
