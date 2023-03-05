@@ -87,25 +87,33 @@ pub async fn npmjs_get_repository_link(_owner: &str, repository: &str) -> Result
 /// * 'repository' - The repository
 /// * 'response_res' - The response request to parse
 ///
-pub async fn github_get_codebase_length(owner: &str, repository: &str, response_res:  Result<serde_json::Value, String>) -> Result<String, String> {
+pub async fn github_get_codebase_length(owner: &str, repository: &str) -> Result<String, String> {
     let response_res = github_get_response_body(owner, repository, None).await;
-    /*
-
     if response_res.is_err() {
         return Err(response_res.err().unwrap().to_string())
     }
-    */
     let response = response_res.unwrap();
 
-    let codebase_length_res = response.get("size");
-    if codebase_length_res.is_none() {
-        return Err(format!("Failed to get codebase size of {}/{}", owner, repository));
+    let open_issues_res = response.get("open_issues");
+    let forks_res = response.get("forks");
+    if open_issues_res.is_none() {
+        return Err(format!("Failed to get number of open issues of {}/{} for ramp-up", owner, repository));
     }
-    let codebase_length_val = codebase_length_res.unwrap().as_i64();
-    if codebase_length_val.is_none() {
-        return Err(format!("Failed to get codebase size of {}/{}", owner, repository));
+    if forks_res.is_none() {
+        return Err(format!("Failed to get number of forks of {}/{} for ramp-up", owner, repository));
     }
-    Ok(format!("{}", codebase_length_val.unwrap()))
+
+    let open_issues_val = open_issues_res.unwrap().as_i64();
+    let forks_val = forks_res.unwrap().as_i64();
+    if open_issues_val.is_none() {
+        return Err(format!("Failed to unwrap number of open issues of {}/{} for ramp-up", owner, repository));
+    }
+    if forks_val.is_none() {
+        return Err(format!("Failed to unwrap number of forks of {}/{} for ramp-up", owner, repository));
+    }
+    //let ratio = open_issues_val.unwrap()/forks_val.unwrap();
+    Ok(format!("{},{}", open_issues_val.unwrap(), forks_val.unwrap()))
+    //Ok(format!("{}", ratio))
 }
 
 

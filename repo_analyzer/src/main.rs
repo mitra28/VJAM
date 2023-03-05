@@ -184,7 +184,7 @@ async fn run_url(filename: &str) {
         let response2 = r.clone();
 
 
-        let codebase_length = match rest_api::github_get_codebase_length(&owner , &package, r).await {
+        let codebase_length = match rest_api::github_get_codebase_length(&owner , &package).await {
             Ok(codebase_length) => codebase_length,
             Err(_e) => {
                 debug!("{}", _e);
