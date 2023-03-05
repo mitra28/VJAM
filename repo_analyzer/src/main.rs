@@ -1,23 +1,31 @@
+#![warn(missing_docs)]
+//! This crate generates an executable that fulfills the requirements as specified in the Part 1 - CLI Documents for the
+//! course ECE 461 at Purdue University
+
 extern crate libc;
 extern crate core;
 
-mod repo_list;
-mod url_input;
-mod metric_calculations;
-mod rest_api;
-mod read_url_file;
+pub mod repo_list;
+pub mod url_input;
+pub mod metric_calculations;
+pub mod rest_api;
+pub mod read_url_file;
 
-mod logging;
+pub mod logging;
 
+
+use crate::rest_api::github_get_response_body;
 use logging::enable_logging;
 use std::error::Error;
 use std::process::Command;
 use log::{info, debug, error};
 
-//use std::ptr::null;
 
 // run test_web_api().await to run different examples of using the rest_api functions.
 // Make sure to set your github token in your environmental variables under the name 'GITHUB_TOKEN'
+
+/// Handles interpreting command line arguments
+#[warn(missing_docs)]
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
 
@@ -28,7 +36,6 @@ async fn main() -> Result<(), Box<dyn Error>> {
         println!("Incorrect number of arguments!");
         return Ok(());
     } else if args.len() == 1 {
-        run_help();
         return Ok(());
     }
 
@@ -45,6 +52,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
+/// Installs all needed crates for building the project
 fn run_install() {
     Command::new("cargo")
         .args(&["install", "cargo-edit"])
@@ -104,6 +112,7 @@ fn run_install() {
         println!("11 dependencies installed...");
 }
 
+/// Builds the exectuable
 fn run_build() {
     Command::new("cargo")
         .arg("build")
@@ -111,10 +120,12 @@ fn run_build() {
         .expect("failed to execute process");
 }
 
-fn run_test() {
+/// Tests the code
+pub fn run_test() {
     // Implement the run_test function here
 }
 
+/// Handles input URL files
 async fn run_url(filename: &str) {
 
     
@@ -163,8 +174,17 @@ async fn run_url(filename: &str) {
             package = git_data[1].to_owned();
 
         }
+        let r = github_get_response_body(&owner, &package, None).await;
+        if r.is_err() {
+            println!("ERROR ");
+            //return Err(response.err().unwrap().to_string());
+        }
+        let response = r.clone();
+        let response1 = r.clone();
+        let response2 = r.clone();
 
-        let codebase_length = match rest_api::github_get_codebase_length(&owner , &package).await {
+
+        let codebase_length = match rest_api::github_get_codebase_length(&owner , &package, r).await {
             Ok(codebase_length) => codebase_length,
             Err(_e) => {
                 debug!("{}", _e);
@@ -173,8 +193,7 @@ async fn run_url(filename: &str) {
         };
 
         //println!("code len: {}", codebase_length);
-
-        let opened_issues = match rest_api::github_get_open_issues(&owner , &package).await {
+        let opened_issues = match rest_api::github_get_open_issues(&owner , &package, response).await {
             Ok(opened_issues) => opened_issues,
             Err(_e) => {
                 debug!("{}", _e);
@@ -184,7 +203,7 @@ async fn run_url(filename: &str) {
 
         //println!("open issues: {}", opened_issues);
 
-        let license = match rest_api::github_get_license(&owner , &package).await {
+        let license = match rest_api::github_get_license(&owner , &package, response1).await {
             Ok(license) => license,
             Err(_e) => {
                 debug!("{}", _e);
@@ -194,7 +213,7 @@ async fn run_url(filename: &str) {
 
         //println!("license: {}", license);
 
-        let number_of_forks = match rest_api::github_get_number_of_forks(&owner , &package).await {
+        let number_of_forks = match rest_api::github_get_number_of_forks(&owner , &package, response2).await {
             Ok(number_of_forks) => number_of_forks,
             Err(_e) => {
                 debug!("{}", _e);
@@ -236,8 +255,4 @@ async fn run_url(filename: &str) {
 
     repos.sort_by_net_score(); // will sort the RepoList by trustworthiness.
     repos.display(); // will print RepoList to stdout in the desired format.
-}
-
-fn run_help() {
-    // Implement the run_help function here
 }
