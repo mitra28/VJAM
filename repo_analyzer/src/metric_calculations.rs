@@ -1,20 +1,6 @@
 //! Contains all functions needed for metric calculations
+use std::collections::HashMap;
 
-/// Normalizes a value over a range according to the following function:
-///```
-// /// let normalized : f32 = value / range
-// pub fn normalize(value: f32, range: f32) -> f32 {
-//     value / range
-// }
-
-
-// /// Returns the minimum value between two choices
-// pub fn min(n1: f32, n2: f32) -> f32 {
-//     if n1 > n2 {
-//         return n2;
-//     }
-//     return n1;
-// }
 
 /// Calculates the metric ramp-up time based on a codebase's length
 pub fn get_ramp_up_time(codebase_length: &str) -> f32 {
@@ -59,25 +45,33 @@ pub fn get_bus_factor(number_of_forks: &str) -> f32 {
     number_of_forks as f32
 }
 
-/// Calculates the metric license compatibility based on whether
-/// a codebase's license matches a set of relevant licenses 
-pub fn get_license(license: &str) -> f32 {
-    let mut names: Vec<String> = Vec::new();
-    names.push("LGPLv2.1".to_owned());
-    names.push("gnu lesser general public license".to_owned());
-    names.push("gnu lesser general public license v2.1".to_owned());
-    names.push("LGPL".to_owned());
+pub fn get_license(license: Result<String, String>) -> f32 {
+    println!("info: {:?}", license);
+    let mut valid_license = HashMap::<String, f32>::new();
+    valid_license.insert("apache".to_string(), 0.0);
+    valid_license.insert("mit".to_string(), 1.0);
+    valid_license.insert("gpl".to_string(), 1.0);
+    valid_license.insert("lgpl".to_string(), 1.0);
+    valid_license.insert("ms-pl".to_string(), 1.0);
+    valid_license.insert("epl".to_string(), 0.0);
+    valid_license.insert("bsd".to_string(), 1.0);
+    valid_license.insert("cddl".to_string(), 0.0);
 
-    let mut has_license = 0.0;
-
-    for name in names {
-        if license.contains(&name) {
-            has_license = 1.0;
-            break;
+    let license_str = match license {
+        Ok(value) => value,
+        Err(error) => return 0.0,
+    };
+    
+    let l_score = 0.0;
+    if valid_license.contains_key(&license_str){
+        match valid_license.get(&license_str) {
+            Some(value) => return *value,
+            None => return l_score,
         }
-    }
 
-    return has_license;
+    }else{
+        return l_score
+    }
 }
 
 

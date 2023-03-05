@@ -221,16 +221,7 @@ async fn run_url(filename: &str) {
         //println!("closed issues: {}", closed_issues);
 
 
-        /*let license = match rest_api::github_get_license(&owner , &package, response1).await {
-
-            Ok(license) => license,
-            Err(_e) => {
-                debug!("{}", _e);
-                "0.0".to_owned()
-            }
-        };*/
-        let license = 1.to_string();
-
+        let license =  rest_api::github_get_license(&owner , &package, response1); //.await {
         //println!("license: {}", license);
 
         let number_of_forks = match rest_api::github_get_number_of_forks(&owner , &package, response2).await {
@@ -258,7 +249,7 @@ async fn run_url(filename: &str) {
             bf =  0.0;
             error!("Failed to get number of forks from {}/{}", &owner, &package);
         }
-        let mut l = metric_calculations::get_license(&license);
+        let mut l = metric_calculations::get_license(license.await);
         if l == -1.0 {
             l =  0.0;
             error!("Failed to get license from {}/{}", &owner, &package);
