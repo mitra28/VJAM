@@ -79,29 +79,54 @@ pub async fn npmjs_get_repository_link(_owner: &str, repository: &str) -> Result
 }
 
 
-pub async fn github_get_codebase_length(owner: &str, repository: &str, response_res:  Result<serde_json::Value, String>) -> Result<String, String> {
-    //let response_res = github_get_response_body(owner, repository, None).await;
-    /*
-
+/// Returns the length of a repository
+///
+/// # Arguments
+///
+/// * 'owner' - The owner of the repository
+/// * 'repository' - The repository
+/// * 'response_res' - The response request to parse
+///
+pub async fn github_get_codebase_length(owner: &str, repository: &str) -> Result<String, String> {
+    let response_res = github_get_response_body(owner, repository, None).await;
     if response_res.is_err() {
         return Err(response_res.err().unwrap().to_string())
     }
-    */
     let response = response_res.unwrap();
 
-    let codebase_length_res = response.get("size");
-    if codebase_length_res.is_none() {
-        return Err(format!("Failed to get codebase size of {}/{}", owner, repository));
+    let open_issues_res = response.get("open_issues");
+    let forks_res = response.get("forks");
+    if open_issues_res.is_none() {
+        return Err(format!("Failed to get number of open issues of {}/{} for ramp-up", owner, repository));
     }
-    let codebase_length_val = codebase_length_res.unwrap().as_i64();
-    if codebase_length_val.is_none() {
-        return Err(format!("Failed to get codebase size of {}/{}", owner, repository));
+    if forks_res.is_none() {
+        return Err(format!("Failed to get number of forks of {}/{} for ramp-up", owner, repository));
     }
-    Ok(format!("{}", codebase_length_val.unwrap()))
+
+    let open_issues_val = open_issues_res.unwrap().as_i64();
+    let forks_val = forks_res.unwrap().as_i64();
+    if open_issues_val.is_none() {
+        return Err(format!("Failed to unwrap number of open issues of {}/{} for ramp-up", owner, repository));
+    }
+    if forks_val.is_none() {
+        return Err(format!("Failed to unwrap number of forks of {}/{} for ramp-up", owner, repository));
+    }
+    //let ratio = open_issues_val.unwrap()/forks_val.unwrap();
+    Ok(format!("{},{}", open_issues_val.unwrap(), forks_val.unwrap()))
+    //Ok(format!("{}", ratio))
 }
 
 
 
+/// Returns the number of open issues of a repository
+
+///
+/// # Arguments
+///
+/// * 'owner' - The owner of the repository
+/// * 'repository' - The repository
+/// * 'response_res' - The response request to parse
+///
 pub async fn github_get_open_issues(owner: &str, repository: &str,  response_res: Result<serde_json::Value, String>) -> Result<String, String> {
     if response_res.is_err() {
         return Err(response_res.err().unwrap().to_string())
@@ -121,34 +146,23 @@ pub async fn github_get_open_issues(owner: &str, repository: &str,  response_res
     Ok(format!("{}", open_issues_val.unwrap()))
 
 }
-/*
-pub async fn github_get_closed_issues(owner: &str, repo: &str) -> Result<u32, String> {
-
-    let token_res = github_get_api_token();
-    if token_res.is_err() {
-        return Err(token_res.err().unwrap().to_string());
-    }
-    let token = token_res.unwrap();
-
-    let client = Client::new();
-    let res: Response = client
-        .get(&format!(
-            "https://api.github.com/repos/{}/{}/issues?state=closed",
-            owner, repo
-        ))
-        .header("Authorization", format!("Bearer {}", token))
-        .send()
-        .await
-        .map_err(|e| e.to_string())?;
-
-    //let json = res.json().await.map_err(|e| e.to_string())?;
-    //let count = json.as_array().map_or(0, |arr| arr.len()) as u32;
-
-    //Ok(count)
-}*/
 
 pub async fn github_get_closed_issues(owner: &str, repository: &str, response_res: Result<serde_json::Value, String>) -> Result<String, String> {
     //println!("github_get_closed_issues");
+/// Returns the number of forks of a repository
+
+///
+/// # Arguments
+///
+/// * 'owner' - The owner of the repository
+/// * 'repository' - The repository
+/// * 'response_res' - The response request to parse
+///
+pub async fn github_get_number_of_forks(owner: &str, repository: &str, response_res: Result<serde_json::Value, String>) -> Result<String, String> {
+    println!("Getting fork information for {} / {}", owner, repository);
+
+    //let response_res = github_get_response_body(owner, repository, None).await;
+    /*
     if response_res.is_err() {
         return Err(response_res.err().unwrap().to_string())
     }
@@ -190,7 +204,17 @@ pub async fn github_get_number_of_forks(owner: &str, repository: &str, response_
 
 }
 
-/*
+
+
+/// Returns the license score of a repository
+
+///
+/// # Arguments
+///
+/// * 'owner' - The owner of the repository
+/// * 'repository' - The repository
+/// * 'response_res' - The response request to parse
+///
 pub async fn github_get_license(owner: &str, repository: &str, response_res: Result<serde_json::Value, String>) -> Result<String, String> {
     //println!("Getting license information for {} / {}", owner, repository);
 
@@ -213,14 +237,10 @@ pub async fn github_get_license(owner: &str, repository: &str, response_res: Res
     println!("License_res : {:?}", license_res);
     if license_res.is_none() {
         return Err(format!("Failed to get license of {}/{}", owner, repository));
-    } else {
-        if license_res == None {
-            // do something here
-        } else {
-            let license_name = license_res.expect("License not found").get("key").unwrap();
-            let my_str = license_name.as_str().expect("Invalid license name");
-            println!("License name: {}", my_str);
-        }
+    }else{
+        let license_name = license_res.expect("License not found").get("key").unwrap();
+        let my_str = license_name.as_str().expect("Invalid license name");
+        println!("License name: {}", my_str);
     }
 
     //works till here, checks to see if license exists in home page, if it does, it gives it a score based on that
