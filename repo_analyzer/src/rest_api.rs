@@ -78,6 +78,15 @@ pub async fn npmjs_get_repository_link(_owner: &str, repository: &str) -> Result
 }
 
 
+/// Returns the length of a repository
+
+///
+/// # Arguments
+///
+/// * 'owner' - The owner of the repository
+/// * 'repository' - The repository
+/// * 'response_res' - The response request to parse
+///
 pub async fn github_get_codebase_length(owner: &str, repository: &str, response_res:  Result<serde_json::Value, String>) -> Result<String, String> {
     let response_res = github_get_response_body(owner, repository, None).await;
     /*
@@ -101,6 +110,15 @@ pub async fn github_get_codebase_length(owner: &str, repository: &str, response_
 
 
 
+/// Returns the number of open issues of a repository
+
+///
+/// # Arguments
+///
+/// * 'owner' - The owner of the repository
+/// * 'repository' - The repository
+/// * 'response_res' - The response request to parse
+///
 pub async fn github_get_open_issues(owner: &str, repository: &str,  response_res: Result<serde_json::Value, String>) -> Result<String, String> {
     //let response_res = github_get_response_body(owner, repository, None).await;
     if response_res.is_err() {
@@ -123,6 +141,15 @@ pub async fn github_get_open_issues(owner: &str, repository: &str,  response_res
 }
 
 
+/// Returns the number of forks of a repository
+
+///
+/// # Arguments
+///
+/// * 'owner' - The owner of the repository
+/// * 'repository' - The repository
+/// * 'response_res' - The response request to parse
+///
 pub async fn github_get_number_of_forks(owner: &str, repository: &str, response_res: Result<serde_json::Value, String>) -> Result<String, String> {
     println!("Getting fork information for {} / {}", owner, repository);
 
@@ -149,6 +176,15 @@ pub async fn github_get_number_of_forks(owner: &str, repository: &str, response_
 }
 
 
+/// Returns the license score of a repository
+
+///
+/// # Arguments
+///
+/// * 'owner' - The owner of the repository
+/// * 'repository' - The repository
+/// * 'response_res' - The response request to parse
+///
 pub async fn github_get_license(owner: &str, repository: &str, response_res: Result<serde_json::Value, String>) -> Result<String, String> {
     //println!("Getting license information for {} / {}", owner, repository);
 
@@ -179,13 +215,9 @@ pub async fn github_get_license(owner: &str, repository: &str, response_res: Res
     if license_res.is_none() {
         return Err(format!("Failed to get license of {}/{}", owner, repository));
     }else{
-        if license_res == Some(std::ptr::null()){
-
-        }else{
         let license_name = license_res.expect("License not found").get("key").unwrap();
         let my_str = license_name.as_str().expect("Invalid license name");
         println!("License name: {}", my_str);
-        }
     }
 
     //works till here, checks to see if license exists in home page, if it does, it gives it a score based on that
