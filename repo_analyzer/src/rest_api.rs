@@ -5,7 +5,8 @@ use std::str;
 use std::env::VarError;
 use std::collections::HashMap;
 use std::result::{Result};
-use reqwest::{Client, Response};
+use reqwest::{Client};
+use reqwest::{Response};
 use reqwest::header::HeaderMap;
 use base64::{ Engine, engine::general_purpose };
 
@@ -79,7 +80,6 @@ pub async fn npmjs_get_repository_link(_owner: &str, repository: &str) -> Result
 
 
 /// Returns the length of a repository
-
 ///
 /// # Arguments
 ///
@@ -128,7 +128,6 @@ pub async fn github_get_codebase_length(owner: &str, repository: &str) -> Result
 /// * 'response_res' - The response request to parse
 ///
 pub async fn github_get_open_issues(owner: &str, repository: &str,  response_res: Result<serde_json::Value, String>) -> Result<String, String> {
-    //let response_res = github_get_response_body(owner, repository, None).await;
     if response_res.is_err() {
         return Err(response_res.err().unwrap().to_string())
     }
@@ -148,7 +147,8 @@ pub async fn github_get_open_issues(owner: &str, repository: &str,  response_res
 
 }
 
-
+pub async fn github_get_closed_issues(owner: &str, repository: &str, response_res: Result<serde_json::Value, String>) -> Result<String, String> {
+    //println!("github_get_closed_issues");
 /// Returns the number of forks of a repository
 
 ///
@@ -166,7 +166,28 @@ pub async fn github_get_number_of_forks(owner: &str, repository: &str, response_
     if response_res.is_err() {
         return Err(response_res.err().unwrap().to_string())
     }
-    */
+    let response = response_res.unwrap();
+
+    let response_str = response.to_string();
+    //println!("\n\n");
+    //println!("{}\n", response_str);
+
+    let issues_res = response.get("number");
+    if issues_res.is_none() {
+        return Err(format!("Failed to get number of issues of {}/{}", owner, repository));
+    }
+
+    let issues_val = issues_res.unwrap().as_i64();
+    if issues_val.is_none() {
+        return Err(format!("Failed to get number of issues of {}/{}", owner, repository));
+    }
+
+    Ok(format!("{}", issues_val.unwrap()))
+}
+
+pub async fn github_get_number_of_forks(owner: &str, repository: &str, response_res: Result<serde_json::Value, String>) -> Result<String, String> {
+    println!("Getting fork information for {} / {}", owner, repository);
+
     let response = response_res.unwrap();
 
     let forks_res = response.get("forks");
@@ -184,6 +205,7 @@ pub async fn github_get_number_of_forks(owner: &str, repository: &str, response_
 }
 
 
+
 /// Returns the license score of a repository
 
 ///
@@ -197,14 +219,7 @@ pub async fn github_get_license(owner: &str, repository: &str, response_res: Res
     //println!("Getting license information for {} / {}", owner, repository);
 
     //let contents_path = format!("{}/contents", repository);
-    /*
-    let contents_response_res = github_get_response_body(owner, repository, None).await;
-    println!("contents_response JSON : {:?}", contents_response_res);
-
-    if contents_response_res.is_err() {
-        return Err(contents_response_res.unwrap_err().to_string());
-    }
-    */
+    
     //defining map of valid licenses
     let mut valid_license = HashMap::new();
     valid_license.insert("apache", 0.0);
@@ -253,7 +268,7 @@ pub async fn github_get_license(owner: &str, repository: &str, response_res: Res
     let license = license_res.unwrap();
     Ok(license)
 }
-
+*/
 /// Returns the response body as a serde_json::Value
 pub async fn github_get_response_body(owner: &str, repository: &str, headers: Option<HeaderMap>) -> Result<serde_json::Value, String> {
     let response_res = github_get_response(owner, repository, headers).await;
@@ -280,6 +295,8 @@ pub async fn github_get_response_body(owner: &str, repository: &str, headers: Op
     Ok(response_json)
     //return response_json;
 }
+
+
 
 /// Returns the Response object from a github url
 pub async fn github_get_response(owner: &str, repository: &str, headers: Option<HeaderMap>) -> Result<Response, String> {
@@ -319,6 +336,82 @@ pub async fn github_get_response(owner: &str, repository: &str, headers: Option<
     let response = response_res.unwrap();
     Ok(response)
 }
+
+pub async fn github_get_issue_response(owner: &str, repository: &str, headers: Option<HeaderMap>) -> Result<Response, String> {
+    let mut owner_mut = String::from(owner);
+    let mut repo_mut = String::from(repository);
+    if !owner.is_empty() {
+        owner_mut.insert(0, '/')
+    }
+    if !repository.is_empty() {
+        repo_mut.insert(0, '/');
+    }
+    let url = format!("https://api.github.com/repos{}{}/issues", owner_mut, repo_mut);
+    let token_res = github_get_api_token();
+    if token_res.is_err() {
+        return Err(token_res.err().unwrap().to_string());
+    }
+    let token = token_res.unwrap();
+
+    let client_id = "";
+    let client_secret = "";
+
+
+    let client = Client::new();
+    let mut request_builder = client
+        .get(url)
+        .header("Authorization", token)
+        .header("client_id", client_id)
+        .header("client_secret", client_secret)
+        .header("User-Agent", "ECE461-repository-analyzer");
+    if headers.is_some() {
+        request_builder = request_builder.headers(headers.unwrap());
+    }
+    let response_res = request_builder.send().await;
+    if response_res.is_err() {
+        return Err(response_res.err().unwrap().to_string());
+    }
+    let response = response_res.unwrap();
+    
+    Ok(response)
+}
+
+pub async fn github_get_issue_response_body(owner: &str, repository: &str, headers: Option<HeaderMap>) -> Result<serde_json::Value, String> {
+    let response_res = github_get_issue_response(owner, repository, headers).await;
+
+    if response_res.is_err() {
+        return Err(response_res.err().unwrap().to_string());
+    }
+    let response = response_res.unwrap();
+
+    let response_text_res = response.text().await;
+
+    if response_text_res.is_err() {
+        return Err(response_text_res.err().unwrap().to_string())
+    }
+
+    let response_text = response_text_res.unwrap().to_owned();
+    println!("\n\nresponse text: {}\n\n", response_text);
+    let response_json_res = serde_json::from_str(&response_text);
+    if response_json_res.is_err() {
+        return Err(response_json_res.err().unwrap().to_string())
+    }
+
+    let response_json: serde_json::Value = response_json_res.unwrap();
+    println!("\n\nresponse: {}\n\n", response_json);
+
+    let issues_count = response_json["number"].as_u64().unwrap_or(0);
+    println!("\n\nNumber of total issues: {}\n\n", issues_count);
+
+    //let response_json: serde_json::Value = response_json_res.unwrap();
+
+    //println!("\n\nresponse: {}\n\n", response_json);
+    //let issues_count = response_json["number"].as_u64().unwrap_or(0);
+    //println!("\n\nNumber of total issues: {}\n\n", issues_count);
+
+    Ok(response_json)
+}
+
 
 
 //////////////////////////

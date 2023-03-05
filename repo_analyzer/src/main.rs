@@ -1,4 +1,4 @@
-#![warn(missing_docs)]
+//#![warn(missing_docs)]
 //! This crate generates an executable that fulfills the requirements as specified in the Part 1 - CLI Documents for the
 //! course ECE 461 at Purdue University
 
@@ -15,6 +15,7 @@ pub mod logging;
 
 
 use crate::rest_api::github_get_response_body;
+use crate::rest_api::github_get_issue_response_body;
 use logging::enable_logging;
 use std::error::Error;
 use std::process::Command;
@@ -183,6 +184,12 @@ async fn run_url(filename: &str) {
         let response1 = r.clone();
         let response2 = r.clone();
 
+        let r2 = github_get_issue_response_body(&owner, &package, None).await;
+        if r2.is_err() {
+            println!("ERROR ");
+        }
+
+
 
         let codebase_length = match rest_api::github_get_codebase_length(&owner , &package).await {
             Ok(codebase_length) => codebase_length,
@@ -203,13 +210,26 @@ async fn run_url(filename: &str) {
 
         //println!("open issues: {}", opened_issues);
 
-        let license = match rest_api::github_get_license(&owner , &package, response1).await {
-            Ok(license) => license,
+        let closed_issues = match rest_api::github_get_closed_issues(&owner , &package, r2).await {
+            Ok(closed_issues) => closed_issues,
             Err(_e) => {
                 debug!("{}", _e);
                 "0.0".to_owned()
             }
         };
+
+        //println!("closed issues: {}", closed_issues);
+
+
+        /*let license = match rest_api::github_get_license(&owner , &package, response1).await {
+
+            Ok(license) => license,
+            Err(_e) => {
+                debug!("{}", _e);
+                "0.0".to_owned()
+            }
+        };*/
+        let license = 1.to_string();
 
         //println!("license: {}", license);
 
@@ -243,16 +263,18 @@ async fn run_url(filename: &str) {
             l =  0.0;
             error!("Failed to get license from {}/{}", &owner, &package);
         }
-        let rm = metric_calculations::get_responsive_maintainer();
+        let mut rm = metric_calculations::get_responsive_maintainer(&opened_issues, &closed_issues);
+        if rm == -1.0 {
+            rm = 0.0;
+            error!("Failed to responsiveness from {}/{}", &owner, &package);
+        }
 
-
-
-        let metrics = [ru, c, bf, l]; // responsive maintainer is omitted
+        let metrics = [ru, c, bf, l, rm]; // responsive maintainer is omitted
         let o = metric_calculations::get_overall(&metrics);
 
         repos.add_repo(repo_list::Repo {url : repo_url, net_score : o, ramp_up : ru, correctness : c, bus_factor : bf, responsive_maintainer : rm, license : l});
     }
 
-    repos.sort_by_net_score(); // will sort the RepoList by trustworthiness.
-    repos.display(); // will print RepoList to stdout in the desired format.
+    repos.sort_by_net_score(); // will sort the RepoList by trustworthiness. 
+    repos.display(); // will print RepoList to stdout in the desired format. 
 }
