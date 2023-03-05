@@ -40,7 +40,6 @@ pub fn enable_logging(log_file_var: &str, log_level_var: &str)-> Result<(), Stri
         Err(_e) => level = LevelFilter::Debug,
     };
     
-    info!("Log Level is {}", level);
 
     let result = File::create(&log_file);
     match result {

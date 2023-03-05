@@ -3,12 +3,13 @@
 use std::{env};
 use std::str;
 use std::env::VarError;
-use std::collections::HashMap;
 use std::result::{Result};
-use serde_json::json;
 use reqwest::{Client, Response};
 use reqwest::header::HeaderMap;
+use log::{ debug };
 extern crate base64;
+use serde_json::Value::Object;
+
 ///
 /// Returns the github link associated with the npmjs package
 
@@ -18,7 +19,6 @@ extern crate base64;
 /// * 'repository' - The full npmjs repository you want the associated github link of
 /// * '_owner' - Unused argument
 ///
-
 pub async fn npmjs_get_repository_link(_owner: &str, repository: &str) -> Result<String, String> {
     // docs of the api to call to get the github link
     // https://api-docs.npms.io/#api-Package
@@ -146,10 +146,7 @@ pub async fn github_get_open_issues(owner: &str, repository: &str,  response_res
 
 }
 
-pub async fn github_get_closed_issues(owner: &str, repository: &str, response_res: Result<serde_json::Value, String>) -> Result<String, String> {
-    //println!("github_get_closed_issues");
-/// Returns the number of forks of a repository
-
+/// Returns the number of closed issues of a repository
 ///
 /// # Arguments
 ///
@@ -157,19 +154,17 @@ pub async fn github_get_closed_issues(owner: &str, repository: &str, response_re
 /// * 'repository' - The repository
 /// * 'response_res' - The response request to parse
 ///
-pub async fn github_get_number_of_forks(owner: &str, repository: &str, response_res: Result<serde_json::Value, String>) -> Result<String, String> {
+pub async fn github_get_closed_issues(owner: &str, repository: &str, response_res: Result<serde_json::Value, String>) -> Result<String, String> {
     println!("Getting fork information for {} / {}", owner, repository);
 
     //let response_res = github_get_response_body(owner, repository, None).await;
-    /*
+    
     if response_res.is_err() {
         return Err(response_res.err().unwrap().to_string())
     }
     let response = response_res.unwrap();
 
-    let response_str = response.to_string();
-    //println!("\n\n");
-    //println!("{}\n", response_str);
+    debug!("{}", response.to_string());
 
     let issues_res = response.get("number");
     if issues_res.is_none() {
@@ -203,14 +198,23 @@ pub async fn github_get_number_of_forks(owner: &str, repository: &str, response_
 
 }
 
-pub async fn github_get_license(owner: &str, repository: &str, response_res: Result<serde_json::Value, String>) -> Result<String, String> { 
+/// Returns the license of a repository
+pub async fn github_get_license(owner: &str, repository: &str, response_res: Result<serde_json::Value, String>) -> Result<String, String> {
+    println!("Getting license information for {} / {}", owner, repository);
+
     let contents_response = response_res.unwrap();
     let license_res = contents_response.get("license");
 
-    let license_name = license_res.expect("License not found").get("key").unwrap();
-    let my_str = license_name.as_str().expect("Invalid license name");
-    Ok(my_str.to_string())
-
+    match license_res.unwrap() {
+        Object(json) => {
+            let license_name = json.get("key").expect("Key: \"key\" is not in the response text");
+            let my_str = license_name.as_str().expect("Invalid license name");
+            Ok(my_str.to_string())        
+        }
+        _ => {
+            Err("".to_string())
+        }
+    }
 }
 
 /// Returns the response body as a serde_json::Value
@@ -336,14 +340,12 @@ pub async fn github_get_issue_response_body(owner: &str, repository: &str, heade
     }
 
     let response_text = response_text_res.unwrap().to_owned();
-    println!("\n\nresponse text: {}\n\n", response_text);
     let response_json_res = serde_json::from_str(&response_text);
     if response_json_res.is_err() {
         return Err(response_json_res.err().unwrap().to_string())
     }
 
     let response_json: serde_json::Value = response_json_res.unwrap();
-    println!("\n\nresponse: {}\n\n", response_json);
 
     let issues_count = response_json["number"].as_u64().unwrap_or(0);
     println!("\n\nNumber of total issues: {}\n\n", issues_count);
@@ -374,134 +376,3 @@ fn github_get_api_token() -> Result<String, VarError> {
     }
     Ok(res.unwrap())
 }
-
-// returns a string with the name of the license if it is found
-// returns a blank string if no license is found
-/*
-async fn github_get_license_from_contents_response(owner: &str, repository: &str, content_arr: &Vec<serde_json::Value>) -> Result<String, String> {
-    // this function assumes that the content_arr passed to it is an array of object which contain information on files in the repository
-
-    // look for key words in file/dir names in base directory
-    // eg.: 'license' or names of licenses
-    // if there is a file called 'license' in root dir, the first words in it may be the license type.
-
-    //
-    // STEP 1: Find the file that contains the repository license
-    //
-    let mut license_file = String::new();
-    let license_in_filename: bool = false;
-
-    let license_word = "license";
-    for file_val in content_arr {
-
-        let file_res = file_val.as_object();
-        if file_res.is_none() {
-            return Err(format!("Failed to get the license of {}/{}", owner, repository))
-        }
-        let file = file_res.unwrap();
-
-        // get file type
-        let filetype_res = file.get("type");
-        if filetype_res.is_none() {
-            return Err(format!("Failed to get the license of {}/{}", owner, repository));
-        }
-        let filetype_val = filetype_res.unwrap().as_str();
-        if filetype_val.is_none() {
-            return Err(format!("Failed to get the license of {}/{}", owner, repository));
-        }
-        let filetype = filetype_val.unwrap();
-
-        if filetype.to_lowercase().eq("dir") {
-            // ignore directories
-            continue;
-        }
-
-        // get path
-        let path_res = file.get("path");
-        if path_res.is_none() {
-            return Err(format!("Failed to get the license of {}/{}", owner, repository));
-        }
-        let path_val = path_res.unwrap().as_str();
-        if path_val.is_none() {
-            return Err(format!("Failed to get the license of {}/{}", owner, repository));
-        }
-        let path = path_val.unwrap();
-
-
-        let name_res = file.get("name");
-        if name_res.is_none() {
-            return Err(format!("Failed to get the license of {}/{}", owner, repository));
-        }
-        let name_val = name_res.unwrap().as_str();
-        if name_val.is_none() {
-            return Err(format!("Failed to get the license of {}/{}", owner, repository));
-        }
-        let name = name_val.unwrap();
-        let name_lower = name.to_lowercase();
-
-        // STEP 1.1: look for a file called 'license'
-        if name_lower.eq(license_word) {
-
-            license_file.push_str(path);
-            break; // license file was found
-
-        }
-
-        // STEP 1.2: check for license.txt or license.md
-        if name_lower.eq("license.txt") || name_lower.eq("license.md") {
-            license_file.push_str(path);
-            break; // license file was found
-        }
-        // STEP 1.3: check if file name contains license
-        if name_lower.contains("license") {
-            license_file.push_str(path);
-            break; // license file was found
-        }
-    }
-
-    //
-    // STEP 2: Find and return the license type
-    //
-    if !license_in_filename {
-        // STEP 2.1: if license name is located in a file, get the file contents, convert from base64, then find the license
-
-        // get file contents
-        let path = format!("{}/contents/{}", repository, license_file);
-        let contents_res = github_get_response_body(owner, &path, None).await;
-        if contents_res.is_err() {
-            return Err(contents_res.err().unwrap());
-        }
-        let contents_val = contents_res.unwrap();
-        let contents_obj = contents_val.as_object();
-        if contents_obj.is_none() {
-            return Err(format!("Failed to get license from filename for {}/{}", owner, repository));
-        }
-        let contents = contents_obj.unwrap();
-
-        let file_contents_res = contents.get("content");
-        if file_contents_res.is_none() {
-            return Err(format!("Failed to get license from filename for {}/{}", owner, repository));
-        }
-        let file_contents_val = file_contents_res.unwrap();
-
-        let file_contents_base64_res = file_contents_val.as_str();
-        if file_contents_base64_res.is_none() {
-            return Err(format!("Failed to get license from filename for {}/{}", owner, repository));
-        }
-        let file_contents_base64 = file_contents_base64_res.unwrap();
-
-        // convert from base64
-        let file_contents_base64_ = file_contents_base64.replace("\n", ""); // remove all new line chars from the base64 string
-        let license_str = str::from_utf8(&*general_purpose::STANDARD.decode(&file_contents_base64_).unwrap()).unwrap().to_owned();
-
-        // find the license
-        let license_lines: Vec<&str> = license_str.split("\n").collect();
-        let license_name = String::from(license_lines[0].trim());
-        // println!("{}", license_name);
-        return Ok(license_name.clone());
-    } 
-
-    // if the code reaches this line, a license was not found
-    Ok("license not implemented yet".to_owned())
-}*/
-

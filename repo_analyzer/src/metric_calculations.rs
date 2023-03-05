@@ -20,7 +20,6 @@ pub fn get_ramp_up_time(codebase_length: &str) -> f32 {
     //     }
     // };
     let score = 1.0 - float_vec[0]/float_vec[1];
-    // normalize(min(score, 50000.0), 50000.0)
     score as f32
 }
 
@@ -31,7 +30,6 @@ pub fn get_correctness(opened_issues: &str) -> f32 {
         Ok(n) => n,
         Err(_) => -1.0
     };
-    // normalize(min(opened_issues, 2000.0), 2000.0)
     opened_issues as f32
 }
 
@@ -41,7 +39,6 @@ pub fn get_bus_factor(number_of_forks: &str) -> f32 {
         Ok(n) => n,
         Err(_) => -1.0
     };
-    // normalize(min(number_of_forks, 1000.0), 1000.0)
     number_of_forks as f32
 }
 
@@ -59,7 +56,7 @@ pub fn get_license(license: Result<String, String>) -> f32 {
 
     let license_str = match license {
         Ok(value) => value,
-        Err(error) => return 0.0,
+        Err(_error) => return 0.0,
     };
     
     let l_score = 0.0;
@@ -85,7 +82,7 @@ pub fn get_responsive_maintainer(opened_issues: &str, closed_issues: &str) -> f3
         Err(_) => -1.0
     };
 
-    normalize(min(opened_issues, 2000.0), 2000.0)
+    opened_issues
 }
 
 /// Calculates the metric net score by averaging all other metrics
