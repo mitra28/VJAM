@@ -188,6 +188,8 @@ async fn run_url(filename: &str) {
         if r2.is_err() {
             println!("ERROR ");
         }
+        
+        println!("Successful get responses ");
 
 
 

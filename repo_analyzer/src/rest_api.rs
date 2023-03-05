@@ -87,6 +87,7 @@ pub async fn npmjs_get_repository_link(_owner: &str, repository: &str) -> Result
 /// * 'response_res' - The response request to parse
 ///
 pub async fn github_get_codebase_length(owner: &str, repository: &str) -> Result<String, String> {
+    println!("Getting ramp up information for {} / {}", owner, repository);
     let response_res = github_get_response_body(owner, repository, None).await;
     if response_res.is_err() {
         return Err(response_res.err().unwrap().to_string())
@@ -127,6 +128,7 @@ pub async fn github_get_codebase_length(owner: &str, repository: &str) -> Result
 /// * 'response_res' - The response request to parse
 ///
 pub async fn github_get_open_issues(owner: &str, repository: &str,  response_res: Result<serde_json::Value, String>) -> Result<String, String> {
+    println!("Getting open issues information for {} / {}", owner, repository);
     if response_res.is_err() {
         return Err(response_res.err().unwrap().to_string())
     }
@@ -155,7 +157,7 @@ pub async fn github_get_open_issues(owner: &str, repository: &str,  response_res
 /// * 'response_res' - The response request to parse
 ///
 pub async fn github_get_closed_issues(owner: &str, repository: &str, response_res: Result<serde_json::Value, String>) -> Result<String, String> {
-    println!("Getting fork information for {} / {}", owner, repository);
+    println!("Getting number issues information for {} / {}", owner, repository);
 
     //let response_res = github_get_response_body(owner, repository, None).await;
     
@@ -175,7 +177,7 @@ pub async fn github_get_closed_issues(owner: &str, repository: &str, response_re
     if issues_val.is_none() {
         return Err(format!("Failed to get number of issues of {}/{}", owner, repository));
     }
-
+    
     Ok(format!("{}", issues_val.unwrap()))
 }
 
@@ -295,7 +297,7 @@ pub async fn github_get_issue_response(owner: &str, repository: &str, headers: O
     if !repository.is_empty() {
         repo_mut.insert(0, '/');
     }
-    let url = format!("https://api.github.com/repos{}{}/issues", owner_mut, repo_mut);
+    let url = format!("https://api.github.com/repos{}{}/issues/", owner_mut, repo_mut);
     let token_res = github_get_api_token();
     if token_res.is_err() {
         return Err(token_res.err().unwrap().to_string());
@@ -347,8 +349,8 @@ pub async fn github_get_issue_response_body(owner: &str, repository: &str, heade
 
     let response_json: serde_json::Value = response_json_res.unwrap();
 
-    let issues_count = response_json["number"].as_u64().unwrap_or(0);
-    println!("\n\nNumber of total issues: {}\n\n", issues_count);
+    // let issues_count = response_json["number"].as_u64().unwrap_or(0);
+    // println!("\n\nNumber of total issues: {}\n\n", issues_count);
 
     //let response_json: serde_json::Value = response_json_res.unwrap();
 
