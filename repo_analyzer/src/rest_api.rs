@@ -155,20 +155,20 @@ pub async fn github_get_closed_issues(owner: &str, repository: &str, response_re
     let response = response_res.unwrap();
 
     let response_str = response.to_string();
-    println!("\n\n");
-    println!("{}\n", response_str);
+    //println!("\n\n");
+    //println!("{}\n", response_str);
 
-    let closed_issues_res = response.get("closed_issues_count");
-    if closed_issues_res.is_none() {
-        return Err(format!("Failed to get number of closed issues of {}/{}", owner, repository));
+    let issues_res = response.get("number");
+    if issues_res.is_none() {
+        return Err(format!("Failed to get number of issues of {}/{}", owner, repository));
     }
 
-    let closed_issues_val = closed_issues_res.unwrap().as_i64();
-    if closed_issues_val.is_none() {
-        return Err(format!("Failed to get number of closed issues of {}/{}", owner, repository));
+    let issues_val = issues_res.unwrap().as_i64();
+    if issues_val.is_none() {
+        return Err(format!("Failed to get number of issues of {}/{}", owner, repository));
     }
 
-    Ok(format!("{}", closed_issues_val.unwrap()))
+    Ok(format!("{}", issues_val.unwrap()))
 }
 
 pub async fn github_get_number_of_forks(owner: &str, repository: &str, response_res: Result<serde_json::Value, String>) -> Result<String, String> {
@@ -326,7 +326,7 @@ pub async fn github_get_issue_response(owner: &str, repository: &str, headers: O
     if !repository.is_empty() {
         repo_mut.insert(0, '/');
     }
-    let url = format!("https://api.github.com/repos{}{}/issues?state=closed", owner_mut, repo_mut);
+    let url = format!("https://api.github.com/repos{}{}/issues", owner_mut, repo_mut);
     let token_res = github_get_api_token();
     if token_res.is_err() {
         return Err(token_res.err().unwrap().to_string());
@@ -371,15 +371,23 @@ pub async fn github_get_issue_response_body(owner: &str, repository: &str, heade
     }
 
     let response_text = response_text_res.unwrap().to_owned();
+    println!("\n\nresponse text: {}\n\n", response_text);
     let response_json_res = serde_json::from_str(&response_text);
     if response_json_res.is_err() {
         return Err(response_json_res.err().unwrap().to_string())
     }
+
     let response_json: serde_json::Value = response_json_res.unwrap();
+    println!("\n\nresponse: {}\n\n", response_json);
 
+    let issues_count = response_json["number"].as_u64().unwrap_or(0);
+    println!("\n\nNumber of total issues: {}\n\n", issues_count);
 
-    let closed_issues_count = response_json["closed_issues"].as_u64().unwrap_or(0);
-    println!("\n\nNumber of closed issues: {}\n\n", closed_issues_count);
+    //let response_json: serde_json::Value = response_json_res.unwrap();
+
+    //println!("\n\nresponse: {}\n\n", response_json);
+    //let issues_count = response_json["number"].as_u64().unwrap_or(0);
+    //println!("\n\nNumber of total issues: {}\n\n", issues_count);
 
     Ok(response_json)
 }

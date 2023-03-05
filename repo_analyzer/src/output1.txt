@@ -1,0 +1,110 @@
+
+
+response text: {"message":"API rate limit exceeded for 128.46.4.98. (But here's the good news: Authenticated requests get a higher rate limit. Check out the documentation for more details.)","documentation_url":"https://docs.github.com/rest/overview/resources-in-the-rest-api#rate-limiting"}
+
+
+
+
+response: {"documentation_url":"https://docs.github.com/rest/overview/resources-in-the-rest-api#rate-limiting","message":"API rate limit exceeded for 128.46.4.98. (But here's the good news: Authenticated requests get a higher rate limit. Check out the documentation for more details.)"}
+
+
+
+
+Number of total issues: 0
+
+
+
+
+
+{"documentation_url":"https://docs.github.com/rest/overview/resources-in-the-rest-api#rate-limiting","message":"API rate limit exceeded for 128.46.4.98. (But here's the good news: Authenticated requests get a higher rate limit. Check out the documentation for more details.)"}
+
+Getting fork information for cloudinary / cloudinary_npm
+
+
+response text: {"message":"API rate limit exceeded for 128.46.4.98. (But here's the good news: Authenticated requests get a higher rate limit. Check out the documentation for more details.)","documentation_url":"https://docs.github.com/rest/overview/resources-in-the-rest-api#rate-limiting"}
+
+
+
+
+response: {"documentation_url":"https://docs.github.com/rest/overview/resources-in-the-rest-api#rate-limiting","message":"API rate limit exceeded for 128.46.4.98. (But here's the good news: Authenticated requests get a higher rate limit. Check out the documentation for more details.)"}
+
+
+
+
+Number of total issues: 0
+
+
+
+
+
+{"documentation_url":"https://docs.github.com/rest/overview/resources-in-the-rest-api#rate-limiting","message":"API rate limit exceeded for 128.46.4.98. (But here's the good news: Authenticated requests get a higher rate limit. Check out the documentation for more details.)"}
+
+Getting fork information for expressjs / express
+
+
+response text: {"message":"API rate limit exceeded for 128.46.4.98. (But here's the good news: Authenticated requests get a higher rate limit. Check out the documentation for more details.)","documentation_url":"https://docs.github.com/rest/overview/resources-in-the-rest-api#rate-limiting"}
+
+
+
+
+response: {"documentation_url":"https://docs.github.com/rest/overview/resources-in-the-rest-api#rate-limiting","message":"API rate limit exceeded for 128.46.4.98. (But here's the good news: Authenticated requests get a higher rate limit. Check out the documentation for more details.)"}
+
+
+
+
+Number of total issues: 0
+
+
+
+
+
+{"documentation_url":"https://docs.github.com/rest/overview/resources-in-the-rest-api#rate-limiting","message":"API rate limit exceeded for 128.46.4.98. (But here's the good news: Authenticated requests get a higher rate limit. Check out the documentation for more details.)"}
+
+Getting fork information for nullivex / nodist
+
+
+response text: {"message":"API rate limit exceeded for 128.46.4.98. (But here's the good news: Authenticated requests get a higher rate limit. Check out the documentation for more details.)","documentation_url":"https://docs.github.com/rest/overview/resources-in-the-rest-api#rate-limiting"}
+
+
+
+
+response: {"documentation_url":"https://docs.github.com/rest/overview/resources-in-the-rest-api#rate-limiting","message":"API rate limit exceeded for 128.46.4.98. (But here's the good news: Authenticated requests get a higher rate limit. Check out the documentation for more details.)"}
+
+
+
+
+Number of total issues: 0
+
+
+
+
+
+{"documentation_url":"https://docs.github.com/rest/overview/resources-in-the-rest-api#rate-limiting","message":"API rate limit exceeded for 128.46.4.98. (But here's the good news: Authenticated requests get a higher rate limit. Check out the documentation for more details.)"}
+
+Getting fork information for lodash / lodash
+
+
+response text: {"message":"API rate limit exceeded for 128.46.4.98. (But here's the good news: Authenticated requests get a higher rate limit. Check out the documentation for more details.)","documentation_url":"https://docs.github.com/rest/overview/resources-in-the-rest-api#rate-limiting"}
+
+
+
+
+response: {"documentation_url":"https://docs.github.com/rest/overview/resources-in-the-rest-api#rate-limiting","message":"API rate limit exceeded for 128.46.4.98. (But here's the good news: Authenticated requests get a higher rate limit. Check out the documentation for more details.)"}
+
+
+
+
+Number of total issues: 0
+
+
+
+
+
+{"documentation_url":"https://docs.github.com/rest/overview/resources-in-the-rest-api#rate-limiting","message":"API rate limit exceeded for 128.46.4.98. (But here's the good news: Authenticated requests get a higher rate limit. Check out the documentation for more details.)"}
+
+Getting fork information for browserify / browserify
+{"URL":"https://github.com/cloudinary/cloudinary_npm", "NET_SCORE":0.00, "RAMP_UP_SCORE":0.00, "CORRECTNESS_SCORE":0.00, "BUS_FACTOR_SCORE":0.00, "RESPONSIVE_MAINTAINER_SCORE":0.00, "LICENSE_SCORE":0.00}
+{"URL":"https://www.npmjs.com/package/express", "NET_SCORE":0.00, "RAMP_UP_SCORE":0.00, "CORRECTNESS_SCORE":0.00, "BUS_FACTOR_SCORE":0.00, "RESPONSIVE_MAINTAINER_SCORE":0.00, "LICENSE_SCORE":0.00}
+{"URL":"https://github.com/nullivex/nodist", "NET_SCORE":0.00, "RAMP_UP_SCORE":0.00, "CORRECTNESS_SCORE":0.00, "BUS_FACTOR_SCORE":0.00, "RESPONSIVE_MAINTAINER_SCORE":0.00, "LICENSE_SCORE":0.00}
+{"URL":"https://github.com/lodash/lodash", "NET_SCORE":0.00, "RAMP_UP_SCORE":0.00, "CORRECTNESS_SCORE":0.00, "BUS_FACTOR_SCORE":0.00, "RESPONSIVE_MAINTAINER_SCORE":0.00, "LICENSE_SCORE":0.00}
+{"URL":"https://www.npmjs.com/package/browserify", "NET_SCORE":0.00, "RAMP_UP_SCORE":0.00, "CORRECTNESS_SCORE":0.00, "BUS_FACTOR_SCORE":0.00, "RESPONSIVE_MAINTAINER_SCORE":0.00, "LICENSE_SCORE":0.00}
