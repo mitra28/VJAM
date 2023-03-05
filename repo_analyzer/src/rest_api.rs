@@ -3,11 +3,11 @@ use std::str;
 use std::env::VarError;
 use std::collections::HashMap;
 use std::result::{Result};
+use serde_json::json;
+//use base64::decode;
 use reqwest::{Client, Response};
 use reqwest::header::HeaderMap;
-use base64::{ Engine, engine::general_purpose };
-
-
+extern crate base64;
 ///
 /// Returns the github link associated with the npmjs package
 ///
@@ -155,18 +155,8 @@ pub async fn github_get_number_of_forks(owner: &str, repository: &str, response_
 
 }
 
-pub async fn github_get_license(owner: &str, repository: &str, response_res: Result<serde_json::Value, String>) -> Result<String, String> {
+pub async fn github_get_license(owner: &str, repository: &str, response_res: Result<serde_json::Value, String>) -> Result<String, String> { // -> Result<String, String> {
     //println!("Getting license information for {} / {}", owner, repository);
-
-    //let contents_path = format!("{}/contents", repository);
-    /*
-    let contents_response_res = github_get_response_body(owner, repository, None).await;
-    println!("contents_response JSON : {:?}", contents_response_res);
-
-    if contents_response_res.is_err() {
-        return Err(contents_response_res.unwrap_err().to_string());
-    }
-    */
     //defining map of valid licenses
     let mut valid_license = HashMap::new();
     valid_license.insert("apache", 0.0);
@@ -181,18 +171,41 @@ pub async fn github_get_license(owner: &str, repository: &str, response_res: Res
 
     let contents_response = response_res.unwrap();
     let license_res = contents_response.get("license");
-    println!("License_res : {:?}", license_res);
-    if license_res.is_none() {
-        return Err(format!("Failed to get license of {}/{}", owner, repository));
-    }else{
-        if license_res == Some(std::ptr::null()){
 
-        }else{
+    /*
+
+
+    if license_res.is_none() || (license_res.unwrap_or(&json!("")).is_null()) {
+        //if it is not in the main repo page, make another get request, this time get the readME to search for license
+        let readme_path = repository.clone().to_owned() + "/contents/README.md";
+        let readme_res = github_get_response_body(owner, &readme_path, None).await;
+        if readme_res.is_err() {
+            println!("ERROR ");
+        }
+
+        let readme = readme_res.unwrap();
+        let content = readme["content"].as_str().unwrap();
+        //println!("readme_res : {:?}", content);
+        //let decoded_content = base64::decode(readme["content"].as_str().unwrap()).unwrap();
+        let bytes = general_purpose::STANDARD
+        .decode(content).unwrap();
+        println!("{:?}", bytes);
+        //let readme_str = String::from_utf8(bytes).unwrap();
+        return "Error".to_string()
+
+        //println!("readme_res : {:?}", readme_bytes);
+        //
+    }else{
         let license_name = license_res.expect("License not found").get("key").unwrap();
         let my_str = license_name.as_str().expect("Invalid license name");
+        Ok(my_str.to_string());
         println!("License name: {}", my_str);
-        }
-    }
+    }*/
+    let license_name = license_res.expect("License not found").get("key").unwrap();
+    let my_str = license_name.as_str().expect("Invalid license name");
+    //println!("License name: {}", my_str);
+    Ok(my_str.to_string())
+    
 
     //works till here, checks to see if license exists in home page, if it does, it gives it a score based on that
 
@@ -201,7 +214,8 @@ pub async fn github_get_license(owner: &str, repository: &str, response_res: Res
     /*let contents_arr_res = contents_response.as_array();
     if contents_arr_res.is_none() {
         return Err(format!("Failed to get contents of Github repository: {}/{}", owner, repository));
-    }*/
+    }
+    
     if !contents_response.is_array() {
         return Err("Unexpected response format from GitHub API".to_string());
     }
@@ -210,14 +224,16 @@ pub async fn github_get_license(owner: &str, repository: &str, response_res: Res
     //let contents_arr = contents_arr_res.unwrap();
     //println!("Contents response res: {:?}", contents_arr);
 
-
     let license_res = github_get_license_from_contents_response(owner, repository, contents_arr).await;
 
     if license_res.is_err() {
         return Err(format!("Failed to get license from repository: {}/{}", owner, repository));
     }
     let license = license_res.unwrap();
-    Ok(license)
+
+
+
+    Ok(license) */
 }
 
 
@@ -403,6 +419,7 @@ pub async fn github_get_response(owner: &str, repository: &str, headers: Option<
         repo_mut.insert(0, '/');
     }
     let url = format!("https://api.github.com/repos{}{}", owner_mut, repo_mut);
+    println!("URL:  {}", url);
     let token_res = github_get_api_token();
     if token_res.is_err() {
         return Err(token_res.err().unwrap().to_string());
@@ -453,6 +470,7 @@ fn github_get_api_token() -> Result<String, VarError> {
 
 // returns a string with the name of the license if it is found
 // returns a blank string if no license is found
+/*
 async fn github_get_license_from_contents_response(owner: &str, repository: &str, content_arr: &Vec<serde_json::Value>) -> Result<String, String> {
     // this function assumes that the content_arr passed to it is an array of object which contain information on files in the repository
 
@@ -593,7 +611,7 @@ async fn github_get_license_from_contents_response(owner: &str, repository: &str
     // if the code reaches this line, a license was not found
     // println!("{:#?}", content_arr);
     Ok("license not implemented yet".to_owned())
-}
+}*/
 
 // returns a blank string if no license is found
 // fn github_get_readme_from_contents_response(_owner: &str, repository: &str, content_arr: &Vec<serde_json::Value>) -> Result<String, Box<dyn Error>> {

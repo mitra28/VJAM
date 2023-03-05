@@ -229,3 +229,58 @@
 [INFO]: Logger successfully loaded!
 [INFO]: Logger successfully loaded!
 [INFO]: Logger successfully loaded!
+[INFO]: Logger successfully loaded!
+[WARNING]: Failed to get license from repository: cloudinary/cloudinary_npm
+[INFO]: Logger successfully loaded!
+[WARNING]: Failed to get license from repository: cloudinary/cloudinary_npm
+[INFO]: Logger successfully loaded!
+[WARNING]: Unexpected response format from GitHub API
+[INFO]: Logger successfully loaded!
+[INFO]: Logger successfully loaded!
+[INFO]: Logger successfully loaded!
+[INFO]: Logger successfully loaded!
+[INFO]: Logger successfully loaded!
+[WARNING]: Unexpected response format from GitHub API
+[INFO]: Logger successfully loaded!
+[WARNING]: Unexpected response format from GitHub API
+[INFO]: Logger successfully loaded!
+[WARNING]: Unexpected response format from GitHub API
+[INFO]: Logger successfully loaded!
+[WARNING]: Unexpected response format from GitHub API
+[INFO]: Logger successfully loaded!
+[WARNING]: Unexpected response format from GitHub API
+[INFO]: Logger successfully loaded!
+[WARNING]: Unexpected response format from GitHub API
+[INFO]: Logger successfully loaded!
+[WARNING]: Unexpected response format from GitHub API
+[INFO]: Logger successfully loaded!
+[INFO]: Logger successfully loaded!
+[INFO]: Logger successfully loaded!
+[INFO]: Logger successfully loaded!
+[INFO]: Logger successfully loaded!
+[INFO]: Logger successfully loaded!
+[INFO]: Logger successfully loaded!
+[INFO]: Logger successfully loaded!
+[INFO]: Logger successfully loaded!
+[INFO]: Logger successfully loaded!
+[INFO]: Logger successfully loaded!
+[INFO]: Logger successfully loaded!
+[INFO]: Logger successfully loaded!
+[INFO]: Logger successfully loaded!
+[INFO]: Logger successfully loaded!
+[INFO]: Logger successfully loaded!
+[INFO]: Logger successfully loaded!
+[WARNING]: Unexpected response format from GitHub API
+[INFO]: Logger successfully loaded!
+[WARNING]: Unexpected response format from GitHub API
+[INFO]: Logger successfully loaded!
+[WARNING]: Unexpected response format from GitHub API
+[INFO]: Logger successfully loaded!
+[WARNING]: Unexpected response format from GitHub API
+[INFO]: Logger successfully loaded!
+[INFO]: Logger successfully loaded!
+[INFO]: Logger successfully loaded!
+[INFO]: Logger successfully loaded!
+[INFO]: Logger successfully loaded!
+[INFO]: Logger successfully loaded!
+[INFO]: Logger successfully loaded!

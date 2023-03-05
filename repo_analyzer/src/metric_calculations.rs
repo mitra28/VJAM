@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 fn normalize(value: f32, range: f32) -> f32 {
 
     value / range
@@ -35,7 +37,8 @@ pub fn get_bus_factor(number_of_forks: &str) -> f32 {
     normalize(min(number_of_forks, 1000.0), 1000.0)
 }
 
-pub fn get_license(license: &str) -> f32 {
+pub fn get_license(license: Result<String, String>) -> f32 {
+    /*
     let mut names: Vec<String> = Vec::new();
     names.push("LGPLv2.1".to_owned());
     names.push("gnu lesser general public license".to_owned());
@@ -51,7 +54,38 @@ pub fn get_license(license: &str) -> f32 {
         }
     }
 
-    return has_license;
+    return has_license;*/
+    println!("info: {:?}", license);
+    let mut valid_license = HashMap::<String, f32>::new();
+    valid_license.insert("apache".to_string(), 0.0);
+    valid_license.insert("mit".to_string(), 1.0);
+    valid_license.insert("gpl".to_string(), 1.0);
+    valid_license.insert("lgpl".to_string(), 1.0);
+    valid_license.insert("ms-pl".to_string(), 1.0);
+    valid_license.insert("epl".to_string(), 0.0);
+    valid_license.insert("bsd".to_string(), 1.0);
+    valid_license.insert("cddl".to_string(), 0.0);
+
+    /*let newlis_str = license.unwrap();*/
+
+    let license_str = match license {
+        Ok(value) => value,
+        Err(error) => return 0.0,
+    };
+    
+    let l_score = 0.0;
+    if valid_license.contains_key(&license_str){
+        match valid_license.get(&license_str) {
+            Some(value) => return *value,
+            None => return l_score,
+        }
+
+        //println!("Here");
+    }else{
+        return l_score
+    }
+
+    //return 0.5;
 }
 
 pub fn get_responsive_maintainer() -> f32 {
