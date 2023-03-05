@@ -188,15 +188,6 @@ async fn run_url(filename: &str) {
         //println!("open issues: {}", opened_issues);
 
         let license =  rest_api::github_get_license(&owner , &package, response1); //.await {
-            /*
-            Ok(license) => license,
-            Err(_e) => {
-                logger.log_warning(&format!("{}", _e.as_str()));
-                "0.0".to_owned()
-            }
-        };*/
-
-        //println!("license: {}", license);
 
         let number_of_forks = match rest_api::github_get_number_of_forks(&owner , &package, response2).await {
             Ok(number_of_forks) => number_of_forks,

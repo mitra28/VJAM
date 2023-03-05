@@ -155,85 +155,14 @@ pub async fn github_get_number_of_forks(owner: &str, repository: &str, response_
 
 }
 
-pub async fn github_get_license(owner: &str, repository: &str, response_res: Result<serde_json::Value, String>) -> Result<String, String> { // -> Result<String, String> {
-    //println!("Getting license information for {} / {}", owner, repository);
-    //defining map of valid licenses
-    let mut valid_license = HashMap::new();
-    valid_license.insert("apache", 0.0);
-    valid_license.insert("mit", 1.0);
-    valid_license.insert("gpl", 1.0);
-    valid_license.insert("lgpl", 1.0);
-    valid_license.insert("ms-pl", 1.0);
-    valid_license.insert("epl", 0.0);
-    valid_license.insert("bsd", 1.0);
-    valid_license.insert("cddl", 0.0);
-
-
+pub async fn github_get_license(owner: &str, repository: &str, response_res: Result<serde_json::Value, String>) -> Result<String, String> { 
     let contents_response = response_res.unwrap();
     let license_res = contents_response.get("license");
 
-    /*
-
-
-    if license_res.is_none() || (license_res.unwrap_or(&json!("")).is_null()) {
-        //if it is not in the main repo page, make another get request, this time get the readME to search for license
-        let readme_path = repository.clone().to_owned() + "/contents/README.md";
-        let readme_res = github_get_response_body(owner, &readme_path, None).await;
-        if readme_res.is_err() {
-            println!("ERROR ");
-        }
-
-        let readme = readme_res.unwrap();
-        let content = readme["content"].as_str().unwrap();
-        //println!("readme_res : {:?}", content);
-        //let decoded_content = base64::decode(readme["content"].as_str().unwrap()).unwrap();
-        let bytes = general_purpose::STANDARD
-        .decode(content).unwrap();
-        println!("{:?}", bytes);
-        //let readme_str = String::from_utf8(bytes).unwrap();
-        return "Error".to_string()
-
-        //println!("readme_res : {:?}", readme_bytes);
-        //
-    }else{
-        let license_name = license_res.expect("License not found").get("key").unwrap();
-        let my_str = license_name.as_str().expect("Invalid license name");
-        Ok(my_str.to_string());
-        println!("License name: {}", my_str);
-    }*/
     let license_name = license_res.expect("License not found").get("key").unwrap();
     let my_str = license_name.as_str().expect("Invalid license name");
-    //println!("License name: {}", my_str);
     Ok(my_str.to_string())
-    
 
-    //works till here, checks to see if license exists in home page, if it does, it gives it a score based on that
-
-
-
-    /*let contents_arr_res = contents_response.as_array();
-    if contents_arr_res.is_none() {
-        return Err(format!("Failed to get contents of Github repository: {}/{}", owner, repository));
-    }
-    
-    if !contents_response.is_array() {
-        return Err("Unexpected response format from GitHub API".to_string());
-    }
-
-    let contents_arr = contents_response.as_array().unwrap();
-    //let contents_arr = contents_arr_res.unwrap();
-    //println!("Contents response res: {:?}", contents_arr);
-
-    let license_res = github_get_license_from_contents_response(owner, repository, contents_arr).await;
-
-    if license_res.is_err() {
-        return Err(format!("Failed to get license from repository: {}/{}", owner, repository));
-    }
-    let license = license_res.unwrap();
-
-
-
-    Ok(license) */
 }
 
 

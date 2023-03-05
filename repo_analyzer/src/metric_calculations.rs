@@ -38,23 +38,6 @@ pub fn get_bus_factor(number_of_forks: &str) -> f32 {
 }
 
 pub fn get_license(license: Result<String, String>) -> f32 {
-    /*
-    let mut names: Vec<String> = Vec::new();
-    names.push("LGPLv2.1".to_owned());
-    names.push("gnu lesser general public license".to_owned());
-    names.push("gnu lesser general public license v2.1".to_owned());
-    names.push("LGPL".to_owned());
-
-    let mut has_license = 0.0;
-
-    for name in names {
-        if license.contains(&name) {
-            has_license = 1.0;
-            break;
-        }
-    }
-
-    return has_license;*/
     println!("info: {:?}", license);
     let mut valid_license = HashMap::<String, f32>::new();
     valid_license.insert("apache".to_string(), 0.0);
@@ -65,8 +48,6 @@ pub fn get_license(license: Result<String, String>) -> f32 {
     valid_license.insert("epl".to_string(), 0.0);
     valid_license.insert("bsd".to_string(), 1.0);
     valid_license.insert("cddl".to_string(), 0.0);
-
-    /*let newlis_str = license.unwrap();*/
 
     let license_str = match license {
         Ok(value) => value,
@@ -80,12 +61,9 @@ pub fn get_license(license: Result<String, String>) -> f32 {
             None => return l_score,
         }
 
-        //println!("Here");
     }else{
         return l_score
     }
-
-    //return 0.5;
 }
 
 pub fn get_responsive_maintainer() -> f32 {
