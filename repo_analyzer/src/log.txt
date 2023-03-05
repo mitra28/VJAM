@@ -1,0 +1,2 @@
+[INFO]: Logger successfully loaded!
+[WARNING]: Failed to get license from repository: cloudinary/cloudinary_npm
