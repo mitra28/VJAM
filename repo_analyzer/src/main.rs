@@ -252,7 +252,7 @@ async fn run_url(filename: &str) {
             error!("Failed to responsiveness from {}/{}", &owner, &package);
         }
 
-        let metrics = [ru, c, bf, rm]; // responsive maintainer is omitted
+        let metrics = [ru, c, bf, l, rm]; // responsive maintainer is omitted
         let o = metric_calculations::get_overall(&metrics);
 
         repos.add_repo(repo_list::Repo {url : repo_url, net_score : o, ramp_up : ru, correctness : c, bus_factor : bf, responsive_maintainer : rm, license : l});
