@@ -4,11 +4,12 @@ use std::{env};
 use std::str;
 use std::env::VarError;
 use std::result::{Result};
-use reqwest::{Client, Response};
+// use reqwest::{Client, Response};
+use reqwest::Client;
 use reqwest::header::HeaderMap;
 use log::{ debug };
 extern crate base64;
-use serde_json::Value::Object;
+// use serde_json::Value::Object;
 
 ///
 /// Returns the github link associated with the npmjs package
@@ -78,7 +79,7 @@ pub async fn npmjs_get_repository_link(_owner: &str, repository: &str) -> Result
 }
 
 
-/// Returns the length of a repository
+/// All functions starting with "github_get" have the following arguments:
 ///
 /// # Arguments
 ///
@@ -86,52 +87,14 @@ pub async fn npmjs_get_repository_link(_owner: &str, repository: &str) -> Result
 /// * 'repository' - The repository
 /// * 'response_res' - The response request to parse
 ///
-pub async fn github_get_codebase_length(owner: &str, repository: &str) -> Result<String, String> {
-    println!("Getting ramp up information for {} / {}", owner, repository);
-    let response_res = github_get_response_body(owner, repository, None).await;
-    if response_res.is_err() {
-        return Err(response_res.err().unwrap().to_string())
-    }
-    let response = response_res.unwrap();
-
-    let open_issues_res = response.get("open_issues");
-    let forks_res = response.get("forks");
-    if open_issues_res.is_none() {
-        return Err(format!("Failed to get number of open issues of {}/{} for ramp-up", owner, repository));
-    }
-    if forks_res.is_none() {
-        return Err(format!("Failed to get number of forks of {}/{} for ramp-up", owner, repository));
-    }
-
-    let open_issues_val = open_issues_res.unwrap().as_i64();
-    let forks_val = forks_res.unwrap().as_i64();
-    if open_issues_val.is_none() {
-        return Err(format!("Failed to unwrap number of open issues of {}/{} for ramp-up", owner, repository));
-    }
-    if forks_val.is_none() {
-        return Err(format!("Failed to unwrap number of forks of {}/{} for ramp-up", owner, repository));
-    }
-    //let ratio = open_issues_val.unwrap()/forks_val.unwrap();
-    Ok(format!("{},{}", open_issues_val.unwrap(), forks_val.unwrap()))
-    //Ok(format!("{}", ratio))
-}
 
 
 
 /// Returns the number of open issues of a repository
-
-///
-/// # Arguments
-///
-/// * 'owner' - The owner of the repository
-/// * 'repository' - The repository
-/// * 'response_res' - The response request to parse
 ///
 pub async fn github_get_open_issues(owner: &str, repository: &str,  response_res: Result<serde_json::Value, String>) -> Result<String, String> {
-    println!("Getting open issues information for {} / {}", owner, repository);
-    if response_res.is_err() {
-        return Err(response_res.err().unwrap().to_string())
-    }
+    // println!("Getting open issues information for {} / {}", owner, repository);
+    
     let response = response_res.unwrap();
 
     let open_issues_res = response.get("open_issues_count");
@@ -148,27 +111,17 @@ pub async fn github_get_open_issues(owner: &str, repository: &str,  response_res
 
 }
 
-/// Returns the number of closed issues of a repository
+/// Returns the number of total issues of a repository
 ///
-/// # Arguments
-///
-/// * 'owner' - The owner of the repository
-/// * 'repository' - The repository
-/// * 'response_res' - The response request to parse
-///
-pub async fn github_get_closed_issues(owner: &str, repository: &str, response_res: Result<serde_json::Value, String>) -> Result<String, String> {
-    println!("Getting number issues information for {} / {}", owner, repository);
 
-    //let response_res = github_get_response_body(owner, repository, None).await;
-    
-    if response_res.is_err() {
-        return Err(response_res.err().unwrap().to_string())
-    }
+pub async fn github_get_total_issues(owner: &str, repository: &str, response_res: Result<serde_json::Value, String>) -> Result<String, String> {
+    // println!("Getting number issues information for {} / {}", owner, repository);
+
     let response = response_res.unwrap();
 
     debug!("{}", response.to_string());
 
-    let issues_res = response.get("number");
+    let issues_res = response[0].get("number");
     if issues_res.is_none() {
         return Err(format!("Failed to get number of issues of {}/{}", owner, repository));
     }
@@ -181,8 +134,10 @@ pub async fn github_get_closed_issues(owner: &str, repository: &str, response_re
     Ok(format!("{}", issues_val.unwrap()))
 }
 
+/// Returns the number of total issues of a repository
+///
 pub async fn github_get_number_of_forks(owner: &str, repository: &str, response_res: Result<serde_json::Value, String>) -> Result<String, String> {
-    println!("Getting fork information for {} / {}", owner, repository);
+    // println!("Getting fork information for {} / {}", owner, repository);
 
     let response = response_res.unwrap();
 
@@ -201,28 +156,115 @@ pub async fn github_get_number_of_forks(owner: &str, repository: &str, response_
 }
 
 /// Returns the license of a repository
+///
 pub async fn github_get_license(owner: &str, repository: &str, response_res: Result<serde_json::Value, String>) -> Result<String, String> {
-    println!("Getting license information for {} / {}", owner, repository);
+    // println!("Getting license information for {} / {}", owner, repository);
 
     let contents_response = response_res.unwrap();
     let license_res = contents_response.get("license");
 
-    match license_res.unwrap() {
-        Object(json) => {
-            let license_name = json.get("key").expect("Key: \"key\" is not in the response text");
-            let my_str = license_name.as_str().expect("Invalid license name");
-            Ok(my_str.to_string())        
-        }
-        _ => {
-            Err("".to_string())
-        }
+    if license_res.is_none() {
+        return Err(format!("Failed to get license information of {}/{}", owner, repository));
     }
+
+    let license_key = contents_response.get("license")
+        .and_then(|license_value| license_value.get("key"))
+        .ok_or(" ")?;
+
+    let key_as_str = license_key.as_str();
+    let license_key_string = match key_as_str {
+        Some(s) => String::from(s),
+        None => String::new(), // or handle the error however you want
+    };
+    
+    Ok(license_key_string)
+    
 }
 
-/// Returns the response body as a serde_json::Value
-pub async fn github_get_response_body(owner: &str, repository: &str, headers: Option<HeaderMap>) -> Result<serde_json::Value, String> {
-    let response_res = github_get_response(owner, repository, headers).await;
+/// Returns the Response object from a github url
+///
+pub async fn github_get_response(owner: &str, repository: &str, headers: Option<HeaderMap>) -> Result<serde_json::Value, String> {
+    let owner_mut = String::from(owner);
+    let repo_mut = String::from(repository);
+   
+    let url = format!("https://api.github.com/repos/{}/{}", owner_mut, repo_mut);
 
+    // println!("URL:  {}", url);
+    let token_res = github_get_api_token();
+    if token_res.is_err() {
+        return Err(token_res.err().unwrap().to_string());
+    }
+    let token = token_res.unwrap();
+
+    let client_id = "";
+    let client_secret = "";
+
+
+    let client = Client::new();
+    let mut request_builder = client
+        .get(url)
+        .header("Authorization", token)
+        .header("client_id", client_id)
+        .header("client_secret", client_secret)
+        .header("User-Agent", "ECE461-repository-analyzer");
+    if headers.is_some() {
+        request_builder = request_builder.headers(headers.unwrap());
+    }
+    let response_res = request_builder.send().await;
+    if response_res.is_err() {
+        return Err(response_res.err().unwrap().to_string());
+    }
+
+    let response = response_res.unwrap();
+
+    let response_text_res = response.text().await;
+
+    if response_text_res.is_err() {
+        return Err(response_text_res.err().unwrap().to_string())
+    }
+
+    let response_text = response_text_res.unwrap().to_owned();
+    let response_json_res = serde_json::from_str(&response_text);
+    if response_json_res.is_err() {
+        return Err(response_json_res.err().unwrap().to_string())
+    }
+    let response_json = response_json_res.unwrap();
+
+    Ok(response_json)
+}
+
+/// Returns the Issues response object from a github url
+pub async fn github_get_issue_response(owner: &str, repository: &str, headers: Option<HeaderMap>) -> Result<serde_json::Value, String> {
+    let owner_mut = String::from(owner);
+    let repo_mut = String::from(repository);
+    // if !owner.is_empty() {
+    //     owner_mut.insert(0, '/')
+    // }
+    // if !repository.is_empty() {
+    //     repo_mut.insert(0, '/');
+    // }
+    let url = format!("https://api.github.com/repos/{}/{}/issues", owner_mut, repo_mut);
+    let token_res = github_get_api_token();
+    if token_res.is_err() {
+        return Err(token_res.err().unwrap().to_string());
+    }
+    let token = token_res.unwrap();
+
+    let client_id = "";
+    let client_secret = "";
+
+
+    let client = Client::new();
+    let mut request_builder = client
+        .get(url)
+        .header("Authorization", token)
+        .header("client_id", client_id)
+        .header("client_secret", client_secret)
+        .header("User-Agent", "ECE461-repository-analyzer");
+    if headers.is_some() {
+        request_builder = request_builder.headers(headers.unwrap());
+    }
+    let response_res = request_builder.send().await;
     if response_res.is_err() {
         return Err(response_res.err().unwrap().to_string());
     }
@@ -240,127 +282,9 @@ pub async fn github_get_response_body(owner: &str, repository: &str, headers: Op
         return Err(response_json_res.err().unwrap().to_string())
     }
     let response_json = response_json_res.unwrap();
-    //println!("response JSON : {:?}", response_json);
-
-    Ok(response_json)
-    //return response_json;
-}
-
-
-
-/// Returns the Response object from a github url
-pub async fn github_get_response(owner: &str, repository: &str, headers: Option<HeaderMap>) -> Result<Response, String> {
-    let mut owner_mut = String::from(owner);
-    let mut repo_mut = String::from(repository);
-    if !owner.is_empty() {
-        owner_mut.insert(0, '/')
-    }
-    if !repository.is_empty() {
-        repo_mut.insert(0, '/');
-    }
-    let url = format!("https://api.github.com/repos{}{}", owner_mut, repo_mut);
-    println!("URL:  {}", url);
-    let token_res = github_get_api_token();
-    if token_res.is_err() {
-        return Err(token_res.err().unwrap().to_string());
-    }
-    let token = token_res.unwrap();
-
-    let client_id = "";
-    let client_secret = "";
-
-
-    let client = Client::new();
-    let mut request_builder = client
-        .get(url)
-        .header("Authorization", token)
-        .header("client_id", client_id)
-        .header("client_secret", client_secret)
-        .header("User-Agent", "ECE461-repository-analyzer");
-    if headers.is_some() {
-        request_builder = request_builder.headers(headers.unwrap());
-    }
-    let response_res = request_builder.send().await;
-    if response_res.is_err() {
-        return Err(response_res.err().unwrap().to_string());
-    }
-    let response = response_res.unwrap();
-    Ok(response)
-}
-
-pub async fn github_get_issue_response(owner: &str, repository: &str, headers: Option<HeaderMap>) -> Result<Response, String> {
-    let mut owner_mut = String::from(owner);
-    let mut repo_mut = String::from(repository);
-    if !owner.is_empty() {
-        owner_mut.insert(0, '/')
-    }
-    if !repository.is_empty() {
-        repo_mut.insert(0, '/');
-    }
-    let url = format!("https://api.github.com/repos{}{}/issues/", owner_mut, repo_mut);
-    let token_res = github_get_api_token();
-    if token_res.is_err() {
-        return Err(token_res.err().unwrap().to_string());
-    }
-    let token = token_res.unwrap();
-
-    let client_id = "";
-    let client_secret = "";
-
-
-    let client = Client::new();
-    let mut request_builder = client
-        .get(url)
-        .header("Authorization", token)
-        .header("client_id", client_id)
-        .header("client_secret", client_secret)
-        .header("User-Agent", "ECE461-repository-analyzer");
-    if headers.is_some() {
-        request_builder = request_builder.headers(headers.unwrap());
-    }
-    let response_res = request_builder.send().await;
-    if response_res.is_err() {
-        return Err(response_res.err().unwrap().to_string());
-    }
-    let response = response_res.unwrap();
-    
-    Ok(response)
-}
-
-pub async fn github_get_issue_response_body(owner: &str, repository: &str, headers: Option<HeaderMap>) -> Result<serde_json::Value, String> {
-    let response_res = github_get_issue_response(owner, repository, headers).await;
-
-    if response_res.is_err() {
-        return Err(response_res.err().unwrap().to_string());
-    }
-    let response = response_res.unwrap();
-
-    let response_text_res = response.text().await;
-
-    if response_text_res.is_err() {
-        return Err(response_text_res.err().unwrap().to_string())
-    }
-
-    let response_text = response_text_res.unwrap().to_owned();
-    let response_json_res = serde_json::from_str(&response_text);
-    if response_json_res.is_err() {
-        return Err(response_json_res.err().unwrap().to_string())
-    }
-
-    let response_json: serde_json::Value = response_json_res.unwrap();
-
-    // let issues_count = response_json["number"].as_u64().unwrap_or(0);
-    // println!("\n\nNumber of total issues: {}\n\n", issues_count);
-
-    //let response_json: serde_json::Value = response_json_res.unwrap();
-
-    //println!("\n\nresponse: {}\n\n", response_json);
-    //let issues_count = response_json["number"].as_u64().unwrap_or(0);
-    //println!("\n\nNumber of total issues: {}\n\n", issues_count);
 
     Ok(response_json)
 }
-
 
 
 //////////////////////////
@@ -370,6 +294,7 @@ pub async fn github_get_issue_response_body(owner: &str, repository: &str, heade
 //////////////////////////
 
 
+/// Returns authentication token from environmental variable
 fn github_get_api_token() -> Result<String, VarError> {
     let name = "GITHUB_TOKEN";
     let res = env::var(name);

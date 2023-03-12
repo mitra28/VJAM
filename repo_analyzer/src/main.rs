@@ -14,8 +14,8 @@ pub mod read_url_file;
 pub mod logging;
 
 
-use crate::rest_api::github_get_response_body;
-use crate::rest_api::github_get_issue_response_body;
+use crate::rest_api::github_get_response;
+use crate::rest_api::github_get_issue_response;
 use logging::enable_logging;
 use std::error::Error;
 use std::process::Command;
@@ -175,33 +175,24 @@ async fn run_url(filename: &str) {
             package = git_data[1].to_owned();
 
         }
-        let r = github_get_response_body(&owner, &package, None).await;
-        if r.is_err() {
-            println!("ERROR ");
-            //return Err(response.err().unwrap().to_string());
-        }
-        let response = r.clone();
-        let response1 = r.clone();
-        let response2 = r.clone();
+        let response = github_get_response(&owner, &package, None).await;
+        // if response.is_err() {
+        //     println!("ERROR ");
+        //     //return Err(response.err().unwrap().to_string());
+        // }
+        // let response = r.clone();
+        let response1 = response.clone();
+        let response2 = response.clone();
 
-        let r2 = github_get_issue_response_body(&owner, &package, None).await;
-        if r2.is_err() {
-            println!("ERROR ");
-        }
+        let r2 = github_get_issue_response(&owner, &package, None).await;
+        // if r2.is_err() {
+        //     println!("ERROR ");
+        // }
         
-        println!("Successful get responses ");
+        // println!("Successful get responses ");
 
-
-
-        let codebase_length = match rest_api::github_get_codebase_length(&owner , &package).await {
-            Ok(codebase_length) => codebase_length,
-            Err(_e) => {
-                debug!("{}", _e);
-                "0.0".to_owned()
-            }
-        };
-
-        //println!("code len: {}", codebase_length);
+        
+        
         let opened_issues = match rest_api::github_get_open_issues(&owner , &package, response).await {
             Ok(opened_issues) => opened_issues,
             Err(_e) => {
@@ -210,9 +201,9 @@ async fn run_url(filename: &str) {
             }
         };
 
-        //println!("open issues: {}", opened_issues);
+        // println!("open issues: {}", opened_issues);
 
-        let closed_issues = match rest_api::github_get_closed_issues(&owner , &package, r2).await {
+        let total_issues = match rest_api::github_get_total_issues(&owner , &package, r2).await {
             Ok(closed_issues) => closed_issues,
             Err(_e) => {
                 debug!("{}", _e);
@@ -220,11 +211,11 @@ async fn run_url(filename: &str) {
             }
         };
 
-        //println!("closed issues: {}", closed_issues);
+        // println!("closed issues: {}", closed_issues);
 
 
         let license =  rest_api::github_get_license(&owner , &package, response1); //.await {
-        //println!("license: {}", license);
+        // println!("license: {}", license);
 
         let number_of_forks = match rest_api::github_get_number_of_forks(&owner , &package, response2).await {
             Ok(number_of_forks) => number_of_forks,
@@ -234,9 +225,9 @@ async fn run_url(filename: &str) {
             }
         };
 
-        //println!("number_of_forks: {}", number_of_forks);
+        // println!("number_of_forks: {}", number_of_forks);
 
-        let mut ru = metric_calculations::get_ramp_up_time(&codebase_length);
+        let mut ru = metric_calculations::get_ramp_up_time(&opened_issues, &number_of_forks);
         if ru == -1.0 {
             ru = 0.0;
             error!("Failed to get ramp up time from {}/{}", &owner, &package);
@@ -256,16 +247,17 @@ async fn run_url(filename: &str) {
             l =  0.0;
             error!("Failed to get license from {}/{}", &owner, &package);
         }
-        let mut rm = metric_calculations::get_responsive_maintainer(&opened_issues, &closed_issues);
+        let mut rm = metric_calculations::get_responsive_maintainer(&opened_issues, &total_issues);
         if rm == -1.0 {
             rm = 0.0;
             error!("Failed to responsiveness from {}/{}", &owner, &package);
         }
 
-        let metrics = [ru, c, bf, l, rm]; // responsive maintainer is omitted
+        let metrics = [ru, c, bf, rm]; // responsive maintainer is omitted
         let o = metric_calculations::get_overall(&metrics);
 
         repos.add_repo(repo_list::Repo {url : repo_url, net_score : o, ramp_up : ru, correctness : c, bus_factor : bf, responsive_maintainer : rm, license : l});
+        
     }
 
     repos.sort_by_net_score(); // will sort the RepoList by trustworthiness. 
