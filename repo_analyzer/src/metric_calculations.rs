@@ -102,10 +102,10 @@ pub fn get_responsive_maintainer(opened_issues: &str, total_issues: &str) -> f32
 
 /// Calculates the metric net score by averaging all other metrics
 pub fn get_overall(metrics: &[f32]) -> f32 {
-    // called in main L224-> let metrics = [ru, c, bf, l]; // responsive maintainer is omitted
+    // called in main L224-> let metrics = [ru, c, bf, l, rm]; 
 
     // let sum: f32 = metrics.iter().sum();
     // sum / metrics.len() as f32
-    let sum: f32 = 0.4 * metrics[2] + 0.2 * (metrics[0] + metrics[1] + metrics[3]); 
+    let sum: f32 = 0.4 * metrics[2] + 0.2 * (metrics[0] + metrics[1] + metrics[3] + metrics[4]); 
     sum as f32
 }
