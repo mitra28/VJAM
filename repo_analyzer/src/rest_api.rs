@@ -4,14 +4,12 @@ use std::{env};
 use std::str;
 use std::env::VarError;
 use std::result::{Result};
-// use reqwest::{Client, Response};
 use reqwest::Client;
 use reqwest::header::HeaderMap;
 use log::{ debug };
 extern crate base64;
-// use serde_json::Value::Object;
 
-///
+
 /// Returns the github link associated with the npmjs package
 
 ///
@@ -170,6 +168,8 @@ pub async fn github_get_license(owner: &str, repository: &str, response_res: Res
     let license_key = contents_response.get("license")
         .and_then(|license_value| license_value.get("key"))
         .ok_or(" ")?;
+    
+    // drop(license_key);
 
     let key_as_str = license_key.as_str();
     let license_key_string = match key_as_str {

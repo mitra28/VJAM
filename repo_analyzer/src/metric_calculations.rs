@@ -54,7 +54,7 @@ pub fn get_bus_factor(number_of_forks: &str) -> f32 {
 }
 
 pub fn get_license(license: Result<String, String>) -> f32 {
-    println!("info: {:?}", license);
+    // println!("info: {:?}", license);
     let mut valid_license = HashMap::<String, f32>::new();
     valid_license.insert("apache".to_string(), 0.0);
     valid_license.insert("mit".to_string(), 1.0);
