@@ -117,7 +117,7 @@ pub async fn github_get_total_issues(owner: &str, repository: &str, response_res
 
     let response = response_res.unwrap();
 
-    debug!("{}", response.to_string());
+    //debug!("{}", response.to_string());
 
     let issues_res = response[0].get("number");
     if issues_res.is_none() {
