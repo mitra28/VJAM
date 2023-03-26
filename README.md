@@ -10,11 +10,17 @@ The run executable will be located inside repo_analyzer/target/debug.
 
 
 How to run the website:
+
 Running the frontend (React) and the backend server (Espress)
 
+
 navigate to website/website
+
 build the project with "npm run build"
+
 start the frontend with "npm start"
 
+
 navigate to website/backend
+
 run the server with "node server.js"
