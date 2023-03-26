@@ -1,10 +1,30 @@
 const express = require('express');
+const path = require('path');
 const app = express();
 
 app.get('/', (req, res) => {
-  res.send('Hello World!');
+  res.send('launch new port  8080');
 });
 
-app.listen(3000, () => {
-  console.log('Server listening on port 3000');
+// Serve static files from the "build" directory
+app.use(express.static(path.join(__dirname, '..', 'website', 'build')));
+console.log("Serving static assets from directory: " + path.join(__dirname, '..', 'website', 'build'));
+
+
+// Define your other routes and middleware below
+// Serve your backend API routes
+app.get('/api', (req, res) => {
+    // handle your API requests here
+  });
+  
+// Serve the React app on any other routes
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, 'website/build/index.html'));
+    console.log("Serving React App from directory: " + path.join(__dirname, 'website/build/index.html'));
+  });
+
+
+// Start the server
+app.listen(8080, () => {
+  console.log('Espress Server listening on port 8080');
 });

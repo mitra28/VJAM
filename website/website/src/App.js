@@ -9,6 +9,7 @@ function App() {
         <h1>ECE 461</h1>
         <p>
           Edit <code>src/App.js</code> and save to reload.
+          Running on port 3000.
         </p>
         <a
           className="App-link"
