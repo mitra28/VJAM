@@ -20,6 +20,7 @@ use crate::rest_api::github_get_issue_response;
 use crate::rest_api::count_closed_pull;
 use crate::rest_api::count_closed_pull_requests_with_reviewers;
 //use crate::rest_api::closed_pulls_with_reviews;
+use crate::rest_api::get_repo_info;
 use logging::enable_logging;
 use std::error::Error;
 use std::process::Command;
@@ -190,7 +191,8 @@ async fn run_url(filename: &str) {
 
         let _r2 = github_get_issue_response(&owner, &package, None).await;
         //let _r3 = count_closed_pull(&owner, &package).await;
-        let _r4 = count_closed_pull_requests_with_reviewers(&owner, &package, None).await;
+        //let _r4 = count_closed_pull_requests_with_reviewers(&owner, &package, None).await;
+        let _r5 = get_repo_info(&owner, &package, None).await;
         //let r4 = closed_pulls_with_reviews(&owner, &package, None).await;
         // if r2.is_err() {
         //     println!("ERROR ");

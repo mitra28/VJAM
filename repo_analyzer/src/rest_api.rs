@@ -11,6 +11,8 @@ extern crate base64;
 
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
+use std::collections::HashMap;
+
 
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -297,9 +299,7 @@ pub async fn count_closed_pull_requests_with_reviewers(owner: &str, repository: 
     } else {
         Err("Failed to parse response as JSON".to_owned())
     }
-}*/
-
-/*
+}
 pub async fn github_get_pull_reviews(owner: &str,repository: &str, page: usize, headers: Option<HeaderMap>) -> Result<String, String> {
     let owner_mut = String::from(owner);
     let repo_mut = String::from(repository);
@@ -381,6 +381,7 @@ pub async fn count_closed_pull_requests_with_reviewers(owner: &str, repository: 
     Ok(count)
 }*/
 
+
 pub async fn count_closed_pull_requests_with_reviewers(owner: &str, repo: &str, headers: Option<&str>) -> Result<usize, String> {
     let mut count = 0;
 
@@ -436,6 +437,67 @@ pub async fn count_closed_pull_requests_with_reviewers(owner: &str, repo: &str, 
     println!("the value of count is {}", count);
     Ok(count)
 }
+
+/*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
+//Version pinning. DONE
+
+pub async fn get_repo_info(owner: &str, repo: &str, headers: Option<&HeaderMap>) -> Result<Vec<(String, String)>, Box<dyn std::error::Error>> {
+    let url = format!("https://api.github.com/repos/{}/{}/contents/", owner, repo);
+    let token_res = github_get_api_token();
+    let token = token_res?;
+    let client = Client::new();
+    let mut request_builder = client.get(&url)
+        .header("Authorization", format!("Bearer {}", token))
+        .header("User-Agent", "ECE461-repository-analyzer");
+    if let Some(header_map) = headers {
+        request_builder = request_builder.headers(header_map.clone());
+    }
+
+    let response = request_builder.send().await?.text().await?;
+    let response_json: Vec<Value> = serde_json::from_str(&response)?;
+
+    let mut result = Vec::new();
+
+    for item in response_json {
+        if let Some(name) = item.get("name").and_then(Value::as_str) {
+            if name == "package.json" || name == "requirements.txt" {
+                let download_url = item
+                    .get("download_url")
+                    .and_then(Value::as_str)
+                    .ok_or_else(|| format!("Download URL not found for file {}", name))?;
+
+                let file_response = client
+                    .get(download_url)
+                    .header("Authorization", format!("Bearer {}", token))
+                    .header("User-Agent", "ECE461-repository-analyzer")
+                    .send()
+                    .await?;
+
+                let file_text = file_response.text().await?;
+                let dependencies = get_major_minor_dependencies(&file_text)?;
+                result.extend(dependencies);
+            }
+        }
+    }
+    println!("The value of result is {:?}", result);
+    Ok(result)
+}
+
+fn get_major_minor_dependencies(file_text: &str) -> Result<Vec<(String, String)>, Box<dyn std::error::Error>> {
+    let package_json: Value = serde_json::from_str(&file_text)?;
+    let dependencies = package_json["dependencies"].as_object().ok_or("dependencies not found")?;
+    let mut result = Vec::new();
+    for (name, version) in dependencies {
+        if let Some(version_str) = version.as_str() {
+            let parts: Vec<&str> = version_str.split('.').collect();
+            if parts.len() >= 2 {
+                result.push((name.to_string(), format!("{}.{}", parts[0], parts[1])));
+            }
+        }
+    }
+    Ok(result)
+}
+
 
 
 
