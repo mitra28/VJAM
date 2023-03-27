@@ -1,0 +1,8 @@
+runtime: nodejs16
+
+env_variables:
+  MY_VARIABLE: my-value
+
+handlers:
+  - url: /.*
+    script: auto
