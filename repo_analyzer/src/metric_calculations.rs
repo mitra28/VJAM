@@ -81,6 +81,37 @@ pub fn get_license(license: Result<String, String>) -> f32 {
         return l_score
     }
 }
+pub fn version_pin(result: Result<Vec<(String, String)>, Box<dyn std::error::Error>>) -> f32 {
+    println!("We are in version pin function");
+    let mut major_minor = 0.0;
+    let mut major = 0.0;
+    let mut total = 0.0;
+    match result {
+        Ok(vec) => {
+            for (_, s2) in vec {
+                total = total + 1.0;
+                let _version = match s2.strip_prefix('^') {
+                    Some(v) => v,
+                    None => match s2.strip_prefix('~') {
+                        Some(v) => v,
+                        None => &s2,
+                    },
+                };
+                if s2.ends_with(".x") {
+                    major = major + 1.0;
+                }
+                else{
+                    major_minor = major_minor + 1.0;
+                }
+            }
+            return (((major_minor) + (0.5 * major)) / total) as f32;
+        },
+        Err(e) => {
+            println!("Error: {}", e);
+            return -1.0;
+        }
+    }
+}
 
 
 pub fn get_responsive_maintainer(opened_issues: &str, total_issues: &str) -> f32 {

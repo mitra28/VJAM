@@ -192,7 +192,7 @@ async fn run_url(filename: &str) {
         let _r2 = github_get_issue_response(&owner, &package, None).await;
         //let _r3 = count_closed_pull(&owner, &package).await;
         //let _r4 = count_closed_pull_requests_with_reviewers(&owner, &package, None).await;
-        let _r5 = get_repo_info(&owner, &package, None).await;
+        let _dependencies = get_repo_info(&owner, &package, None).await;
         //let r4 = closed_pulls_with_reviews(&owner, &package, None).await;
         // if r2.is_err() {
         //     println!("ERROR ");
@@ -211,6 +211,7 @@ async fn run_url(filename: &str) {
         };
 
         // println!("open issues: {}", opened_issues);
+
 
         let total_issues = match rest_api::github_get_total_issues(&owner , &package, _r2).await {
             Ok(closed_issues) => closed_issues,
@@ -234,6 +235,13 @@ async fn run_url(filename: &str) {
         };
 
         // println!("number_of_forks: {}", number_of_forks);
+
+        let mut version_score = metric_calculations::version_pin(_dependencies);
+        println!("the version score {}", version_score);
+        if version_score == -1.0 {
+            version_score = 0.0;
+            error!("Failed to get version score from {}/{}", &owner, &package);
+        }
 
         let mut ru = metric_calculations::get_ramp_up_time(&opened_issues, &number_of_forks);
         if ru == -1.0 {
