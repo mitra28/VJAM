@@ -214,7 +214,7 @@ async fn run_url(filename: &str) {
 
 
         let total_issues = match rest_api::github_get_total_issues(&owner , &package, _r2).await {
-            Ok(closed_issues) => closed_issues,
+            Ok(total_issues) => total_issues,
             Err(_e) => {
                 debug!("{}", _e);
                 "0.0".to_owned()
