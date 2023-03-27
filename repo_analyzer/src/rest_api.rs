@@ -9,6 +9,15 @@ use reqwest::header::HeaderMap;
 use log::{ debug };
 extern crate base64;
 
+use serde::{Deserialize, Serialize};
+use serde_json::Value;
+
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct PullRequest {
+    url: String,
+    state: String,
+}
 
 /// Returns the github link associated with the npmjs package
 
@@ -77,6 +86,7 @@ pub async fn npmjs_get_repository_link(_owner: &str, repository: &str) -> Result
 }
 
 
+
 /// All functions starting with "github_get" have the following arguments:
 ///
 /// # Arguments
@@ -85,6 +95,347 @@ pub async fn npmjs_get_repository_link(_owner: &str, repository: &str) -> Result
 /// * 'repository' - The repository
 /// * 'response_res' - The response request to parse
 ///
+
+//function to retrieve the list of pull requests.Result<serde_json::Value, String>
+
+/*
+pub async fn github_get_closed_pulls(owner: &str, repository: &str, headers: Option<HeaderMap>) -> Result<String, String> {
+    let owner_mut = String::from(owner);
+    let repo_mut = String::from(repository);
+    println!("value of owner {}, value of repo{}", owner_mut, repo_mut);
+    //"https://api.github.com/repos/{}/{}/pulls?state=closed"
+    let url = format!("https://api.github.com/repos/{}/{}/pulls?state=closed", owner_mut, repo_mut);
+    let token_res = github_get_api_token();
+
+    if token_res.is_err() {
+        return Err(token_res.err().unwrap().to_string());
+    }
+    let token = token_res.unwrap();
+
+    let client_id = "";
+    let client_secret = "";
+
+    let client = Client::new();
+    let mut request_builder = client
+        .get(url)
+        .header("Authorization", token)
+        .header("client_id", client_id)
+        .header("client_secret", client_secret)
+        .header("User-Agent", "ECE461-repository-analyzer");
+    if headers.is_some() {
+        request_builder = request_builder.headers(headers.unwrap());
+    }
+    let response_res = request_builder.send().await;
+    if response_res.is_err() {
+        return Err(response_res.err().unwrap().to_string());
+    }
+    let response = response_res.unwrap();
+
+    let response_text_res = response.text().await;
+
+    if response_text_res.is_err() {
+        return Err(response_text_res.err().unwrap().to_string());
+    }
+
+    let response_text = response_text_res.unwrap().to_owned();
+
+    Ok(response_text)
+}
+//works
+
+pub async fn count_closed_pull(owner: &str, repository: &str) -> Result<usize, String> {
+    let pulls_res = github_get_closed_pulls(owner, repository, None).await?;
+
+    let pulls: Vec<PullRequest> = serde_json::from_str(&pulls_res).map_err(|err| err.to_string())?;
+    
+    let total_closed_pull_requests = pulls
+        .iter()
+        .filter(|pr| pr.state == "closed")
+        .count();
+
+    println!("Number of closed pull requests: {:?}", total_closed_pull_requests);
+
+    Ok(total_closed_pull_requests)
+
+}*/
+pub async fn github_get_closed_pulls(owner: &str, repository: &str, page: usize, headers: Option<HeaderMap>) -> Result<String, String> {
+    let url = format!("https://api.github.com/repos/{}/{}/pulls?state=closed&per_page=100&page={}", owner, repository, page);
+    let token_res = github_get_api_token();
+
+    if token_res.is_err() {
+        return Err(token_res.err().unwrap().to_string());
+    }
+    let token = token_res.unwrap();
+
+    let client_id = "";
+    let client_secret = "";
+
+    let client = Client::new();
+    let mut request_builder = client
+        .get(url)
+        .header("Authorization", token)
+        .header("client_id", client_id)
+        .header("client_secret", client_secret)
+        .header("User-Agent", "ECE461-repository-analyzer");
+    if headers.is_some() {
+        request_builder = request_builder.headers(headers.unwrap());
+    }
+    let response_res = request_builder.send().await;
+    if response_res.is_err() {
+        return Err(response_res.err().unwrap().to_string());
+    }
+    let response = response_res.unwrap();
+
+    let response_text_res = response.text().await;
+
+    if response_text_res.is_err() {
+        return Err(response_text_res.err().unwrap().to_string());
+    }
+
+    let response_text = response_text_res.unwrap().to_owned();
+
+    Ok(response_text)
+}
+pub async fn count_closed_pull(owner: &str, repository: &str) -> Result<usize, String> {
+    let mut page = 1;
+    let mut total_closed_pull_requests = 0;
+
+    while page <= 3 { //run at most 1000 total total pages so the API does not time out
+        let pulls_res = github_get_closed_pulls(owner, repository, page, None).await?;
+
+        let pulls: Vec<PullRequest> = serde_json::from_str(&pulls_res).map_err(|err| err.to_string())?;
+        
+        let closed_pull_requests_on_page = pulls
+            .iter()
+            .filter(|pr| pr.state == "closed")
+            .count();
+
+        total_closed_pull_requests += closed_pull_requests_on_page;
+
+        if pulls.len() < 100 {
+            break;
+        }
+
+        page += 1;
+        println!("Number of closed pull requests for page {}: {:?}", page, total_closed_pull_requests);
+    }
+
+    println!("Number of closed pull requests: {:?}", total_closed_pull_requests);
+
+    Ok(total_closed_pull_requests)
+}
+
+/*pub async fn github_get_pull_reviews(owner: &str,repository: &str,headers: Option<HeaderMap>) -> Result<String, String> {
+    let owner_mut = String::from(owner);
+    let repo_mut = String::from(repository);
+
+    
+    //let url = format!("https://api.github.com/repos/{}/{}/pulls?state=closed?requested_reviewers!=[]?sort=updated",owner_mut, repo_mut);
+    let url = format!("https://api.github.com/repos/{}/{}/pulls?state=closed&per_page=100&requested_reviewers!=[]&sort=updated", owner_mut, repo_mut);
+
+
+    let token_res = github_get_api_token();
+
+    if token_res.is_err() {
+        return Err(token_res.err().unwrap().to_string());
+    }
+    let token = token_res.unwrap();
+
+    let client_id = "";
+    let client_secret = "";
+
+    let client = Client::new();
+    let mut request_builder = client
+        .get(url)
+        .header("Authorization", token)
+        .header("client_id", client_id)
+        .header("client_secret", client_secret)
+        .header("User-Agent", "ECE461-repository-analyzer");
+
+    if headers.is_some() {
+        request_builder = request_builder.headers(headers.unwrap());
+    }
+    let response_res = request_builder.send().await;
+    if response_res.is_err() {
+        return Err(response_res.err().unwrap().to_string());
+    }
+    let response = response_res.unwrap();
+
+    let response_text_res = response.text().await;
+
+    if response_text_res.is_err() {
+        return Err(response_text_res.err().unwrap().to_string());
+    }
+
+    let response_text = response_text_res.unwrap().to_owned();
+    Ok(response_text)
+}
+
+pub async fn count_closed_pull_requests_with_reviewers(owner: &str, repository: &str, headers: Option<HeaderMap>) -> Result<usize, String> {
+    let response_text = github_get_pull_reviews(owner, repository, headers).await?;
+    let mut count = 0;
+    let mut counter = 0;
+
+    if let Ok(pulls) = serde_json::from_str::<Vec<Value>>(&response_text) {
+        for pull in pulls {
+            counter = counter + 1;
+            //if let Some(state) = pull.get("state").and_then(|s| s.as_str()) {
+            //    if state == "closed" {
+                    if let Some(requested_reviewers) = pull.get("requested_reviewers").and_then(|r| r.as_array()) {
+                        let _reviewers: Vec<_> = requested_reviewers.iter().map(|r| r.to_string()).collect();
+                        println!("This is what response {:?}", _reviewers);
+                        if requested_reviewers.len() >= 2 {
+                            count += 1;
+                        }
+                    }
+                //}
+            //}
+        }
+        println!("the value of count: {}", count);
+        println!("the value of count: {}", counter);
+        Ok(count)
+    } else {
+        Err("Failed to parse response as JSON".to_owned())
+    }
+}*/
+
+/*
+pub async fn github_get_pull_reviews(owner: &str,repository: &str, page: usize, headers: Option<HeaderMap>) -> Result<String, String> {
+    let owner_mut = String::from(owner);
+    let repo_mut = String::from(repository);
+
+    
+    //let url = format!("https://api.github.com/repos/{}/{}/pulls?state=closed?requested_reviewers!=[]?sort=updated",owner_mut, repo_mut);
+    let url = format!("https://api.github.com/repos/{}/{}/pulls?state=closed&requested_reviewers!=[]&sort=updated&page={}", owner_mut, repo_mut, page);
+
+
+    let token_res = github_get_api_token();
+
+    if token_res.is_err() {
+        return Err(token_res.err().unwrap().to_string());
+    }
+    let token = token_res.unwrap();
+
+    let client_id = "";
+    let client_secret = "";
+
+    let client = Client::new();
+    let mut request_builder = client
+        .get(url)
+        .header("Authorization", token)
+        .header("client_id", client_id)
+        .header("client_secret", client_secret)
+        .header("User-Agent", "ECE461-repository-analyzer");
+
+    if headers.is_some() {
+        request_builder = request_builder.headers(headers.unwrap());
+    }
+    let response_res = request_builder.send().await;
+    if response_res.is_err() {
+        return Err(response_res.err().unwrap().to_string());
+    }
+    let response = response_res.unwrap();
+
+    let response_text_res = response.text().await;
+
+    if response_text_res.is_err() {
+        return Err(response_text_res.err().unwrap().to_string());
+    }
+
+    let response_text = response_text_res.unwrap().to_owned();
+    Ok(response_text)
+}
+
+pub async fn count_closed_pull_requests_with_reviewers(owner: &str, repository: &str, headers: Option<HeaderMap>) -> Result<usize, String> {
+    let mut count = 0;
+    let mut page = 1;
+
+    while page <= 3 {
+        let response_text = github_get_pull_reviews(owner, repository, page, headers.clone()).await?;
+
+        if let Ok(pulls) = serde_json::from_str::<Vec<Value>>(&response_text) {
+            for pull in pulls.iter() {
+                if let Some(state) = pull.get("state").and_then(|s| s.as_str()) {
+                    if state == "closed" {
+                        if let Some(requested_reviewers) = pull.get("requested_reviewers").and_then(|r| r.as_array()) {
+                            let _reviewers: Vec<_> = requested_reviewers.iter().map(|r| r.to_string()).collect();
+                            if requested_reviewers.len() >= 2 {
+                                count += 1;
+                            }
+                        }
+                    }
+                }
+            }
+
+            if pulls.len() < 100 {
+                break;
+            }
+
+            page += 1;
+        } else {
+            return Err("Failed to parse response as JSON".to_owned());
+        }
+    }
+
+    println!("The total number of closed pull requests with reviewers: {}", count);
+    Ok(count)
+}*/
+
+pub async fn count_closed_pull_requests_with_reviewers(owner: &str, repo: &str, headers: Option<&str>) -> Result<usize, String> {
+    let mut count = 0;
+
+    let client = Client::new();
+    let mut page = 1;
+
+    while page <= 2 {
+        let url = format!(
+            "https://api.github.com/repos/{}/{}/pulls?state=closed&per_page=100&page={}",
+            owner, repo, page
+        );
+
+        let response_res = client.get(&url)
+            .header("Authorization", headers.unwrap_or(""))
+            .header("User-Agent", "ECE461-repository-analyzer")
+            .send()
+            .await
+            .map_err(|e| e.to_string())?;
+
+        let response_text = response_res.text().await.map_err(|e| e.to_string())?;
+
+        let pulls: Vec<Value> = serde_json::from_str(&response_text).map_err(|e| e.to_string())?;
+
+        if pulls.is_empty() {
+            break;
+        }
+
+        for pull in pulls {
+            let number = pull["number"].as_i64().unwrap();
+            let url = format!(
+                "https://api.github.com/repos/{}/{}/pulls/{}/comments",
+                owner, repo, number
+            );
+
+            let response_res =  client.get(&url)
+                .header("Authorization", headers.unwrap_or(""))
+                .header("User-Agent", "ECE461-repository-analyzer")
+                .send()
+                .await
+                .map_err(|e| e.to_string())?;
+
+            let response_text = response_res.text().await.map_err(|e| e.to_string())?;
+
+            let comments: Vec<Value> = serde_json::from_str(&response_text).map_err(|e| e.to_string())?;
+
+            if !comments.is_empty() {
+                count += 1;
+            }
+        }
+
+        page += 1;
+    }
+    println!("the value of count is {}", count);
+    Ok(count)
+}
 
 
 

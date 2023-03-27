@@ -16,6 +16,10 @@ pub mod logging;
 
 use crate::rest_api::github_get_response;
 use crate::rest_api::github_get_issue_response;
+//use crate::rest_api::github_get_closed_pulls_number;
+use crate::rest_api::count_closed_pull;
+use crate::rest_api::count_closed_pull_requests_with_reviewers;
+//use crate::rest_api::closed_pulls_with_reviews;
 use logging::enable_logging;
 use std::error::Error;
 use std::process::Command;
@@ -184,7 +188,10 @@ async fn run_url(filename: &str) {
         let response1 = response.clone();
         let response2 = response.clone();
 
-        let r2 = github_get_issue_response(&owner, &package, None).await;
+        let _r2 = github_get_issue_response(&owner, &package, None).await;
+        //let _r3 = count_closed_pull(&owner, &package).await;
+        let _r4 = count_closed_pull_requests_with_reviewers(&owner, &package, None).await;
+        //let r4 = closed_pulls_with_reviews(&owner, &package, None).await;
         // if r2.is_err() {
         //     println!("ERROR ");
         // }
@@ -203,7 +210,7 @@ async fn run_url(filename: &str) {
 
         // println!("open issues: {}", opened_issues);
 
-        let total_issues = match rest_api::github_get_total_issues(&owner , &package, r2).await {
+        let total_issues = match rest_api::github_get_total_issues(&owner , &package, _r2).await {
             Ok(closed_issues) => closed_issues,
             Err(_e) => {
                 debug!("{}", _e);
