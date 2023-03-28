@@ -17,9 +17,10 @@ pub mod logging;
 use crate::rest_api::github_get_response;
 use crate::rest_api::github_get_issue_response;
 //use crate::rest_api::github_get_closed_pulls_number;
-use crate::rest_api::count_closed_pull;
-use crate::rest_api::count_closed_pull_requests_with_reviewers;
+//use crate::rest_api::count_closed_pull;
+//use crate::rest_api::count_closed_pull_requests_with_reviewers;
 //use crate::rest_api::closed_pulls_with_reviews;
+use crate::rest_api::get_closed_pr_count;
 use crate::rest_api::get_repo_info;
 use logging::enable_logging;
 use std::error::Error;
@@ -193,12 +194,23 @@ async fn run_url(filename: &str) {
         //let _r3 = count_closed_pull(&owner, &package).await;
         //let _r4 = count_closed_pull_requests_with_reviewers(&owner, &package, None).await;
         let _dependencies = get_repo_info(&owner, &package, None).await;
+        //let _total_pull_req = get_closed_pr_count(&owner, &package).await;
+        //println!("the total closed pull {}",_total_pull_req );
         //let r4 = closed_pulls_with_reviews(&owner, &package, None).await;
         // if r2.is_err() {
         //     println!("ERROR ");
         // }
         
         // println!("Successful get responses ");
+        let total_pull_req = match get_closed_pr_count(&owner, &package).await {
+            Ok(count) => count,
+            Err(_) => {
+                println!("Failed to get total closed pull requests");
+                -1
+            }
+        };
+        
+        println!("The total closed pull requests: {}", total_pull_req);
 
         
         

@@ -11,15 +11,17 @@ extern crate base64;
 
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
-use std::collections::HashMap;
+use serde_json::json;
+use reqwest::{StatusCode};
 
+// use std::collections::HashMap;
 
+// #[derive(Debug, Deserialize, Serialize)]
+// pub struct PullRequest {
+//     url: String,
+//     state: String,
+// }
 
-#[derive(Debug, Deserialize, Serialize)]
-pub struct PullRequest {
-    url: String,
-    state: String,
-}
 
 /// Returns the github link associated with the npmjs package
 
@@ -160,6 +162,7 @@ pub async fn count_closed_pull(owner: &str, repository: &str) -> Result<usize, S
     Ok(total_closed_pull_requests)
 
 }*/
+/*
 pub async fn github_get_closed_pulls(owner: &str, repository: &str, page: usize, headers: Option<HeaderMap>) -> Result<String, String> {
     let url = format!("https://api.github.com/repos/{}/{}/pulls?state=closed&per_page=100&page={}", owner, repository, page);
     let token_res = github_get_api_token();
@@ -225,7 +228,7 @@ pub async fn count_closed_pull(owner: &str, repository: &str) -> Result<usize, S
     println!("Number of closed pull requests: {:?}", total_closed_pull_requests);
 
     Ok(total_closed_pull_requests)
-}
+}*/
 
 /*pub async fn github_get_pull_reviews(owner: &str,repository: &str,headers: Option<HeaderMap>) -> Result<String, String> {
     let owner_mut = String::from(owner);
@@ -379,7 +382,7 @@ pub async fn count_closed_pull_requests_with_reviewers(owner: &str, repository: 
 
     println!("The total number of closed pull requests with reviewers: {}", count);
     Ok(count)
-}*/
+}
 
 
 pub async fn count_closed_pull_requests_with_reviewers(owner: &str, repo: &str, headers: Option<&str>) -> Result<usize, String> {
@@ -436,7 +439,7 @@ pub async fn count_closed_pull_requests_with_reviewers(owner: &str, repo: &str, 
     }
     println!("the value of count is {}", count);
     Ok(count)
-}
+}*/
 
 /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 //Version pinning. DONE
@@ -479,7 +482,7 @@ pub async fn get_repo_info(owner: &str, repo: &str, headers: Option<&HeaderMap>)
             }
         }
     }
-    println!("The value of result is {:?}", result);
+    //println!("The value of result is {:?}", result);
     Ok(result)
 }
 
@@ -497,8 +500,64 @@ fn get_major_minor_dependencies(file_text: &str) -> Result<Vec<(String, String)>
     }
     Ok(result)
 }
+//Graph QL
 
 
+pub async fn get_closed_pr_count(owner: &str, repo: &str) -> Result<i32, String> {
+    // Construct the GraphQL query to get the total number of closed pull requests
+    let token_res = github_get_api_token();
+    if token_res.is_err() {
+        println!("failed to get token");
+        return Err(token_res.err().unwrap().to_string());
+    }
+    let token = token_res.unwrap();
+
+    let query = format!(
+        r#"
+        query {{
+            repository(owner:"{}", name:"{}") {{
+                pullRequests(states:CLOSED) {{
+                    totalCount
+                }}
+            }}
+        }}
+        "#,
+        owner, repo
+    );
+
+    // Send the GraphQL query to the GitHub API
+    let client = reqwest::Client::new();
+    let response = match client
+        .post("https://api.github.com/graphql")
+        .header("Authorization", format!("Bearer {}", token))
+        .header("User-Agent", "ECE461-repository-analyzer")
+        .json(&serde_json::json!({ "query": query }))
+        .send()
+        .await
+    {
+        Ok(res) => res,
+        Err(e) =>{
+            println!("error getting response");
+            return Err(format!("Error sending GraphQL request: {}", e));
+        } 
+    };
+
+    // Parse the response and extract the total count of closed pull requests
+    println!("response_______________{:?}", response);
+    let json: serde_json::Value = match response.json().await {
+        Ok(val) => val,
+        Err(e) => {
+            println!("error parsing response");
+            return Err(format!("Error parsing GraphQL response: {}", e));
+        }
+    };
+    let count = match json["data"]["repository"]["pullRequests"]["totalCount"].as_u64() {
+        Some(val) => val as i32,
+        None => -1,
+    };
+
+    Ok(count)
+}
 
 
 /// Returns the number of open issues of a repository
