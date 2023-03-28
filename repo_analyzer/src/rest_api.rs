@@ -13,6 +13,8 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use serde_json::json;
 use reqwest::{StatusCode};
+use std::collections::HashSet;
+
 
 // use std::collections::HashMap;
 
@@ -543,7 +545,6 @@ pub async fn get_closed_pr_count(owner: &str, repo: &str) -> Result<i32, String>
     };
 
     // Parse the response and extract the total count of closed pull requests
-    println!("response_______________{:?}", response);
     let json: serde_json::Value = match response.json().await {
         Ok(val) => val,
         Err(e) => {
@@ -558,6 +559,290 @@ pub async fn get_closed_pr_count(owner: &str, repo: &str) -> Result<i32, String>
 
     Ok(count)
 }
+
+//find total number of closed pull request with rat least 2 reviews
+/*
+pub async fn get_closed_pr_reviews_count(owner: &str, repo: &str, total_closed:Result<i32, String> ) -> Result<i32, String> {
+    
+    /*let token_res = github_get_api_token();
+    if token_res.is_err() {
+        println!("failed to get token");
+        return Err(token_res.err().unwrap().to_string());
+    }
+    let token = token_res.unwrap();*/
+
+    let min_reviewers = 2;
+
+    let closed_pr_count = match total_closed {
+        Ok(count) => count,
+        Err(e) => return Err(e),
+    };
+    let mut pr_urls = HashSet::new();
+    let num_pages = (closed_pr_count + 99) / 100;
+
+    for _page in 1..=num_pages{
+        let pr_query = format!(
+            r#"
+            query {{
+              repository(owner: "{}", name: "{}") {{
+                pullRequests(states: CLOSED, first: 100, after: "{}", orderBy: {{field: UPDATED_AT, direction: DESC}}) {{
+                  pageInfo {{
+                    endCursor
+                    hasNextPage
+                  }}
+                  nodes {{
+                    url
+                    reviews(first: 10) {{
+                      nodes {{
+                        author {{
+                          login
+                        }}
+                      }}
+                    }}
+                  }}
+                }}
+              }}
+            }}
+            "#,
+            owner, repo, pr_urls.iter().last().unwrap_or(&"".to_owned())
+        );
+        let pr_response = send_graphql_request(&pr_query).await?;
+        println!("print the value of pr_response {}",pr_response);
+        let pr_data = pr_response["data"]["repository"]["pullRequests"].as_object().unwrap();
+
+        let pr_nodes = pr_data["nodes"].as_array().unwrap();
+        for pr in pr_nodes {
+            let pr_url = pr["url"].as_str().unwrap().to_owned();
+            let mut reviewers = HashSet::new();
+
+            if let Some(reviews) = pr["reviews"]["nodes"].as_array() {
+                for review in reviews {
+                    if let Some(author) = review["author"]["login"].as_str() {
+                        reviewers.insert(author.to_owned());
+                    }
+                }
+            }
+
+            if reviewers.len() >= min_reviewers {
+                pr_urls.insert(pr_url);
+            }
+        }
+
+        if !pr_data["pageInfo"]["hasNextPage"].as_bool().unwrap() {
+            break;
+        }
+    }
+    println!("Total number of closed pull requests with at least {} reviewers: {}", min_reviewers, pr_urls.len());
+
+    Ok(pr_urls.len() as i32)
+}*/
+/*
+pub async fn get_closed_pr_reviews_count(owner: &str, repo: &str, total_closed: Result<i32, String>) -> Result<i32, String> {
+    let min_reviewers = 2;
+    let closed_pr_count = match total_closed {
+        Ok(count) => count,
+        Err(e) => return Err(e),
+    };
+    let mut pr_urls = HashSet::new();
+    let num_pages = (closed_pr_count + 99) / 100;
+
+    for _page in 1..=num_pages {
+        let pr_query = format!(
+            r#"
+            query {{
+              repository(owner: "{}", name: "{}") {{
+                pullRequests(states: CLOSED, first: 100, after: "{}", orderBy: {{field: UPDATED_AT, direction: DESC}}) {{
+                  pageInfo {{
+                    endCursor
+                    hasNextPage
+                  }}
+                  nodes {{
+                    url
+                    reviews(first: 10) {{
+                      nodes {{
+                        author {{
+                          login
+                        }}
+                      }}
+                    }}
+                  }}
+                }}
+              }}
+            }}
+            "#,
+            owner,
+            repo,
+            pr_urls.iter().last().unwrap_or(&"".to_owned())
+        );
+        let pr_response = send_graphql_request(&pr_query).await?;
+        println!("print the value of pr_response {}", pr_response);
+        let pr_data: serde_json::Value = serde_json::from_str(&pr_response).map_err(|err| err.to_string())?;
+
+        let pr_nodes = pr_data["data"]["repository"]["pullRequests"]["nodes"].as_array().unwrap();
+        for pr in pr_nodes {
+            let pr_url = pr["url"].as_str().unwrap().to_owned();
+            let mut reviewers = HashSet::new();
+
+            if let Some(reviews) = pr["reviews"]["nodes"].as_array() {
+                for review in reviews {
+                    if let Some(author) = review["author"]["login"].as_str() {
+                        reviewers.insert(author.to_owned());
+                    }
+                }
+            }
+
+            if reviewers.len() >= min_reviewers {
+                pr_urls.insert(pr_url);
+            }
+        }
+
+        if !pr_data["data"]["repository"]["pullRequests"]["pageInfo"]["hasNextPage"].as_bool().unwrap() {
+            break;
+        }
+    }
+
+    println!("Total number of closed pull requests with at least {} reviewers: {}", min_reviewers, pr_urls.len());
+
+    Ok(pr_urls.len() as i32)
+}*/
+
+pub async fn get_closed_pr_reviews_count(owner: &str, repo: &str, total_closed: Result<i32, String>) -> Result<i32, String> {
+    let min_reviewers = 2;
+    let closed_pr_count = match total_closed {
+        Ok(count) => count,
+        Err(e) => return Err(e),
+    };
+    let mut pr_urls = HashSet::new();
+    let num_pages = (closed_pr_count + 99) / 100;
+
+    for page in 1..=num_pages {
+        let after = if pr_urls.is_empty() {
+            "null".to_owned()
+        } else {
+            format!("\"{}\"", pr_urls.iter().last().unwrap())
+        };
+        let pr_query = format!(
+            r#"
+            query {{
+              repository(owner: "{}", name: "{}") {{
+                pullRequests(states: CLOSED, first: 100, after: {}, orderBy: {{field: UPDATED_AT, direction: DESC}}) {{
+                  pageInfo {{
+                    endCursor
+                    hasNextPage
+                  }}
+                  nodes {{
+                    url
+                    reviews(first: 10) {{
+                      nodes {{
+                        author {{
+                          login
+                        }}
+                      }}
+                    }}
+                  }}
+                }}
+              }}
+            }}
+            "#,
+            owner,
+            repo,
+            after,
+        );
+        let pr_response = send_graphql_request(&pr_query).await?;
+        let pr_data: serde_json::Value = serde_json::from_str(&pr_response).map_err(|err| err.to_string())?;
+
+        let pr_nodes = pr_data["data"]["repository"]["pullRequests"]["nodes"].as_array().unwrap();
+        for pr in pr_nodes {
+            let pr_url = pr["url"].as_str().unwrap().to_owned();
+            let mut reviewers = HashSet::new();
+
+            if let Some(reviews) = pr["reviews"]["nodes"].as_array() {
+                for review in reviews {
+                    if let Some(author) = review["author"]["login"].as_str() {
+                        reviewers.insert(author.to_owned());
+                    }
+                }
+            }
+
+            if reviewers.len() >= min_reviewers {
+                pr_urls.insert(pr_url);
+            }
+        }
+
+        if !pr_data["data"]["repository"]["pullRequests"]["pageInfo"]["hasNextPage"].as_bool().unwrap() {
+            break;
+        }
+    }
+
+    println!("Total number of closed pull requests with at least {} reviewers: {}", min_reviewers, pr_urls.len());
+
+    Ok(pr_urls.len() as i32)
+}
+
+/*async fn send_graphql_request(query: &str) -> Result<serde_json::Value, String> {
+    let token_res = github_get_api_token();
+    if token_res.is_err() {
+        return Err(token_res.err().unwrap().to_string());
+    }
+    let token = token_res.unwrap();
+
+    let client = reqwest::Client::new();
+    let mut response = client
+        .post("https://api.github.com/graphql")
+        .header("Authorization", format!("Bearer {}", token))
+        .header("User-Agent", "ECE461-repository-analyzer")
+        .json(&serde_json::json!({ "query": query }))
+        .send()
+        .await
+        .map_err(|err| err.to_string())?
+        .json()
+        .await
+        .map_err(|err| err.to_string())?;
+
+    Ok(response)
+}*/
+async fn send_graphql_request(query: &str) -> Result<String, String> {
+    let token_res = github_get_api_token();
+    if token_res.is_err() {
+        return Err(token_res.err().unwrap().to_string());
+    }
+    let token = token_res.unwrap();
+
+    let client = reqwest::Client::new();
+    let mut response = client
+        .post("https://api.github.com/graphql")
+        .header("Authorization", format!("Bearer {}", token))
+        .header("User-Agent", "ECE461-repository-analyzer")
+        .json(&serde_json::json!({ "query": query }))
+        .send()
+        .await
+        .map_err(|err| err.to_string())?;
+
+    let response_text = response.text().await.map_err(|err| err.to_string())?;
+    //println!("Response: {}", response_text);
+
+    Ok(response_text)
+}
+
+/*
+async fn send_graphql_request(query: &str) -> Result<serde_json::Value, Box<dyn std::error::Error>> {
+    let token_res = github_get_api_token()?;
+    let token = format!("Bearer {}", token_res);
+
+    let client = reqwest::Client::new();
+    let response = client
+        .post("https://api.github.com/graphql")
+        .header("Authorization", token)
+        .header("User-Agent", "ECE461-repository-analyzer")
+        .json(&serde_json::json!({ "query": query }))
+        .send()
+        .await?
+        .json()
+        .await?;
+
+    Ok(response)
+}*/
+
 
 
 /// Returns the number of open issues of a repository
