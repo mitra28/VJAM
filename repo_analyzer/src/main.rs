@@ -16,10 +16,6 @@ pub mod logging;
 
 use crate::rest_api::github_get_response;
 use crate::rest_api::github_get_issue_response;
-//use crate::rest_api::github_get_closed_pulls_number;
-//use crate::rest_api::count_closed_pull;
-//use crate::rest_api::count_closed_pull_requests_with_reviewers;
-//use crate::rest_api::closed_pulls_with_reviews;
 use crate::rest_api::get_closed_pr_comments_count;
 use crate::rest_api::get_closed_pr_count;
 use crate::rest_api::get_closed_pr_reviews_count;
@@ -37,8 +33,12 @@ use log::{info, debug, error};
 #[warn(missing_docs)]
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
+    handle_command().await?;
 
-    // test_web_api().await;
+    Ok(())
+}
+
+async fn handle_command() -> Result<(), Box<dyn Error>> {
     let args: Vec<String> = std::env::args().collect();
 
     if args.len() > 2 {
@@ -48,18 +48,16 @@ async fn main() -> Result<(), Box<dyn Error>> {
         return Ok(());
     }
 
-    if args[1] == "install"{
-        run_install();
-    } else if args[1] == "build"{
-        run_build();
-    } else if args[1] == "test"{
-        run_test();
-    } else {
-        run_url(&args[1]).await;
+    match args[1].as_str() {
+        "install" => run_install(),
+        "build" => run_build(),
+        "test" => run_test(),
+        _ => run_url(&args[1]).await,
     }
 
     Ok(())
 }
+
 
 /// Installs all needed crates for building the project
 fn run_install() {

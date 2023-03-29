@@ -8,20 +8,8 @@ use reqwest::Client;
 use reqwest::header::HeaderMap;
 use log::{ debug };
 extern crate base64;
-
-//use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::collections::HashSet;
-
-
-// use std::collections::HashMap;
-
-// #[derive(Debug, Deserialize, Serialize)]
-// pub struct PullRequest {
-//     url: String,
-//     state: String,
-// }
-
 
 /// Returns the github link associated with the npmjs package
 
@@ -149,7 +137,7 @@ pub async fn get_repo_info(owner: &str, repo: &str, headers: Option<&HeaderMap>)
 
 fn get_major_minor_dependencies(file_text: &str) -> Result<Vec<(String, String)>, Box<dyn std::error::Error>> {
     let package_json: Value = serde_json::from_str(&file_text)?;
-    let dependencies = package_json["dependencies"].as_object().ok_or("")?;
+    let dependencies = package_json["dependencies"].as_object().ok_or(" ")?;
     let mut result = Vec::new();
     for (name, version) in dependencies {
         if let Some(version_str) = version.as_str() {
