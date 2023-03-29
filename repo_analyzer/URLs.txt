@@ -1,2 +1,2 @@
-https://github.com/lodash/lodash
+https://www.npmjs.com/package/browserify
 

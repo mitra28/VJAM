@@ -213,7 +213,7 @@ async fn run_url(filename: &str) {
         let total_pull_req_reviewers = match get_closed_pr_reviews_count(&owner, &package, Ok(total_pull_req)).await {
             Ok(count) => count,
             Err(_) => {
-                println!("Failed to get total closed pull requests");
+                println!("Failed to get total closed pull requests with reviews");
                 -1
             }
         };

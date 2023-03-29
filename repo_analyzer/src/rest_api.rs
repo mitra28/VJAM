@@ -713,7 +713,10 @@ pub async fn get_closed_pr_reviews_count(owner: &str, repo: &str, total_closed: 
         Err(e) => return Err(e),
     };
     let mut pr_urls = HashSet::new();
-    let num_pages = (closed_pr_count + 99) / 100;
+    let mut num_pages = (closed_pr_count + 99) / 100;
+    // if (num_pages > 15) {
+    //     num_pages = 15;
+    // }
 
     for page in 1..=num_pages {
         let after = if pr_urls.is_empty() {
@@ -751,15 +754,29 @@ pub async fn get_closed_pr_reviews_count(owner: &str, repo: &str, total_closed: 
         let pr_response = send_graphql_request(&pr_query).await?;
         let pr_data: serde_json::Value = serde_json::from_str(&pr_response).map_err(|err| err.to_string())?;
 
-        let pr_nodes = pr_data["data"]["repository"]["pullRequests"]["nodes"].as_array().unwrap();
+        //let pr_nodes = pr_data["data"]["repository"]["pullRequests"]["nodes"].as_array().unwrap();
+        let pr_nodes = match pr_data["data"]["repository"]["pullRequests"]["nodes"].as_array() {
+            Some(nodes) => nodes,
+            None => return Err("Missing 'nodes' array in pull request data".to_owned()),
+        };
         for pr in pr_nodes {
-            let pr_url = pr["url"].as_str().unwrap().to_owned();
+            //let pr_url = pr["url"].as_str().unwrap().to_owned();
+            let pr_url = pr["url"].as_str().ok_or_else(|| "Missing 'url' field in pull request data")?.to_owned();
             let mut reviewers = HashSet::new();
-
+/*
             if let Some(reviews) = pr["reviews"]["nodes"].as_array() {
                 for review in reviews {
                     if let Some(author) = review["author"]["login"].as_str() {
                         reviewers.insert(author.to_owned());
+                    }
+                }
+            }*/
+            if let Some(reviews) = pr["reviews"]["nodes"].as_array() {
+                for review in reviews {
+                    if let Some(login) = review["author"]["login"].as_str() {
+                        reviewers.insert(login.to_owned());
+                    } else {
+                        return Err("Missing 'login' field in review data".to_owned());
                     }
                 }
             }
