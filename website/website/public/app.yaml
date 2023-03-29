@@ -1,0 +1,9 @@
+runtime: nodejs
+env: flex
+
+# The entrypoint for the app
+entrypoint: serve -s .
+
+# Set environment variables
+env_variables:
+  REACT_APP_API_URL: "https://ece-461-part-2-web-service.uk.r.appspot.com/api"
