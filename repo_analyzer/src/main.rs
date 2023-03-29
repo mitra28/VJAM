@@ -1,4 +1,4 @@
-//#![warn(missing_docs)]
+#![warn(missing_docs)]
 //! This crate generates an executable that fulfills the requirements as specified in the Part 1 - CLI Documents for the
 //! course ECE 461 at Purdue University
 
