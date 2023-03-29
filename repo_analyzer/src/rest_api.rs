@@ -8,7 +8,8 @@ use reqwest::Client;
 use reqwest::header::HeaderMap;
 use log::{ debug };
 extern crate base64;
-
+use serde_json::Value;
+use std::collections::HashSet;
 
 /// Returns the github link associated with the npmjs package
 
@@ -77,6 +78,7 @@ pub async fn npmjs_get_repository_link(_owner: &str, repository: &str) -> Result
 }
 
 
+
 /// All functions starting with "github_get" have the following arguments:
 ///
 /// # Arguments
@@ -85,6 +87,283 @@ pub async fn npmjs_get_repository_link(_owner: &str, repository: &str) -> Result
 /// * 'repository' - The repository
 /// * 'response_res' - The response request to parse
 ///
+
+//function to retrieve the list of pull requests.Result<serde_json::Value, String>
+
+/*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
+//Version pinning. DONE
+
+pub async fn get_repo_info(owner: &str, repo: &str, headers: Option<&HeaderMap>) -> Result<Vec<(String, String)>, Box<dyn std::error::Error>> {
+    let url = format!("https://api.github.com/repos/{}/{}/contents/", owner, repo);
+    let token_res = github_get_api_token();
+    let token = token_res?;
+    let client = Client::new();
+    let mut request_builder = client.get(&url)
+        .header("Authorization", format!("Bearer {}", token))
+        .header("User-Agent", "ECE461-repository-analyzer");
+    if let Some(header_map) = headers {
+        request_builder = request_builder.headers(header_map.clone());
+    }
+
+    let response = request_builder.send().await?.text().await?;
+    let response_json: Vec<Value> = serde_json::from_str(&response)?;
+
+    let mut result = Vec::new();
+
+    for item in response_json {
+        if let Some(name) = item.get("name").and_then(Value::as_str) {
+            if name == "package.json" || name == "requirements.txt" {
+                let download_url = item
+                    .get("download_url")
+                    .and_then(Value::as_str)
+                    .ok_or_else(|| format!("Download URL not found for file {}", name))?;
+
+                let file_response = client
+                    .get(download_url)
+                    .header("Authorization", format!("Bearer {}", token))
+                    .header("User-Agent", "ECE461-repository-analyzer")
+                    .send()
+                    .await?;
+
+                let file_text = file_response.text().await?;
+                let dependencies = get_major_minor_dependencies(&file_text)?;
+                result.extend(dependencies);
+            }
+        }
+    }
+    //println!("The value of result is {:?}", result);
+    Ok(result)
+}
+
+fn get_major_minor_dependencies(file_text: &str) -> Result<Vec<(String, String)>, Box<dyn std::error::Error>> {
+    let package_json: Value = serde_json::from_str(&file_text)?;
+    let dependencies = package_json["dependencies"].as_object().ok_or(" ")?;
+    let mut result = Vec::new();
+    for (name, version) in dependencies {
+        if let Some(version_str) = version.as_str() {
+            let parts: Vec<&str> = version_str.split('.').collect();
+            if parts.len() >= 2 {
+                result.push((name.to_string(), format!("{}.{}", parts[0], parts[1])));
+            }
+        }
+    }
+    Ok(result)
+}
+//Graph QL
+
+
+pub async fn get_closed_pr_count(owner: &str, repo: &str) -> Result<i32, String> {
+    // Construct the GraphQL query to get the total number of closed pull requests
+    let token_res = github_get_api_token();
+    if token_res.is_err() {
+        println!("failed to get token");
+        return Err(token_res.err().unwrap().to_string());
+    }
+    let token = token_res.unwrap();
+
+    let query = format!(
+        r#"
+        query {{
+            repository(owner:"{}", name:"{}") {{
+                pullRequests(states:CLOSED) {{
+                    totalCount
+                }}
+            }}
+        }}
+        "#,
+        owner, repo
+    );
+
+    // Send the GraphQL query to the GitHub API
+    let client = reqwest::Client::new();
+    let response = match client
+        .post("https://api.github.com/graphql")
+        .header("Authorization", format!("Bearer {}", token))
+        .header("User-Agent", "ECE461-repository-analyzer")
+        .json(&serde_json::json!({ "query": query }))
+        .send()
+        .await
+    {
+        Ok(res) => res,
+        Err(e) =>{
+            println!("error getting response");
+            return Err(format!("Error sending GraphQL request: {}", e));
+        } 
+    };
+
+    // Parse the response and extract the total count of closed pull requests
+    let json: serde_json::Value = match response.json().await {
+        Ok(val) => val,
+        Err(e) => {
+            println!("error parsing response");
+            return Err(format!("Error parsing GraphQL response: {}", e));
+        }
+    };
+    let count = match json["data"]["repository"]["pullRequests"]["totalCount"].as_u64() {
+        Some(val) => val as i32,
+        None => -1,
+    };
+
+    Ok(count)
+}
+
+
+pub async fn get_closed_pr_reviews_count(owner: &str, repo: &str, total_closed: Result<i32, String>) -> Result<i32, String> {
+    let min_reviewers = 2;
+    let closed_pr_count = match total_closed {
+        Ok(count) => count,
+        Err(e) => return Err(e),
+    };
+    let mut pr_urls = HashSet::new();
+    let num_pages = (closed_pr_count + 99) / 100;
+    for _page in 1..=num_pages {
+        let after = if pr_urls.is_empty() {
+            "null".to_owned()
+        } else {
+            format!("\"{}\"", pr_urls.iter().last().unwrap())
+        };
+        let pr_query = format!(
+            r#"
+            query {{
+              repository(owner: "{}", name: "{}") {{
+                pullRequests(states: CLOSED, first: 100, after: {}, orderBy: {{field: UPDATED_AT, direction: DESC}}) {{
+                  pageInfo {{
+                    endCursor
+                    hasNextPage
+                  }}
+                  nodes {{
+                    url
+                    reviews(first: 10) {{
+                      nodes {{
+                        author {{
+                          login
+                        }}
+                      }}
+                    }}
+                  }}
+                }}
+              }}
+            }}
+            "#,
+            owner,
+            repo,
+            after,
+        );
+        let pr_response = send_graphql_request(&pr_query).await?;
+        let pr_data: serde_json::Value = serde_json::from_str(&pr_response).map_err(|err| err.to_string())?;
+
+        //let pr_nodes = pr_data["data"]["repository"]["pullRequests"]["nodes"].as_array().unwrap();
+        let pr_nodes = match pr_data["data"]["repository"]["pullRequests"]["nodes"].as_array() {
+            Some(nodes) => nodes,
+            None => return Err("Missing 'nodes' array in pull request data".to_owned()),
+        };
+        for pr in pr_nodes {
+            //let pr_url = pr["url"].as_str().unwrap().to_owned();
+            let pr_url = pr["url"].as_str().ok_or_else(|| "Missing 'url' field in pull request data")?.to_owned();
+            let mut reviewers = HashSet::new();
+            if let Some(reviews) = pr["reviews"]["nodes"].as_array() {
+                for review in reviews {
+                    if let Some(login) = review["author"]["login"].as_str() {
+                        reviewers.insert(login.to_owned());
+                    } else {
+                        return Err("Missing 'login' field in review data".to_owned());
+                    }
+                }
+            }
+
+            if reviewers.len() >= min_reviewers {
+                pr_urls.insert(pr_url);
+            }
+        }
+
+        if !pr_data["data"]["repository"]["pullRequests"]["pageInfo"]["hasNextPage"].as_bool().unwrap() {
+            break;
+        }
+    }
+    Ok(pr_urls.len() as i32)
+}
+
+
+async fn send_graphql_request(query: &str) -> Result<String, String> {
+    let token_res = github_get_api_token();
+    if token_res.is_err() {
+        return Err(token_res.err().unwrap().to_string());
+    }
+    let token = token_res.unwrap();
+
+    let client = reqwest::Client::new();
+    let response = client
+        .post("https://api.github.com/graphql")
+        .header("Authorization", format!("Bearer {}", token))
+        .header("User-Agent", "ECE461-repository-analyzer")
+        .json(&serde_json::json!({ "query": query }))
+        .send()
+        .await
+        .map_err(|err| err.to_string())?;
+
+    let response_text = response.text().await.map_err(|err| err.to_string())?;
+    Ok(response_text)
+}
+pub async fn get_closed_pr_comments_count(owner: &str, repo: &str, total_closed: Result<i32, String>) -> Result<i32, String> {
+    let min_comments = 2;
+    let closed_pr_count = match total_closed {
+        Ok(count) => count,
+        Err(e) => return Err(e),
+    };
+    let mut pr_urls = HashSet::new();
+    let num_pages = (closed_pr_count + 99) / 100;
+    for _page in 1..=num_pages {
+        let after = if pr_urls.is_empty() {
+            "null".to_owned()
+        } else {
+            format!("\"{}\"", pr_urls.iter().last().unwrap())
+        };
+        let pr_query = format!(
+            r#"
+            query {{
+              repository(owner: "{}", name: "{}") {{
+                pullRequests(states: CLOSED, first: 100, after: {}, orderBy: {{field: UPDATED_AT, direction: DESC}}) {{
+                  pageInfo {{
+                    endCursor
+                    hasNextPage
+                  }}
+                  nodes {{
+                    url
+                    comments(first: 10) {{
+                      totalCount
+                    }}
+                  }}
+                }}
+              }}
+            }}
+            "#,
+            owner,
+            repo,
+            after,
+        );
+        let pr_response = send_graphql_request(&pr_query).await?;
+        let pr_data: serde_json::Value = serde_json::from_str(&pr_response).map_err(|err| err.to_string())?;
+
+        let pr_nodes = match pr_data["data"]["repository"]["pullRequests"]["nodes"].as_array() {
+            Some(nodes) => nodes,
+            None => return Err("Missing 'nodes' array in pull request data".to_owned()),
+        };
+        for pr in pr_nodes {
+            let pr_url = pr["url"].as_str().ok_or_else(|| "Missing 'url' field in pull request data")?.to_owned();
+            let comments_count = pr["comments"]["totalCount"].as_i64().ok_or_else(|| "Missing 'totalCount' field in comments data")?;
+
+            if comments_count >= min_comments {
+                pr_urls.insert(pr_url);
+            }
+        }
+
+        if !pr_data["data"]["repository"]["pullRequests"]["pageInfo"]["hasNextPage"].as_bool().unwrap() {
+            break;
+        }
+    }
+
+    Ok(pr_urls.len() as i32)
+}
 
 
 

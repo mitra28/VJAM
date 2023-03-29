@@ -81,6 +81,59 @@ pub fn get_license(license: Result<String, String>) -> f32 {
         return l_score
     }
 }
+pub fn version_pin(result: Result<Vec<(String, String)>, Box<dyn std::error::Error>>) -> f32 {
+    let mut major_minor = 0.0;
+    let mut major = 0.0;
+    let mut total = 0.0;
+    match result {
+        Ok(vec) => {
+            for (_, s2) in vec {
+                total = total + 1.0;
+                let _version = match s2.strip_prefix('^') {
+                    Some(v) => v,
+                    None => match s2.strip_prefix('~') {
+                        Some(v) => v,
+                        None => &s2,
+                    },
+                };
+                if s2.ends_with(".x") {
+                    major = major + 1.0;
+                }
+                else{
+                    major_minor = major_minor + 1.0;
+                }
+            }
+            return (((major_minor) + (0.5 * major)) / total) as f32;
+        },
+        Err(e) => {
+            println!("Error: {}", e);
+            return -1.0;
+        }
+    }
+}
+pub fn get_adherence_score(total_closed: Result<i32, String>, total_reviewers: Result<i32, String>) -> f32 {
+    // If total_closed is an error or 0, return a score of 0
+    let closed_count = match total_closed {
+        Ok(count) => {
+            if count == 0 {
+                return 0.0;
+            }
+            count
+        },
+        Err(_) => return -1.0,
+    };
+
+    // If total_reviewers is an error, return a score of 0
+    let reviewer_count = match total_reviewers {
+        Ok(count) => count,
+        Err(_) => return -1.0,
+    };
+
+    // Calculate adherence score
+    let score = (reviewer_count as f32) / (closed_count as f32);
+
+    score
+}
 
 
 pub fn get_responsive_maintainer(opened_issues: &str, total_issues: &str) -> f32 {

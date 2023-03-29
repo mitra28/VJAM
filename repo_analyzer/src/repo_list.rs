@@ -25,6 +25,12 @@ pub struct Repo{
 
     /// The license metric
     pub license: f32,
+
+    //The version pinning metric
+    pub version_score: f32,
+
+    //The adherence to engineering principles metric
+    pub adherence_score: f32,
 }
 
 /// Default behavior for Repo
@@ -38,6 +44,8 @@ impl Default for Repo {
             bus_factor: 0.0,
             responsive_maintainer: 0.0,
             license: 0.0,
+            version_score: 0.0,
+            adherence_score: 0.0,
         }
     }
 }
@@ -68,8 +76,8 @@ impl RepoList {
     /// Prints out the [Repo]s contained in [RepoList.repos] in NDJSON format
     pub fn display(&self) {
         for repo in &self.repos {
-            println!("{{\"URL\":\"{}\", \"NET_SCORE\":{:.2}, \"RAMP_UP_SCORE\":{:.2}, \"CORRECTNESS_SCORE\":{:.2}, \"BUS_FACTOR_SCORE\":{:.2}, \"RESPONSIVE_MAINTAINER_SCORE\":{:.2}, \"LICENSE_SCORE\":{:.2}}}", 
-                repo.url, repo.net_score, repo.ramp_up, repo.correctness, repo.bus_factor, repo.responsive_maintainer, repo.license);
+            println!("{{\"URL\":\"{}\", \"NET_SCORE\":{:.2}, \"RAMP_UP_SCORE\":{:.2}, \"CORRECTNESS_SCORE\":{:.2}, \"BUS_FACTOR_SCORE\":{:.2}, \"RESPONSIVE_MAINTAINER_SCORE\":{:.2}, \"LICENSE_SCORE\":{:.2}, \"VERSION_PIN_SCORE\":{:.2}, \"ADHERENCE_SCORE\":{:.2}}}", 
+                repo.url, repo.net_score, repo.ramp_up, repo.correctness, repo.bus_factor, repo.responsive_maintainer, repo.license, repo.version_score, repo.adherence_score);
         }
     }
 }
