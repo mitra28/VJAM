@@ -9,10 +9,8 @@ use reqwest::header::HeaderMap;
 use log::{ debug };
 extern crate base64;
 
-use serde::{Deserialize, Serialize};
+//use serde::{Deserialize, Serialize};
 use serde_json::Value;
-use serde_json::json;
-use reqwest::{StatusCode};
 use std::collections::HashSet;
 
 
@@ -151,7 +149,7 @@ pub async fn get_repo_info(owner: &str, repo: &str, headers: Option<&HeaderMap>)
 
 fn get_major_minor_dependencies(file_text: &str) -> Result<Vec<(String, String)>, Box<dyn std::error::Error>> {
     let package_json: Value = serde_json::from_str(&file_text)?;
-    let dependencies = package_json["dependencies"].as_object().ok_or("dependencies not found")?;
+    let dependencies = package_json["dependencies"].as_object().ok_or("")?;
     let mut result = Vec::new();
     for (name, version) in dependencies {
         if let Some(version_str) = version.as_str() {
@@ -229,8 +227,8 @@ pub async fn get_closed_pr_reviews_count(owner: &str, repo: &str, total_closed: 
         Err(e) => return Err(e),
     };
     let mut pr_urls = HashSet::new();
-    let mut num_pages = (closed_pr_count + 99) / 100;
-    for page in 1..=num_pages {
+    let num_pages = (closed_pr_count + 99) / 100;
+    for _page in 1..=num_pages {
         let after = if pr_urls.is_empty() {
             "null".to_owned()
         } else {
@@ -294,9 +292,6 @@ pub async fn get_closed_pr_reviews_count(owner: &str, repo: &str, total_closed: 
             break;
         }
     }
-
-    println!("Total number of closed pull requests with at least {} reviewers: {}", min_reviewers, pr_urls.len());
-
     Ok(pr_urls.len() as i32)
 }
 
@@ -309,7 +304,7 @@ async fn send_graphql_request(query: &str) -> Result<String, String> {
     let token = token_res.unwrap();
 
     let client = reqwest::Client::new();
-    let mut response = client
+    let response = client
         .post("https://api.github.com/graphql")
         .header("Authorization", format!("Bearer {}", token))
         .header("User-Agent", "ECE461-repository-analyzer")
@@ -322,14 +317,14 @@ async fn send_graphql_request(query: &str) -> Result<String, String> {
     Ok(response_text)
 }
 pub async fn get_closed_pr_comments_count(owner: &str, repo: &str, total_closed: Result<i32, String>) -> Result<i32, String> {
-    let min_comments = 1;
+    let min_comments = 2;
     let closed_pr_count = match total_closed {
         Ok(count) => count,
         Err(e) => return Err(e),
     };
     let mut pr_urls = HashSet::new();
-    let mut num_pages = (closed_pr_count + 99) / 100;
-    for page in 1..=num_pages {
+    let num_pages = (closed_pr_count + 99) / 100;
+    for _page in 1..=num_pages {
         let after = if pr_urls.is_empty() {
             "null".to_owned()
         } else {
@@ -378,8 +373,6 @@ pub async fn get_closed_pr_comments_count(owner: &str, repo: &str, total_closed:
             break;
         }
     }
-
-    println!("Total number of closed pull requests with at least {} comments: {}", min_comments, pr_urls.len());
 
     Ok(pr_urls.len() as i32)
 }

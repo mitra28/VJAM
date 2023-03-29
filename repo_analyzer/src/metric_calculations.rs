@@ -82,7 +82,6 @@ pub fn get_license(license: Result<String, String>) -> f32 {
     }
 }
 pub fn version_pin(result: Result<Vec<(String, String)>, Box<dyn std::error::Error>>) -> f32 {
-    println!("We are in version pin function");
     let mut major_minor = 0.0;
     let mut major = 0.0;
     let mut total = 0.0;
@@ -111,6 +110,29 @@ pub fn version_pin(result: Result<Vec<(String, String)>, Box<dyn std::error::Err
             return -1.0;
         }
     }
+}
+pub fn get_adherence_score(total_closed: Result<i32, String>, total_reviewers: Result<i32, String>) -> f32 {
+    // If total_closed is an error or 0, return a score of 0
+    let closed_count = match total_closed {
+        Ok(count) => {
+            if count == 0 {
+                return 0.0;
+            }
+            count
+        },
+        Err(_) => return -1.0,
+    };
+
+    // If total_reviewers is an error, return a score of 0
+    let reviewer_count = match total_reviewers {
+        Ok(count) => count,
+        Err(_) => return -1.0,
+    };
+
+    // Calculate adherence score
+    let score = (reviewer_count as f32) / (closed_count as f32);
+
+    score
 }
 
 

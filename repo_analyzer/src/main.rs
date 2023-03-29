@@ -20,6 +20,7 @@ use crate::rest_api::github_get_issue_response;
 //use crate::rest_api::count_closed_pull;
 //use crate::rest_api::count_closed_pull_requests_with_reviewers;
 //use crate::rest_api::closed_pulls_with_reviews;
+use crate::rest_api::get_closed_pr_comments_count;
 use crate::rest_api::get_closed_pr_count;
 use crate::rest_api::get_closed_pr_reviews_count;
 use crate::rest_api::get_repo_info;
@@ -192,34 +193,35 @@ async fn run_url(filename: &str) {
         let response2 = response.clone();
 
         let _r2 = github_get_issue_response(&owner, &package, None).await;
-        //let _r3 = count_closed_pull(&owner, &package).await;
-        //let _r4 = count_closed_pull_requests_with_reviewers(&owner, &package, None).await;
         let _dependencies = get_repo_info(&owner, &package, None).await;
-        //let _total_pull_req = get_closed_pr_count(&owner, &package).await;
-        //println!("the total closed pull {}",_total_pull_req );
-        //let r4 = closed_pulls_with_reviews(&owner, &package, None).await;
-        // if r2.is_err() {
-        //     println!("ERROR ");
-        // }
-        
         // println!("Successful get responses ");
-        let total_pull_req = match get_closed_pr_count(&owner, &package).await {
+        let mut total_pull_req = match get_closed_pr_count(&owner, &package).await {
             Ok(count) => count,
             Err(_) => {
-                println!("Failed to get total closed pull requests");
                 -1
             }
         };
         let mut total_pull_req_reviewers = match get_closed_pr_reviews_count(&owner, &package, Ok(total_pull_req)).await {
-            Ok(count) => count,
-            Err(_) => {
-                println!("Failed to get total closed pull requests with reviews");
-                -1
+            Ok(count) if count > 0 => count,
+            Ok(_) | Err(_) => {
+                //println!("Failed to get total closed pull requests with reviews. Trying to get total closed pull requests with comments...");
+                match get_closed_pr_comments_count(&owner, &package, Ok(total_pull_req)).await {
+                    Ok(count) if count > 0 => count,
+                    Ok(_) | Err(_) => {
+                        //println!("Failed to get total closed pull requests with comments. Setting total_pull_req_reviewers to -1");
+                        -1
+                    }
+                }
             }
         };
-        
-        println!("The total closed pull requests: {}", total_pull_req);
 
+        if total_pull_req_reviewers == -1 {
+            total_pull_req_reviewers = 0;
+        }
+        if total_pull_req == -1 {
+            total_pull_req = 0;
+        }
+        
         
         
         let opened_issues = match rest_api::github_get_open_issues(&owner , &package, response).await {
@@ -257,10 +259,15 @@ async fn run_url(filename: &str) {
         // println!("number_of_forks: {}", number_of_forks);
 
         let mut version_score = metric_calculations::version_pin(_dependencies);
-        println!("the version score {}", version_score);
         if version_score == -1.0 {
             version_score = 0.0;
             error!("Failed to get version score from {}/{}", &owner, &package);
+        }
+
+        let mut adherence_score = metric_calculations::get_adherence_score(Ok(total_pull_req),Ok(total_pull_req_reviewers ));
+        if adherence_score == -1.0 {
+            adherence_score = 0.0;
+            error!("Failed to get adherence score from {}/{}", &owner, &package);
         }
 
         let mut ru = metric_calculations::get_ramp_up_time(&opened_issues, &number_of_forks);
@@ -292,7 +299,7 @@ async fn run_url(filename: &str) {
         let metrics = [ru, c, bf, l, rm]; // responsive maintainer is omitted
         let o = metric_calculations::get_overall(&metrics);
 
-        repos.add_repo(repo_list::Repo {url : repo_url, net_score : o, ramp_up : ru, correctness : c, bus_factor : bf, responsive_maintainer : rm, license : l});
+        repos.add_repo(repo_list::Repo {url : repo_url, net_score : o, ramp_up : ru, correctness : c, bus_factor : bf, responsive_maintainer : rm, license : l, version_score: version_score ,adherence_score: adherence_score});
         
     }
 
