@@ -14,6 +14,7 @@ function App(prop) {
   return (
     <div className="App">
       {message}
+      Hello, World!
       {/* {prop.children} */}
     </div>
   );
