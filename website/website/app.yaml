@@ -1,9 +1,6 @@
 runtime: nodejs
 env: flex
 
-# Set environment variables
-runtime: nodejs16
-
 env_variables:
   REACT_APP_API_URL: "https://ece-461-part-2-web-service.uk.r.appspot.com/api"
 
