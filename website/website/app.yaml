@@ -1,0 +1,21 @@
+runtime: nodejs
+env: flex
+
+env_variables:
+  REACT_APP_API_URL: "https://ece-461-part-2-web-service.uk.r.appspot.com/api"
+
+handlers:
+  - url: /api/*
+    script: auto
+    secure: always
+
+  - url: /
+    static_files: build/index.html
+    upload: build/index.html
+
+  - url: /(.*)
+    static_files: build/\1
+    upload: build/(.*)
+    
+skip_files:
+  - ^backend/
