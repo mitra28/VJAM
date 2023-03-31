@@ -23,10 +23,10 @@ jobs:
       - name: Deploy backend
         run: |
           cd website/backend
-          gcloud app deploy
+          gcloud app deploy --account=github-continuous-deployment@ece-461-part-2-web-service.iam.gserviceaccount.com
       - name: Deploy frontend
         run: |
           cd website/website
-          gcloud app deploy
+          gcloud app deploy --account=github-continuous-deployment@ece-461-part-2-web-service.iam.gserviceaccount.com
       
           
