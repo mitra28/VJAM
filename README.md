@@ -1,4 +1,6 @@
-# ECE461
+# ECE461 Part 2 - Spring 2023
+(description of project)
+
 
 ## The Original Team 
 Maximilian Manzhosov
