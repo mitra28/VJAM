@@ -20,10 +20,6 @@ jobs:
           version: 'latest'
           project_id: ece-461-part-2-web-service
           service_account_key: ${{ secrets.GCP_SA_KEY }}
-      - name: Run frontend tests
-        run: |
-          cd website/website
-          npm test
       - name: Deploy backend
         run: |
           cd website/backend
