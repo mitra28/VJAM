@@ -1,0 +1,37 @@
+name: Validate Javascript Website
+
+on:
+  push:
+    branches: [ "main" ]
+    paths:
+      - '**.js'
+  pull_request:
+    branches: [ "main" ]
+    paths:
+      - '**.js'
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  test:
+    name: Test javascript
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Install necessary packages
+      run: |
+        cd website/website
+        pwd
+        npm install --verbose
+    - name: Build website code
+      run: |
+        cd website/website
+        pwd
+        npm run build --verbose
+    - name: Run website tests
+      run: |
+        cd website/website
+        pwd
+        npm run test:no_watch --verbose
