@@ -1,3 +1,4 @@
+#![allow(unused_imports)]
 //! Handles interaction with the npm and github REST APIs
 
 use std::{env};
@@ -151,7 +152,7 @@ fn get_major_minor_dependencies(file_text: &str) -> Result<Vec<(String, String)>
 }
 //Graph QL
 
-
+/// Gets the total count of closed PRs
 pub async fn get_closed_pr_count(owner: &str, repo: &str) -> Result<i32, String> {
     // Construct the GraphQL query to get the total number of closed pull requests
     let token_res = github_get_api_token();
@@ -207,7 +208,7 @@ pub async fn get_closed_pr_count(owner: &str, repo: &str) -> Result<i32, String>
     Ok(count)
 }
 
-
+/// Gets the totals closed PR reviews count
 pub async fn get_closed_pr_reviews_count(owner: &str, repo: &str, total_closed: Result<i32, String>) -> Result<i32, String> {
     let min_reviewers = 2;
     let closed_pr_count = match total_closed {
@@ -304,6 +305,8 @@ async fn send_graphql_request(query: &str) -> Result<String, String> {
     let response_text = response.text().await.map_err(|err| err.to_string())?;
     Ok(response_text)
 }
+
+/// Gets closed PR comment count
 pub async fn get_closed_pr_comments_count(owner: &str, repo: &str, total_closed: Result<i32, String>) -> Result<i32, String> {
     let min_comments = 2;
     let closed_pr_count = match total_closed {

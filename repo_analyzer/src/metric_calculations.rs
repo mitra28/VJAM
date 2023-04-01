@@ -53,6 +53,7 @@ pub fn get_bus_factor(number_of_forks: &str) -> f32 {
     normalize(min(number_of_forks, 1000.0), 1000.0)
 }
 
+/// Checks to see if license matches any known values
 pub fn get_license(license: Result<String, String>) -> f32 {
     // println!("info: {:?}", license);
     let mut valid_license = HashMap::<String, f32>::new();
@@ -81,6 +82,8 @@ pub fn get_license(license: Result<String, String>) -> f32 {
         return l_score
     }
 }
+
+/// Checks to see what the ratio of version pinning is
 pub fn version_pin(result: Result<Vec<(String, String)>, Box<dyn std::error::Error>>) -> f32 {
     let mut major_minor = 0.0;
     let mut major = 0.0;
@@ -111,6 +114,8 @@ pub fn version_pin(result: Result<Vec<(String, String)>, Box<dyn std::error::Err
         }
     }
 }
+
+/// Checks the adherence score of a repository
 pub fn get_adherence_score(total_closed: Result<i32, String>, total_reviewers: Result<i32, String>) -> f32 {
     // If total_closed is an error or 0, return a score of 0
     let closed_count = match total_closed {
@@ -135,7 +140,7 @@ pub fn get_adherence_score(total_closed: Result<i32, String>, total_reviewers: R
     score
 }
 
-
+/// Determines the responsive maintainer score
 pub fn get_responsive_maintainer(opened_issues: &str, total_issues: &str) -> f32 {
     let opened_issues = match opened_issues.parse::<f32>() {
         Ok(n) => n,
