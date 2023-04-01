@@ -45,6 +45,7 @@ pub fn enable_logging(log_file_var: &str, log_level_var: &str)-> Result<(), Stri
     match result {
         Ok(..) => {
             simple_logging::log_to_file(log_file, level).expect("Logging should occur at log_file");
+            error!("Logging to file!");
             Ok(())
         }
         Err(e) => {
@@ -54,4 +55,17 @@ pub fn enable_logging(log_file_var: &str, log_level_var: &str)-> Result<(), Stri
         }
     }
     
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_invalid_log_file_and_level() {
+        let log_file  = "N/A";
+        let log_level = "N/A";
+        let result = enable_logging(log_file, log_level);
+        assert!(result.is_err());
+    }
 }

@@ -26,10 +26,10 @@ pub struct Repo{
     /// The license metric
     pub license: f32,
 
-    //The version pinning metric
+    /// The version pinning metric
     pub version_score: f32,
 
-    //The adherence to engineering principles metric
+    /// The adherence to engineering principles metric
     pub adherence_score: f32,
 }
 
