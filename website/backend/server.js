@@ -2,6 +2,8 @@ const express = require('express');
 const cors = require("cors");
 const path = require('path');
 const app = express();
+const packageRoutes = require('./routes/packageroutes');
+const Package = require('./models/package');
 
 app.get('/', (req, res) => {
   res.send('launch new port  8080');
@@ -12,6 +14,8 @@ app.use(express.json());
 // Serve static files from the "build" directory
 app.use(express.static(path.join(__dirname, '..', 'website', 'build')));
 console.log("Serving static assets from directory: " + path.join(__dirname, '..', 'website', 'build'));
+
+app.use('/api', packageRoutes);
 
 /*
 // Define your other routes and middleware below

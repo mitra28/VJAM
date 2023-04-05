@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import './App.css';
+import PackageForm from './components/PackageForm';
 
 
 function App(prop) {
@@ -16,6 +17,7 @@ function App(prop) {
       {message}
       Hello, World!
       {/* {prop.children} */}
+      <PackageForm />
     </div>
   );
 }
