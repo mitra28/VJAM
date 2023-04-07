@@ -80,4 +80,25 @@ impl RepoList {
                 repo.url, repo.net_score, repo.ramp_up, repo.correctness, repo.bus_factor, repo.responsive_maintainer, repo.license, repo.version_score, repo.adherence_score);
         }
     }
+
+    pub fn formatoutput(&self) -> String {
+        let mut output = String::new();
+        for repo in &self.repos {
+            let formatted_str = format!(
+                "{{\"URL\":\"{}\", \"NET_SCORE\":{:.2}, \"RAMP_UP_SCORE\":{:.2}, \"CORRECTNESS_SCORE\":{:.2}, \"BUS_FACTOR_SCORE\":{:.2}, \"RESPONSIVE_MAINTAINER_SCORE\":{:.2}, \"LICENSE_SCORE\":{:.2}, \"VERSION_PIN_SCORE\":{:.2}, \"ADHERENCE_SCORE\":{:.2}}}",
+                repo.url,
+                repo.net_score,
+                repo.ramp_up,
+                repo.correctness,
+                repo.bus_factor,
+                repo.responsive_maintainer,
+                repo.license,
+                repo.version_score,
+                repo.adherence_score,
+            );
+            output.push_str(&formatted_str);
+        }
+        output
+    }
+
 }

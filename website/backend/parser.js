@@ -4,7 +4,7 @@ function getUrlFromPackageJson() {
   // check for package.json; if it doesnt exist return bad request
 
   // open the package.json file for parsing
-  const packageJson = fs.readFileSync('package.json');
+  const packageJson = fs.readFileSync('package.json'); // package.json is in same directory as this file
   const data = JSON.parse(packageJson);
 
 
@@ -17,11 +17,15 @@ function getUrlFromPackageJson() {
     return url;
   }
   else if (data.repository){
-
+    // verifyOwnerRepo(data.repository)
     let url = "https://github.com/" + data.repository;
     return url;
   }
 
 
   return undefined;
+}
+
+function verifyOwnerRepo(){
+  return 1;
 }

@@ -303,4 +303,5 @@ async fn run_url(filename: &str) {
 
     repos.sort_by_net_score(); // will sort the RepoList by trustworthiness. 
     repos.display(); // will print RepoList to stdout in the desired format. 
+    //repos.formatoutput();
 }
