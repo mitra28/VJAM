@@ -22,16 +22,16 @@ jobs:
     - uses: actions/checkout@v3
     - name: Install necessary packages
       run: |
-        cd website/website
+        cd website/react
         pwd
         npm install --verbose
     - name: Build website code
       run: |
-        cd website/website
+        cd website/react
         pwd
         npm run build --verbose
     - name: Run website tests
       run: |
-        cd website/website
+        cd website/react
         pwd
         npm run test:no_watch --verbose
