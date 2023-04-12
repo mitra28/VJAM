@@ -22,11 +22,11 @@ jobs:
           service_account_key: ${{ secrets.GCP_SA_KEY }}
       - name: Deploy backend
         run: |
-          cd website/backend
+          cd website
           gcloud app deploy --account=github-continuous-deployment@ece-461-part-2-web-service.iam.gserviceaccount.com
       - name: Deploy frontend
         run: |
-          cd website/website
+          cd website/react
           gcloud app deploy --account=github-continuous-deployment@ece-461-part-2-web-service.iam.gserviceaccount.com
       
           
