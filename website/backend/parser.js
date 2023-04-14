@@ -3,6 +3,7 @@ const fs = require('fs');
 function getUrlFromPackageJson() {
   /* https://piazza.com/class/lc9qx1w86k643t/post/230 
     assume the homepage URL is the github repository
+    see https://github.com/nullivex/nodist/blob/master/package.json
   */
 
   // check for package.json; if it doesnt exist return bad request
