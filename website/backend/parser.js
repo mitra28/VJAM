@@ -21,21 +21,3 @@ function getUrlFromPackageJson() {
   }
   return undefined;
 }
-
-
-/*
-// check if repository field & repository url field (ex. browsify, cloudinary)
-  if (data.repository && data.repository.url) {
-    let url = data.repository.url;
-    if (url.endsWith('.git')) {
-      url = url.substring(0, url.length - 4);
-    }
-    return url;
-  }
-  else if (data.repository){
-    // verifyOwnerRepo(data.repository)
-    let url = "https://github.com/" + data.repository;
-    return url;
-  }
-
-*/
