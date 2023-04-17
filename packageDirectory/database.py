@@ -1,8 +1,12 @@
 import os
+import zipfile
+import io
+import base64
+from google.cloud import storage
 from google.cloud.sql.connector import Connector
 import sqlalchemy
 import pymysql
-from sqlalchemy import create_engine, Column, Integer, String, Float
+from sqlalchemy import create_engine, Column, Integer, String, Float,LargeBinary
 from sqlalchemy.orm import sessionmaker, declarative_base
 
 # Set up the Cloud SQL connection
@@ -54,6 +58,11 @@ def create_table(engine: sqlalchemy.engine.Engine):
         license_score = Column(Float)
         version_score = Column(Float)
         adherence_score = Column(Float)
+    class MyZipFilesTable(Base):
+        __tablename__ = 'my_zip_files_table'
+        id = Column(Integer, primary_key=True)#auto generated to store the row
+        file_identifier = Column(String(255)) #name of the file
+        zipped_file = Column(LargeBinary)    #binary version of the file
     Base.metadata.create_all(bind=engine)
 
 def insert_data(engine: sqlalchemy.engine.Engine, data):
@@ -65,6 +74,43 @@ def insert_data(engine: sqlalchemy.engine.Engine, data):
             db_conn.execute(MyTable.__table__.insert(), data)
     except Exception as e:
         print(f"Error occurred while inserting data: {e}")
+
+#assumes the data is downloaded into the computer first and the file path is then sent to this function
+def insert_zipped_file(engine: sqlalchemy.engine.Engine, file_path: str, file_identifier: str):
+    try:
+        with engine.connect() as db_conn:
+            with open(file_path, "rb") as file:
+                # read the file and encode it as base64
+                encoded_file = base64.b64encode(file.read())
+                # insert the encoded file and its identifier into the database
+                db_conn.execute(MyZipFilesTable.__table__.insert(), {"file_identifier": file_identifier, "zipped_file": encoded_file})
+    except Exception as e:
+        print(f"Error occurred while inserting zipped file: {e}")    
+            
+#retrieve using filename or using id given??            
+def retrieve_zipped_file_by_id(engine: sqlalchemy.engine.Engine, file_id: int):
+    try:
+        # interact with Cloud SQL database using connection pool
+        with engine.connect() as db_conn:
+            # query database for file with matching id
+            result = db_conn.execute(MyZipFilesTable.__table__.select().where(MyZipFilesTable.id == file_id)).fetchone()
+            if result:
+                # create a byte stream from the binary data
+                data = io.BytesIO(result.file_data)
+                # instantiate a client to access Cloud Storage
+                storage_client = storage.Client()
+                # get a bucket reference
+                bucket = storage_client.get_bucket("my-bucket-name")
+                # get a blob reference
+                blob = bucket.blob(f"{file_id}.zip")
+                # upload the byte stream as a blob
+                blob.upload_from_file(data)
+                # return the public URL for the uploaded blob
+                return blob.public_url
+            else:
+                return None
+    except Exception as e:
+        print(f"Error occurred while retrieving data: {e}")
 
 def retrieve_data(engine: sqlalchemy.engine.Engine):
     try:
