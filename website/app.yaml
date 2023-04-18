@@ -1,3 +1,4 @@
+service: backend-service
 runtime: nodejs16
 
 env_variables:
