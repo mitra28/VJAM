@@ -31,7 +31,7 @@ app.get('*', (req, res) => {
   });*/
 
 app.get("/message", (req, res) => {
-    res.json({ message: "Hello from server!" });
+    res.json({ message: "Hello from server! Version after download. " });
   });
 
 
