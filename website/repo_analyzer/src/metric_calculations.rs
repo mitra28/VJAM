@@ -108,8 +108,8 @@ pub fn version_pin(result: Result<Vec<(String, String)>, Box<dyn std::error::Err
             }
             return (((major_minor) + (0.5 * major)) / total) as f32;
         },
-        Err(e) => {
-            println!("Error: {}", e);
+        Err(_) => {
+            // println!("Error: {}", e);
             return -1.0;
         }
     }
