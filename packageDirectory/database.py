@@ -30,11 +30,11 @@ def delete_table(engine, table_name):
         print(f"Table {table_name} has been deleted.")
 
  #id INT AUTO_INCREMENT PRIMARY KEY,
-def create_table(engine):
+def create_repo_table(engine):
     with engine.connect() as conn:
         stmt = text("""
             CREATE TABLE repo_info (
-            id INT PRIMARY KEY,
+            id INT AUTO_INCREMENT PRIMARY KEY,
             repo_name VARCHAR(255),
             url VARCHAR(255),
             total_score FLOAT,
@@ -49,8 +49,51 @@ def create_table(engine):
         """)
         conn.execute(stmt)
         print("Table 'repo_info' created successfully.")
-'''
-def insert_data(engine, repo_name, url, total_score, ramp_up_score, correctness_score,
+
+
+def create_zip_table(engine):
+    with engine.connect() as conn:
+        stmt = text("""
+            CREATE TABLE zipped_table (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            file_id VARCHAR(255),
+            url VARCHAR(255),
+            zipped_file LONGBLOB,
+            );
+        """)
+        conn.execute(stmt)
+        print("Table 'zipped_table' created successfully.")        
+
+def insert_zipped_data(engine, file_id, url, zipped_file):
+    with engine.connect() as conn:
+        insert_stmt = text("""
+            INSERT INTO zipped_table (file_id, url,zipped_file)
+            VALUES (:file_id, :url, :zipped_file)
+        """)
+        try:
+            conn.execute(insert_stmt, {
+                "file_id": file_id,
+                "url": url,
+                "zipped_file": zipped_file,
+            })
+            conn.commit()
+        except exc.SQLAlchemyError as e:
+            print(f"Error occurred: {e}")
+
+def retrieve_zipped_file(engine, url):
+    with engine.connect() as conn:
+        result = conn.execute(
+            text("SELECT zipped_file FROM zip_files WHERE url=:url"), {"url": url}
+        ).fetchone()
+        if result is not None:
+            zipped_file = result[0]
+            return zipped_file
+        else:
+            print(f"No zipped file found for url {url}")
+            return None
+
+
+def insert_repo_data(engine, repo_name, url, total_score, ramp_up_score, correctness_score,
                 bus_factor, responsiveness_score, license_score, version_score, adherence_score):
     with engine.connect() as conn:
         # Check if a record with the same URL already exists
@@ -83,6 +126,7 @@ def insert_data(engine, repo_name, url, total_score, ramp_up_score, correctness_
                 "version_score": version_score,
                 "adherence_score": adherence_score,
             })
+            conn.commit()
             print("Data inserted successfully.")
         except exc.SQLAlchemyError as e:
             print(f"Error occurred: {e}")
@@ -112,30 +156,45 @@ def insert_data(engine,row, repo_name, url, total_score, ramp_up_score, correctn
 
         except exc.SQLAlchemyError as e:
             print(f"Error occurred: {e}")
+'''
+#this retrieve function retrieves entire table
 
-def retrieve_data(engine):
+def retrieve_repo_data(engine):
     with engine.connect() as conn:
         data = conn.execute(sqlalchemy.text("SELECT * from repo_info")).fetchall()
-        print(data)
+        #print(data)
         if len(data) > 0:
             return data
         else:
             return None
+
+def retrieve_repo_data_url(engine, url):
+    with engine.connect() as conn:
+        data = conn.execute(sqlalchemy.text("SELECT * FROM repo_info WHERE url=:url"), {"url": url}).fetchall()
+        print(data)
+        if len(data) > 0:
+            return data[0]
+        else:
+            return None
+
 def main():
     # Establish a connection to the database
     engine = create_engine_with_conn_pool()
     #delete_table(engine, "repo_info")
-    #create_table(engine)
+    #create_repo_table(engine)
     #delete_table(engine, "repo_info")
     #print("table created")
-    insert_data(engine, 1, "my_repo", "https://github.com/my_repo", 0.8, 0.7, 0.9, 0.6, 0.85, 0.9, 0.75, 0.8)
-    #row_id = 1
-    
-    data = retrieve_data(engine)
+    #insert_repo_data(engine, "my_repo", "https://github.com/my_repo", 0.8, 0.7, 0.9, 0.6, 0.85, 0.9, 0.75, 0.8)  
+
+    data = retrieve_repo_data_url(engine,"https://github.com/my_repo")
     if data:
         print(data)
     else:
         print("No matching row found.")
+
+    #create_zip_table(engine)
+
+      
         
         
         
