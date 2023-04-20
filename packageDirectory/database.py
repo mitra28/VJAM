@@ -29,12 +29,12 @@ def delete_table(engine, table_name):
         conn.execute(stmt)
         print(f"Table {table_name} has been deleted.")
 
-
+ #id INT AUTO_INCREMENT PRIMARY KEY,
 def create_table(engine):
     with engine.connect() as conn:
         stmt = text("""
             CREATE TABLE repo_info (
-            id INT AUTO_INCREMENT PRIMARY KEY,
+            id INT PRIMARY KEY,
             repo_name VARCHAR(255),
             url VARCHAR(255),
             total_score FLOAT,
@@ -49,10 +49,21 @@ def create_table(engine):
         """)
         conn.execute(stmt)
         print("Table 'repo_info' created successfully.")
-
+'''
 def insert_data(engine, repo_name, url, total_score, ramp_up_score, correctness_score,
                 bus_factor, responsiveness_score, license_score, version_score, adherence_score):
     with engine.connect() as conn:
+        # Check if a record with the same URL already exists
+        check_stmt = text("""
+            SELECT EXISTS(
+                SELECT 1 FROM repo_info WHERE url = :url LIMIT 1
+            )
+        """)
+        check_result = conn.execute(check_stmt, {"url": url})
+        if check_result.fetchone()[0]:
+            raise ValueError(f"Record with URL {url} already exists in the database")
+
+        #insert to db
         stmt = text("""
             INSERT INTO repo_info (repo_name, url, total_score, ramp_up_score, correctness_score,
                 bus_factor, responsiveness_score, license_score, version_score, adherence_score)
@@ -75,13 +86,62 @@ def insert_data(engine, repo_name, url, total_score, ramp_up_score, correctness_
             print("Data inserted successfully.")
         except exc.SQLAlchemyError as e:
             print(f"Error occurred: {e}")
+'''
+def insert_data(engine,row, repo_name, url, total_score, ramp_up_score, correctness_score,
+                bus_factor, responsiveness_score, license_score, version_score, adherence_score):
+    with engine.connect() as conn:
+        # Check if a record with the same URL already exists
+        insert_stmt = sqlalchemy.text(
+            "INSERT INTO repo_info (id, repo_name, url, total_score, ramp_up_score, correctness_score, bus_factor, responsiveness_score, license_score, version_score, adherence_score) VALUES (:id, :repo_name, :url, :total_score, :ramp_up_score, :correctness_score, :bus_factor, :responsiveness_score, :license_score, :version_score, :adherence_score)"
+        )
+        try:
+            conn.execute(insert_stmt, parameters= {"id": row,
+                "repo_name": repo_name,
+                "url": url,
+                "total_score": total_score,
+                "ramp_up_score": ramp_up_score,
+                "correctness_score": correctness_score,
+                "bus_factor": bus_factor,
+                "responsiveness_score": responsiveness_score,
+                "license_score": license_score,
+                "version_score": version_score,
+                "adherence_score": adherence_score,
+            })
+            result = conn.execute(sqlalchemy.text("SELECT * from repo_info")).fetchall()
+            conn.commit()
+
+        except exc.SQLAlchemyError as e:
+            print(f"Error occurred: {e}")
+
+def retrieve_data(engine):
+    with engine.connect() as conn:
+        data = conn.execute(sqlalchemy.text("SELECT * from repo_info")).fetchall()
+        print(data)
+        if len(data) > 0:
+            return data
+        else:
+            return None
 def main():
     # Establish a connection to the database
     engine = create_engine_with_conn_pool()
+    #delete_table(engine, "repo_info")
     #create_table(engine)
     #delete_table(engine, "repo_info")
-    print("table created")
-    insert_data(engine, "my_repo", "https://github.com/my_repo", 0.8, 0.7, 0.9, 0.6, 0.85, 0.9, 0.75, 0.8)
+    #print("table created")
+    insert_data(engine, 1, "my_repo", "https://github.com/my_repo", 0.8, 0.7, 0.9, 0.6, 0.85, 0.9, 0.75, 0.8)
+    #row_id = 1
+    
+    data = retrieve_data(engine)
+    if data:
+        print(data)
+    else:
+        print("No matching row found.")
+        
+        
+        
+        
+      
+        
 
 
 if __name__ == '__main__':
