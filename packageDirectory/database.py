@@ -29,6 +29,7 @@ def delete_table(engine, table_name):
         conn.execute(stmt)
         print(f"Table {table_name} has been deleted.")
 
+
 def create_table(engine):
     with engine.connect() as conn:
         stmt = text("""
@@ -77,10 +78,10 @@ def insert_data(engine, repo_name, url, total_score, ramp_up_score, correctness_
 def main():
     # Establish a connection to the database
     engine = create_engine_with_conn_pool()
-    delete_table(engine, "repo_info")
     #create_table(engine)
-    print("table deleted")
-    #insert_data(engine, "my_repo", "https://github.com/my_repo", 0.8, 0.7, 0.9, 0.6, 0.85, 0.9, 0.75, 0.8)
+    #delete_table(engine, "repo_info")
+    print("table created")
+    insert_data(engine, "my_repo", "https://github.com/my_repo", 0.8, 0.7, 0.9, 0.6, 0.85, 0.9, 0.75, 0.8)
 
 
 if __name__ == '__main__':
