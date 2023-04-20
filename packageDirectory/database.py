@@ -1,3 +1,92 @@
+import pymysql
+from google.cloud.sql.connector import Connector
+import sqlalchemy
+from sqlalchemy import create_engine, Column, Integer, String, Float,LargeBinary, pool, text, exc
+
+
+def getconn() -> pymysql.connections.Connection:
+    conn: pymysql.connections.Connection = Connector().connect(
+        "ece-461-part-2-web-service:us-central1:ece-461",
+        "pymysql",
+        user="root",
+        password="Youwillneverguessthispassword461",
+        db="ECE_461_DATABASE"
+    )
+    return conn
+
+
+def create_engine_with_conn_pool() -> sqlalchemy.engine.Engine:
+    engine = sqlalchemy.create_engine(
+        "mysql+pymysql://",
+        creator=getconn,
+        poolclass=pool.QueuePool,
+        pool_pre_ping=True)
+    return engine    
+
+def delete_table(engine, table_name):
+    with engine.connect() as conn:
+        stmt = text(f"DROP TABLE IF EXISTS {table_name}")
+        conn.execute(stmt)
+        print(f"Table {table_name} has been deleted.")
+
+def create_table(engine):
+    with engine.connect() as conn:
+        stmt = text("""
+            CREATE TABLE repo_info (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            repo_name VARCHAR(255),
+            url VARCHAR(255),
+            total_score FLOAT,
+            ramp_up_score FLOAT,
+            correctness_score FLOAT,
+            bus_factor FLOAT,
+            responsiveness_score FLOAT,
+            license_score FLOAT,
+            version_score FLOAT,
+            adherence_score FLOAT
+            );
+        """)
+        conn.execute(stmt)
+        print("Table 'repo_info' created successfully.")
+
+def insert_data(engine, repo_name, url, total_score, ramp_up_score, correctness_score,
+                bus_factor, responsiveness_score, license_score, version_score, adherence_score):
+    with engine.connect() as conn:
+        stmt = text("""
+            INSERT INTO repo_info (repo_name, url, total_score, ramp_up_score, correctness_score,
+                bus_factor, responsiveness_score, license_score, version_score, adherence_score)
+            VALUES (:repo_name, :url, :total_score, :ramp_up_score, :correctness_score,
+                :bus_factor, :responsiveness_score, :license_score, :version_score, :adherence_score)
+        """)
+        try:
+            conn.execute(stmt, {
+                "repo_name": repo_name,
+                "url": url,
+                "total_score": total_score,
+                "ramp_up_score": ramp_up_score,
+                "correctness_score": correctness_score,
+                "bus_factor": bus_factor,
+                "responsiveness_score": responsiveness_score,
+                "license_score": license_score,
+                "version_score": version_score,
+                "adherence_score": adherence_score,
+            })
+            print("Data inserted successfully.")
+        except exc.SQLAlchemyError as e:
+            print(f"Error occurred: {e}")
+def main():
+    # Establish a connection to the database
+    engine = create_engine_with_conn_pool()
+    delete_table(engine, "repo_info")
+    #create_table(engine)
+    print("table deleted")
+    #insert_data(engine, "my_repo", "https://github.com/my_repo", 0.8, 0.7, 0.9, 0.6, 0.85, 0.9, 0.75, 0.8)
+
+
+if __name__ == '__main__':
+    main()
+
+'''
 import os
 import zipfile
 import io
@@ -11,7 +100,7 @@ from sqlalchemy.orm import sessionmaker, declarative_base
 
 # Set up the Cloud SQL connection
 #export GOOGLE_APPLICATION_CREDENTIALS="/home/shay/a/wakanbi/VJAM/packageDirectory/serviceKey.json" 
-'''
+
 class MyTable(Base):
     __tablename__ = 'my_table'
     id = Column(Integer, primary_key=True)
@@ -25,7 +114,7 @@ class MyTable(Base):
     license_score = Column(Float)
     version_score = Column(Float)
     adherence_score = Column(Float)
-'''
+
 Base = declarative_base()
 class MyTable(Base):
     __tablename__ = 'my_table'
@@ -40,13 +129,12 @@ class MyTable(Base):
     license_score = Column(Float)
     version_score = Column(Float)
     adherence_score = Column(Float)
-'''    
+
 class MyZipFilesTable(Base):
     __tablename__ = 'my_zip_files_table'
     id = Column(Integer, primary_key=True)#auto generated to store the row
     file_identifier = Column(String(255)) #name of the file
-    zipped_file = Column(LargeBinary)    #binary version of the file
-'''    
+    zipped_file = Column(LargeBinary)    #binary version of the file   
 
 def getconn() -> pymysql.connections.Connection:
     conn: pymysql.connections.Connection = connector.connect(
@@ -65,29 +153,7 @@ def create_engine_with_conn_pool() -> sqlalchemy.engine.Engine:
     return engine
 
 def create_table(engine: sqlalchemy.engine.Engine):
-    Base.metadata.create_all(bind=engine)
 
-def insert_data(engine: sqlalchemy.engine.Engine, data):
-    try:
-        # interact with Cloud SQL database using connection pool
-        with engine.connect() as db_conn:
-            # create the table if it doesn't exist
-            # insert data into database
-            db_conn.execute(MyTable.__table__.insert(), data)
-    except Exception as e:
-        print(f"Error occurred while inserting data: {e}")
-
-
-def retrieve_data(engine: sqlalchemy.engine.Engine):
-    try:
-        # interact with Cloud SQL database using connection pool
-        with engine.connect() as db_conn:
-            # query database
-            result = db_conn.execute(MyTable.__table__.select()).fetchall()
-            # return results
-            return result
-    except Exception as e:
-        print(f"Error occurred while retrieving data: {e}")
 
 def defineData(id, Rname, url, total_score, ramp_score, cor_score, bus_factor, res_score, lisc_score, version_score, adhere_score):
     # define data to be inserted
@@ -97,24 +163,6 @@ def defineData(id, Rname, url, total_score, ramp_score, cor_score, bus_factor, r
              "version_score": version_score, "adherence_score": adhere_score}]
     return data
 
-def printOutput(results):
-    # print results
-    print(results)
-    '''
-    for row in results:
-        print(row)
-    '''   
-
-def retrieve_table_description(engine: sqlalchemy.engine.Engine, table_name: str):
-    try:
-        # interact with Cloud SQL database using connection pool
-        with engine.connect() as db_conn:
-            # query table description
-            query = f"SELECT * FROM information_schema.columns WHERE table_name = '{table_name}'"
-            result = db_conn.execute(query).fetchall()
-            return result
-    except Exception as e:
-        print(f"Error occurred while retrieving table description: {e}")    
 
 def main():
     # create connection pool
@@ -136,7 +184,7 @@ if __name__ == '__main__':
     connector = Connector()
     main()
     connector.close()
-'''
+
 #assumes the data is downloaded into the computer first and the file path is then sent to this function
 def insert_zipped_file(engine: sqlalchemy.engine.Engine, file_path: str, file_identifier: str):
     try:
@@ -173,4 +221,28 @@ def retrieve_zipped_file_by_id(engine: sqlalchemy.engine.Engine, file_id: int):
                 return None
     except Exception as e:
         print(f"Error occurred while retrieving data: {e}")
+
+
+   def insert_data(engine: sqlalchemy.engine.Engine, data):
+    try:
+        # interact with Cloud SQL database using connection pool
+        with engine.connect() as db_conn:
+            # create the table if it doesn't exist
+            # insert data into database
+            db_conn.execute(MyTable.__table__.insert(), data)
+    except Exception as e:
+        print(f"Error occurred while inserting data: {e}")
+
+
+def retrieve_data(engine: sqlalchemy.engine.Engine):
+    try:
+        # interact with Cloud SQL database using connection pool
+        with engine.connect() as db_conn:
+            # query database
+            result = db_conn.execute(MyTable.__table__.select()).fetchall()
+            # return results
+            return result
+    except Exception as e:
+        print(f"Error occurred while retrieving data: {e}")
+     
 '''            
