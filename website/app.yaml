@@ -1,9 +1,6 @@
 service: backend-service
 runtime: nodejs16
 
-api_version: 1
-
-
 env_variables:
   MY_VARIABLE: my-value
 
