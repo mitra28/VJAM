@@ -24,9 +24,16 @@ jobs:
       - name: Stop previous versions 
         run: |
           PREVIOUS_VERSION=$(gcloud app versions list --service=frontend-service --sort-by='~version' --limit=2 --format='value(version.id)' | tail -1)
-          gcloud app versions stop $PREVIOUS_VERSION --service=frontend-service
+
+          if [[ -n "$PREVIOUS_VERSION" ]]; then
+            gcloud app versions stop $PREVIOUS_VERSION --service=frontend-service
+          fi
+          
           PREVIOUS_VERSION=$(gcloud app versions list --service=backend-service --sort-by='~version' --limit=2 --format='value(version.id)' | tail -1)
-          gcloud app versions stop $PREVIOUS_VERSION --service=backend-service
+          if [[ -n "$PREVIOUS_VERSION" ]]; then
+            gcloud app versions stop $PREVIOUS_VERSION --service=backend-service
+          fi
+
       - name: Deploy backend
         run: |
           cd website
