@@ -2,7 +2,7 @@ service: backend-service
 runtime: nodejs16
 
 api_version: 1
-openapi_spec: ece461_api_specs.yaml
+
 
 env_variables:
   MY_VARIABLE: my-value
