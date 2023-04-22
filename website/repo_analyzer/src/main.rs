@@ -44,96 +44,6 @@ async fn main() -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
-// async fn handle_command() -> Result<(), Box<dyn Error>> {
-//     let args: Vec<String> = std::env::args().collect();
-
-//     if args.len() > 2 {
-//         println!("Incorrect number of arguments!");
-//         return Ok(());
-//     } else if args.len() == 1 {
-//         return Ok(());
-//     }
-
-//     match args[1].as_str() {
-//         "install" => run_install(),
-//         "build" => run_build(),
-//         "test" => run_test(),
-//         _ => run_url(&args[1]).await,
-//     }
-
-//     Ok(())
-// }
-
-// /// Installs all needed crates for building the project
-// fn run_install() {
-//     Command::new("cargo")
-//         .args(&["install", "cargo-edit"])
-//         .output()
-//         .expect("failed to execute process");
-
-//     Command::new("cargo")
-//         .args(&["add", "reqwest"])
-//         .output()
-//         .expect("failed to execute process");
-
-//     Command::new("cargo")
-//         .args(&["add", "serde"])
-//         .output()
-//         .expect("failed to execute process");
-
-//     Command::new("cargo")
-//         .args(&["add", "serde_json"])
-//         .output()
-//         .expect("failed to execute process");
-
-//     Command::new("cargo")
-//         .args(&["add", "tokio"])
-//         .output()
-//         .expect("failed to execute process");
-    
-//     Command::new("cargo")
-//         .args(&["add", "substring"])
-//         .output()
-//         .expect("failed to execute process");
-
-//     Command::new("cargo")
-//         .args(&["add", "base64"])
-//         .output()
-//         .expect("failed to execute process");
-
-//         Command::new("cargo")
-//         .args(&["add", "async-recursion"])
-//         .output()
-//         .expect("failed to execute process");
-
-//     Command::new("cargo")
-//         .args(&["add", "regex"])
-//         .output()
-//         .expect("failed to execute process");
-    
-//     Command::new("cargo")
-//         .args(&["add", "log"])
-//         .output()
-//         .expect("failed to execute process");
-
-//     Command::new("cargo")
-//         .args(&["add", "env_logger"])
-//         .output()
-//         .expect("failed to execute process");
-
-//         println!("11 dependencies installed...");
-// }
-
-// /// Builds the exectuable
-// fn run_build() {
-//     Command::new("cargo")
-//         .arg("build")
-//         .output()
-//         .expect("failed to execute process");
-// }
-
-
-
 /// Handles input URL files
 async fn run_url(repo_url: &str) {
 
@@ -293,5 +203,4 @@ async fn run_url(repo_url: &str) {
 
     repos.sort_by_net_score(); // will sort the RepoList by trustworthiness. 
     repos.display(); // will print RepoList to stdout in the desired format. 
-    //repos.formatoutput();
 }
