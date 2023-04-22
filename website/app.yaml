@@ -1,3 +1,4 @@
+service: backend-service
 runtime: nodejs16
 
 api_version: 1
@@ -7,5 +8,7 @@ env_variables:
   MY_VARIABLE: my-value
 
 handlers:
+  - url: /static
+    static_dir: react/build/static
   - url: /.*
     script: auto

@@ -4,6 +4,7 @@ const path = require('path');
 const app = express();
 const packageRoutes = require('./backend/routes/packageroutes');
 const Package = require('./backend/models/package');
+const port = process.env.PORT || 8080;
 
 app.get('/', (req, res) => {
   res.send('launch new port  8080');
@@ -31,11 +32,11 @@ app.get('*', (req, res) => {
   });*/
 
 app.get("/message", (req, res) => {
-    res.json({ message: "Hello from server!" });
+    res.json({ message: "Hello from server! Version after download. " });
   });
 
 
 // Start the server
-app.listen(8080, () => {
-  console.log('Espress Server listening on port 8080');
+app.listen(port, () => {
+  console.log('Espress Server listening on port ${port}');
 });

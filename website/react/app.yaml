@@ -1,3 +1,4 @@
+service: frontend-service
 runtime: nodejs
 env: flex
 
