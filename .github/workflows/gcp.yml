@@ -19,6 +19,7 @@ jobs:
         with:
           version: 'latest'
           project_id: ece-461-part-2-web-service
+          service_account_email: github-continuous-deployment@ece-461-part-2-web-service.iam.gserviceaccount.com
           service_account_key: ${{ secrets.GCP_SA_KEY }}
 
       - name: Stop previous versions 
