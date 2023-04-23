@@ -6,3 +6,4 @@ target/
 .env
 .bat
 .log
+node_modules

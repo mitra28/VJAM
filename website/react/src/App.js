@@ -5,9 +5,9 @@ import PackageForm from './components/PackageForm';
 
 function App(prop) {
   const [message, setMessage] = useState("");
-
+  const apiUrl = 'https://backend-service-dot-ece-461-part-2-web-service.uk.r.appspot.com/'
   useEffect(() => {
-    fetch("http://localhost:8080/message")
+    fetch(apiUrl)
       .then((res) => res.json())
       .then((data) => setMessage(data.message));
   }, []);
@@ -23,3 +23,5 @@ function App(prop) {
 }
 
 export default App;
+
+// 
