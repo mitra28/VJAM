@@ -19,14 +19,29 @@ jobs:
         with:
           version: 'latest'
           project_id: ece-461-part-2-web-service
+          service_account_email: github-continuous-deployment@ece-461-part-2-web-service.iam.gserviceaccount.com
           service_account_key: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Stop previous versions 
+        run: |
+          PREVIOUS_VERSION=$(gcloud app versions list --service=frontend-service --sort-by='~version' --limit=2 --format='value(version.id)' | tail -1)
+
+          if [[ -n "$PREVIOUS_VERSION" ]]; then
+            gcloud app versions stop $PREVIOUS_VERSION --service=frontend-service
+          fi
+          
+          PREVIOUS_VERSION=$(gcloud app versions list --service=backend-service --sort-by='~version' --limit=2 --format='value(version.id)' | tail -1)
+          if [[ -n "$PREVIOUS_VERSION" ]]; then
+            gcloud app versions stop $PREVIOUS_VERSION --service=backend-service
+          fi
+
       - name: Deploy backend
         run: |
           cd website
-          gcloud app deploy --account=github-continuous-deployment@ece-461-part-2-web-service.iam.gserviceaccount.com
+          gcloud app deploy --account=github-continuous-deployment@ece-461-part-2-web-service.iam.gserviceaccount.com --project=ece-461-part-2-web-service
       - name: Deploy frontend
         run: |
           cd website/react
-          gcloud app deploy --account=github-continuous-deployment@ece-461-part-2-web-service.iam.gserviceaccount.com
+          gcloud app deploy --account=github-continuous-deployment@ece-461-part-2-web-service.iam.gserviceaccount.com --project=ece-461-part-2-web-service
       
           
