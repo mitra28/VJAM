@@ -7,3 +7,7 @@ target/
 .bat
 .log
 node_modules
+website/node_modules
+website/website/node_modules
+website/react/node_modules
+website/backend/node_modules
