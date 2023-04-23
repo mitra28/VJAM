@@ -38,5 +38,5 @@ app.get("/message", (req, res) => {
 
 // Start the server
 app.listen(port, () => {
-  console.log('Espress Server listening on port ${port}');
+  console.log('Espress Server listening on port', port);
 });
