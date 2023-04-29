@@ -32,10 +32,11 @@ app.get('/', (req, res) => {
 
 app.post('/packages', upload.single('file'), (req, res) =>{
   const { filename, mimetype, path: filepath } = req.file;
+  // 1. Check if URL or Content
+
+
   // Get the path to your Rust program
   const analyzerPath = path.join(__dirname, 'repo_analyzer', 'run');
-  // TO-DO: unzip package
-  // TO-DO: 
   // get the url inside filepath (package.json)
   const url = filepath
   // Spawn your analysis process
