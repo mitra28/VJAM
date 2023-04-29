@@ -5,11 +5,12 @@ function PackageForm() {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+    console.log('Package handle submit!');
   
     const packageData = new FormData();
     packageData.append('file', zipfile);
   
-    const response = await fetch('/api/packages', { // use fetch API to make a POST request to /api/packages endpoint
+    const response = await fetch('/packages', { // use fetch API to make a POST request to /api/packages endpoint
       method: 'POST',
       body: packageData,
     });
