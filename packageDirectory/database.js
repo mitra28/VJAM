@@ -1,4 +1,4 @@
-process.env.GOOGLE_APPLICATION_CREDENTIALS = "/home/shay/a/wakanbi/VJAM/packageDirectory/ServiceKey.json";
+process.env.GOOGLE_APPLICATION_CREDENTIALS = "/Users/developer/Desktop/VJAM/VJAM/packageDirectory/ServiceKey.json";
 
 //const mysql = require('mysql2/promise');
 
@@ -58,16 +58,15 @@ const createPool = async (config) => {
 //     console.log(`Table ${table_name} has been deleted.`);
 //     connection.release()
 // }
-async function deleteTable(conn, table_name) {
-    try {
-        //const connection = await conn.getConnection();
-        const stmt = `DROP TABLE IF EXISTS ${table_name}`;
-        await conn.query(stmt);
-        console.log(`Table ${table_name} has been deleted.`);
-        //connection.release();
-    } catch (err) {
-        console.error(err);
-    }
+function deleteTable(conn, table_name) {
+  const stmt = `DROP TABLE IF EXISTS ${table_name}`;
+
+  conn.getConnection(function(err, connection) {
+    connection.query(stmt, function(err){
+      console.log(`Table ${table_name} has been deleted.`);
+    });
+    connection.release();
+  });
 }
 
 async function createRepoTable(conn) {
@@ -232,6 +231,8 @@ async function main() {
     //await deleteTable(pool, "repo_info");
     //console.log("table has been deleted");
     //await createRepoTable(pool);
+    deleteTable(pool, "table");
+    console.log("Table Dropped");
     insert_repo_data(pool, "my_repo", "https://github.com/my_repo", 0.8, 0.7, 0.9, 0.6, 0.85, 0.9, 0.75, 0.8)
 
 
