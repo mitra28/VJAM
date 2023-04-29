@@ -174,6 +174,7 @@ def main():
     #want to retrieve entire table use retrieve_repo_data function else if u want to use url use retrieve_repo_data_url
 
     # how to create repo info table
+    delete_table(engine, "repo_info")
     '''
     delete_table(engine, "repo_info")
     create_repo_table(engine)

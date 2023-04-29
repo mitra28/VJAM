@@ -32,3 +32,7 @@ run the server with "node server.js"
 ## Original Team's run instructions
 Please run cargo build inside the repo_analyzer directory.
 The run executable will be located inside repo_analyzer/target/debug.
+
+Dependencies to install
+
+npm install mysql2 
