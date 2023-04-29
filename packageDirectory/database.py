@@ -232,7 +232,9 @@ from sqlalchemy import create_engine, Column, Integer, String, Float,LargeBinary
 from sqlalchemy.orm import sessionmaker, declarative_base
 
 # Set up the Cloud SQL connection
-
+#export GOOGLE_APPLICATION_CREDENTIALS="/home/shay/a/wakanbi/VJAM/packageDirectory/serviceKey.json"
+ 
+'''
 class MyTable(Base):
     __tablename__ = 'my_table'
     id = Column(Integer, primary_key=True)
