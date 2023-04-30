@@ -50,7 +50,7 @@ export async function createRepoTable(){
 
   const stmt = `SELECT * FROM repo_info`;
 
-  pool.query(stmt, (err, connection) => {
+  await pool.query(stmt, (err, connection) => {
     if (err){
       console.log("Error" + err.message);
       return
