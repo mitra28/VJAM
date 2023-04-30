@@ -174,6 +174,7 @@ def main():
     #want to retrieve entire table use retrieve_repo_data function else if u want to use url use retrieve_repo_data_url
 
     # how to create repo info table
+    create_repo_table(engine)
     delete_table(engine, "repo_info")
     '''
     delete_table(engine, "repo_info")
@@ -212,7 +213,7 @@ def main():
 
 
     #authethentication- put this in terminal before running python3 database.py
-    #export GOOGLE_APPLICATION_CREDENTIALS="/home/shay/a/wakanbi/VJAM/packageDirectory/serviceKey.json" 
+    #export GOOGLE_APPLICATION_CREDENTIALS="/home/shay/a/wakanbi/VJAM/packageDirectory/ServiceKey.json" 
         
     
 
@@ -234,7 +235,7 @@ from sqlalchemy.orm import sessionmaker, declarative_base
 # Set up the Cloud SQL connection
 #export GOOGLE_APPLICATION_CREDENTIALS="/home/shay/a/wakanbi/VJAM/packageDirectory/serviceKey.json"
  
-'''
+
 class MyTable(Base):
     __tablename__ = 'my_table'
     id = Column(Integer, primary_key=True)
