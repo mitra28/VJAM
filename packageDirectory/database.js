@@ -1,37 +1,35 @@
 process.env.GOOGLE_APPLICATION_CREDENTIALS = "/home/shay/a/wakanbi/VJAM/packageDirectory/ServiceKey.json";
 
-var mysql = require('mysql');
+import mysql from 'mysql';
 
-var connection = mysql.createConnection({
-  host: '35.224.26.58',
-  user: 'root',
-  password: 'Youwillneverguessthispassword461',
-  database: 'ECE_461_DATABASE'
-});
+// const connection = mysql.createConnection({
+//   host: '35.224.26.58',
+//   user: 'root',
+//   password: 'Youwillneverguessthispassword461',
+//   database: 'ECE_461_DATABASE'
+// });
 
-connection.connect((err) => {
-  if (err) throw err;
-  console.log('Connected to database.');
+// connection.connect((err) => {
+//   if (err) throw err;
+//   console.log('Connected to database.');
 
-  // create a new table in the database
-  const sql = 'CREATE TABLE customers (id INT AUTO_INCREMENT PRIMARY KEY, name VARCHAR(255), email VARCHAR(255))';
-  connection.query(sql, (err, result) => {
-    if (err) throw err;
-    console.log('Table created successfully.');
-    // close the connection
-    connection.end();
-  });
-});
+//   // create a new table in the database
+//   const sql = 'CREATE TABLE customers (id INT AUTO_INCREMENT PRIMARY KEY, name VARCHAR(255), email VARCHAR(255))';
+//   connection.query(sql, (err, result) => {
+//     if (err) throw err;
+//     console.log('Table created successfully.');
+//     // close the connection
+//     connection.end();
+//   });
+// });
 
-/*
+
 const pool = mysql.createPool({
-    socketPath: '/clloudsql/ece-461-part-2-web-service:us-central1:ece-461',
     host: '35.224.26.58',
     user: 'root',
     password: 'Youwillneverguessthispassword461',
     database: 'ECE_461_DATABASE'
-  }).promise()
-
+  });
 
 
 export async function createRepoTable(){
@@ -112,7 +110,6 @@ export async function retrieveZippedFile(url) {
 export async function insert_repo_data(conn, repo_name, url, total_score, ramp_up_score, correctness_score,
     bus_factor, responsiveness_score, license_score, version_score, adherence_score) {
 
-
         // Check if a record with the same URL already exists
         const check_stmt = `
         SELECT EXISTS(
@@ -149,7 +146,7 @@ export async function insert_repo_data(conn, repo_name, url, total_score, ramp_u
         console.log("Data inserted successfully.");
 }
 
-export async function retrieve_repo_data_url(url) {
+ async function retrieve_repo_data_url(url) {
     const result = await pool.query(
         "SELECT * FROM repo_info WHERE url=:url", { url: url }
     );
@@ -163,4 +160,4 @@ export async function retrieve_repo_data_url(url) {
 
 //deleteTable("zipped_table");
 //createZipTable();
-createRepoTable();*/
+createRepoTable();
