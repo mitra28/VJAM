@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import './App.css';
-import PackageForm from './components/PackageForm';
+import PackageZipForm from './components/PackageZipForm';
+import PackageURLForm from './components/PackageURLForm';
 
 
 function App(prop) {
@@ -18,7 +19,8 @@ function App(prop) {
       {message}
       Hello!
       {/* {prop.children} */}
-      <PackageForm />
+      <PackageZipForm />
+      <PackageURLForm />
     </div>
   );
 }

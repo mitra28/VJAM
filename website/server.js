@@ -3,10 +3,13 @@ const cors = require("cors");
 const mysql = require('mysql');
 const multer = require('multer');
 const path = require('path');
+const bodyParser = require('body-parser');
 const { spawn } = require('child_process');
 const packageRoutes = require('./backend/routes/packageroutes');
 const Package = require('./backend/models/package');
 const upload = multer({ dest: 'temp/' });
+
+const PackageData = require ('./backend/models/packagedata');
 
 // initialize db
 // engine = init_engine();
@@ -21,6 +24,9 @@ app.use(cors());
 app.use(express.json());
 app.use('/packages', packageRoutes);
 
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
+
 // Serve static files from the "build" directory
 app.use(express.static(path.join(__dirname, '.', 'react', 'build')));
 console.log("Serving static assets from directory: " + path.join(__dirname, '.', 'react', 'build'));
@@ -30,36 +36,46 @@ app.get('/', (req, res) => {
 });
 
 
-app.post('/packages', upload.single('file'), (req, res) =>{
-  const { filename, mimetype, path: filepath } = req.file;
-  // 1. Check if URL or Content
+app.post('/packages', (req, res) =>{
+  console.log(req);
+  console.log(req.body);
+  console.log(req.body.constructor.name);
+  // zipfile are buffer types
+  if (req.body instanceof Buffer) { 
+    const packageData = new PackageData({
+      Content: req.body,
+      URL: '',
+      JSProgram: '',
+    });
+  }
+  // URL given
+  else if (req.body.packageUrl){
+      const analyzerPath = path.join(__dirname, 'repo_analyzer', 'run'); // Get the path to your Rust program
+      const url = req.body.packageUrl;
+      // Spawn your analysis process
+      const process = spawn(analyzerPath, [url]);
 
+      process.on('error', (err) => {
+        console.error('Failed to start child process.', err);
+      });
+      
+      process.on('exit', (code, signal) => {
+        console.log(`Child process exited with code ${code} and signal ${signal}`);
+      });
+      
+      process.stdout.on('data', (data) => {
+        console.log(`stdout: ${data}`);
+      });
+      
+      process.stderr.on('data', (data) => {
+        console.error(`stderr: ${data}`);
+      }); 
 
-  // Get the path to your Rust program
-  const analyzerPath = path.join(__dirname, 'repo_analyzer', 'run');
-  // get the url inside filepath (package.json)
-  const url = filepath
-  // Spawn your analysis process
-  const process = spawn(analyzerPath, [url]);
+    }
+    else{
+      console.log('Content and URL cannot both be set');
+    }
 
-  process.on('error', (err) => {
-    console.error('Failed to start child process.', err);
-  });
-  
-  process.on('exit', (code, signal) => {
-    console.log(`Child process exited with code ${code} and signal ${signal}`);
-  });
-  
-  process.stdout.on('data', (data) => {
-    console.log(`stdout: ${data}`);
-  });
-  
-  process.stderr.on('data', (data) => {
-    console.error(`stderr: ${data}`);
-  });
-
-  //scores = repo_analyzer()
-  
   // insert_repo_data(engine, repo_name, url, total_score, ramp_up_score, correctness_score, bus_factor, responsiveness_score, license_score, version_score, adherence_score);
   // insert_zipped_data(engine, file_name, url, zipped_file); 
 

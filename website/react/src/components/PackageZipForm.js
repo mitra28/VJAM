@@ -1,20 +1,23 @@
 import React, { useState } from 'react';
+// const PackageData = require('../../../backend/models/packagedata');
 
-function PackageForm() {
-  const  [zipfile, setFile] = useState(''); // 
+function PackageZipForm() {
+  const  [zipfile, setFile] = useState(null); // 
 
   const handleSubmit = async (event) => {
     event.preventDefault();
     console.log('Package handle submit!');
   
-    const packageData = new FormData();
-    packageData.append('file', zipfile);
-  
-    const response = await fetch('/packages', { // use fetch API to make a POST request to /api/packages endpoint
+    const formData = new FormData();
+    formData.append('zipfile', zipfile);
+
+    const response = await fetch('/packages', {
       method: 'POST',
-      body: packageData,
+      body: formData,
     });
     
+    console.log(response);
+
     if (response.ok) {
       console.log('Package created successfully!');
     } else {
@@ -38,5 +41,5 @@ function PackageForm() {
   );
 }
 
-export default PackageForm;
+export default PackageZipForm;
 
