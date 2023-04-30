@@ -1,11 +1,6 @@
 var mysql = require('mysql');
 
-<<<<<<< HEAD
-=======
-var mysql = require('mysql');
->>>>>>> 0d1ea65d527c7124ffa24e35b65f27933e2acfbe
-
-var connection = mysql.createConnection({
+/*var connection = mysql.createConnection({
   host: '35.224.26.58',
   user: 'root',
   password: 'Youwillneverguessthispassword461',
@@ -24,11 +19,10 @@ connection.connect((err) => {
     // close the connection
     connection.end();
   });
-});
+});*/
 
-/*
+
 const pool = mysql.createPool({
-    socketPath: '/clloudsql/ece-461-part-2-web-service:us-central1:ece-461',
     host: '35.224.26.58',
     user: 'root',
     password: 'Youwillneverguessthispassword461',
@@ -39,13 +33,12 @@ const pool = mysql.createPool({
 
 export async function createRepoTable(){
   console.log("In create Repo function");
-  pool.getConnection((err, connection) => {
+  /*pool.getConnection((err, connection) => {
     if (err){
       console.log("Error" + err.message);
       return
     }
-    console.log("Connected to the database");
-
+    console.log("Connected to the database");*/
     const stmt = `
     CREATE TABLE repo_info (
       id INT AUTO_INCREMENT PRIMARY KEY,
@@ -61,12 +54,14 @@ export async function createRepoTable(){
       adherence_score FLOAT
     )
   `;
-  connection.query(stmt, (err, results, fields) => {
+  await pool.query(stmt);
+  /*connection.query(stmt, (err, results, fields) => {
     connection.release();
     if (err) throw err;
     console.log("Table was successfully created");
   });
-});
+});*/
+  console.log('Repo table has been created');
 }
 
 export async function deleteTable(table_name) {
@@ -93,7 +88,7 @@ export async function insertZippedData(file_id, url, zipped_file) {
       INSERT INTO zipped_table (file_id, url, zipped_file)
       VALUES (:file_id, :url, :zipped_file)
     `;
-    await pool.query(insert_stmt, [file_id, url, zipped_file]);
+    await pool.query(insert_stmt, {file_id, url, zipped_file});
     await pool.commit();
 }
 
@@ -164,6 +159,17 @@ export async function retrieve_repo_data_url(url) {
     }
 }
 
+export async function retrieve_repo_data(){
+  const result = await pool.query(
+    "SELECT * from repo_info"
+  )
+  if(result.rows.length > 0){
+    return result
+  }else{
+    return null;
+  }
+}
+
 //deleteTable("zipped_table");
 //createZipTable();
-createRepoTable();*/
+createRepoTable();
