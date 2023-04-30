@@ -1,9 +1,8 @@
-process.env.GOOGLE_APPLICATION_CREDENTIALS = "/home/shay/a/wakanbi/VJAM/packageDirectory/ServiceKey.json";
+var mysql = require('mysql');
 
-import mysql from 'mysql2'
 
 var connection = mysql.createConnection({
-  socketPath: '/cloudsql/ece-461-part-2-web-service:us-central1:ece-461',
+  host: '35.224.26.58',
   user: 'root',
   password: 'Youwillneverguessthispassword461',
   database: 'ECE_461_DATABASE'
