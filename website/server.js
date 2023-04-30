@@ -23,17 +23,17 @@ app.use('/api', packageRoutes);
 app.get('/api', (req, res) => {
     // handle your API requests here
   });
-  
+*/
+
 // Serve the React app on any other routes
-app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, 'website/build/index.html'));
-    console.log("Serving React App from directory: " + path.join(__dirname, 'website/build/index.html'));
-  });*/
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'website/build/index.html'));
+  console.log("Serving React App from directory: " + path.join(__dirname, 'website/build/index.html'));
+});
 
 app.get("/message", (req, res) => {
     res.json({ message: "Hello from server!" });
-  });
-
+});
 
 // Start the server
 app.listen(8080, () => {
