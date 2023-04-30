@@ -1,5 +1,9 @@
 var mysql = require('mysql');
 
+<<<<<<< HEAD
+=======
+var mysql = require('mysql');
+>>>>>>> 0d1ea65d527c7124ffa24e35b65f27933e2acfbe
 
 var connection = mysql.createConnection({
   host: '35.224.26.58',
