@@ -8,6 +8,8 @@ const { spawn } = require('child_process');
 const packageRoutes = require('./backend/routes/packageroutes');
 const Package = require('./backend/models/package');
 const upload = multer({ dest: 'temp/' });
+const formidable = require('formidable');
+
 
 const PackageData = require ('./backend/models/packagedata');
 
@@ -18,7 +20,7 @@ const PackageData = require ('./backend/models/packagedata');
 // create_repo_table(engine);
 // create_zip_table(engine);
 
-const port = 8080; // process.env.PORT || 8080;
+const port = 7080; // process.env.PORT || 8080;
 const app = express();
 app.use(cors());
 app.use(express.json());
@@ -36,17 +38,28 @@ app.get('/', (req, res) => {
 });
 
 
+
+app.post('/zippackages', upload.single('file'), (req, res) =>{
+  const { filename, mimetype, path: filepath } = req.file;
+  console.log("/zippackages");
+  console.log(req.file);
+  console.log(filename);
+  
+  
+});
+
 app.post('/packages', (req, res) =>{
-  console.log(req);
+  console.log(req.file);
   console.log(req.body);
   console.log(req.body.constructor.name);
-  // zipfile are buffer types
-  if (req.body instanceof Buffer) { 
-    const packageData = new PackageData({
-      Content: req.body,
-      URL: '',
-      JSProgram: '',
-    });
+
+  if (req.headers['content-type'].startsWith('multipart/form-data')) { 
+    if(req.file){
+      // Request body is a file
+      const { filename, mimetype, path: filepath } = req.file;
+      console.log(filename);
+      console.log(filepath);
+      }
   }
   // URL given
   else if (req.body.packageUrl){

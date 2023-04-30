@@ -7,7 +7,7 @@ import PackageURLForm from './components/PackageURLForm';
 function App(prop) {
   const [message, setMessage] = useState("");
   // const apiUrl = 'https://backend-service-dot-ece-461-part-2-web-service.uk.r.appspot.com/'
-  const apiUrl = 'http://localhost:8080/message'
+  const apiUrl = 'http://localhost:7080/message'
   useEffect(() => {
     fetch(apiUrl)
       .then((res) => res.json())
