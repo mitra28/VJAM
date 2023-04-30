@@ -31,37 +31,32 @@ const pool = mysql.createPool({
     database: 'ECE_461_DATABASE'
   });
 
+  // CREATE TABLE repo_info (
+  //   id INT AUTO_INCREMENT PRIMARY KEY,
+  //   repo_name VARCHAR(255),
+  //   url VARCHAR(255),
+  //   total_score FLOAT,
+  //   ramp_up_score FLOAT,
+  //   correctness_score FLOAT,
+  //   bus_factor FLOAT,
+  //   responsiveness_score FLOAT,
+  //   license_score FLOAT,
+  //   version_score FLOAT,
+  //   adherence_score FLOAT)
+
 
 export async function createRepoTable(){
   console.log("In create Repo function");
-  pool.getConnection((err, connection) => {
+
+  const stmt = `SELECT * FROM repo_info`;
+
+  pool.query(stmt, (err, connection) => {
     if (err){
       console.log("Error" + err.message);
       return
     }
-    console.log("Connected to the database");
-
-    const stmt = `
-    CREATE TABLE repo_info (
-      id INT AUTO_INCREMENT PRIMARY KEY,
-      repo_name VARCHAR(255),
-      url VARCHAR(255),
-      total_score FLOAT,
-      ramp_up_score FLOAT,
-      correctness_score FLOAT,
-      bus_factor FLOAT,
-      responsiveness_score FLOAT,
-      license_score FLOAT,
-      version_score FLOAT,
-      adherence_score FLOAT
-    )
-  `;
-  connection.query(stmt, (err, results, fields) => {
-    connection.release();
-    if (err) throw err;
-    console.log("Table was successfully created");
+    console.log("Table was successfully pinged");
   });
-});
 }
 
 export async function deleteTable(table_name) {
