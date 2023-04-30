@@ -174,8 +174,11 @@ def main():
     #want to retrieve entire table use retrieve_repo_data function else if u want to use url use retrieve_repo_data_url
 
     # how to create repo info table
-    create_repo_table(engine)
     delete_table(engine, "repo_info")
+    #create_repo_table(engine)
+    #insert_repo_data(engine, "my_repo", "https://github.com/my_repo", 0.8, 0.7, 0.9, 0.6, 0.85, 0.9, 0.75, 0.8)  
+
+    #delete_table(engine, "repo_info")
     '''
     delete_table(engine, "repo_info")
     create_repo_table(engine)
