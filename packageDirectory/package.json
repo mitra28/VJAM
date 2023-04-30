@@ -2,7 +2,7 @@
   "name": "packagedirectory",
   "version": "1.0.0",
   "description": "",
-  "type": "module",
+  "type": "commonjs",
   "main": "database.js",
   "scripts": {
     "start": "node database.js",
