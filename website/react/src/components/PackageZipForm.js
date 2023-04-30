@@ -1,19 +1,40 @@
 import React, { useState } from 'react';
+import JSZip from 'jszip';
+const encoder = new TextEncoder();
 // const PackageData = require('../../../backend/models/packagedata');
 
 function PackageZipForm() {
-  const  [zipfile, setFile] = useState(null); // 
+  const  [zipfile, setFile] = useState(null); 
+
+  console.log("Inside PackageZipForm");
+  const unzipFile = async (file) => {
+    const zip = new JSZip();
+    const blob = await zip.loadAsync(file);
+    return blob;
+  };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
     console.log('Package handle submit!');
   
-    const packageData = new FormData();
-    packageData.append('file', zipfile);
-
-    const response = await fetch('/packages', { // use fetch API to make a POST request to /api/packages endpoint
+    if (!zipfile) {
+      console.error('No file selected.');
+      return;
+    }
+  
+    // unzip file
+    //const unzippedData = await unzipFile(zipfile);
+    const data = encoder.encode(zipfile);
+    console.log(zipfile);
+    const base64 = window.btoa(String.fromCharCode(...new Uint8Array(data)));
+    console.log(base64);
+  
+    const response = await fetch('/packages', {
       method: 'POST',
-      body: packageData,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({data: base64}),
     });
     
     console.log(response);

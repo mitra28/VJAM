@@ -37,32 +37,15 @@ app.get('/', (req, res) => {
   res.send('launch new port  8080');
 });
 
-
-
-app.post('/zippackages', upload.single('file'), (req, res) =>{
-  const { filename, mimetype, path: filepath } = req.file;
-  console.log("/zippackages");
-  console.log(req.file);
-  console.log(filename);
-  
-  
-});
-
 app.post('/packages', (req, res) =>{
-  console.log(req.file);
   console.log(req.body);
-  console.log(req.body.constructor.name);
-
-  if (req.headers['content-type'].startsWith('multipart/form-data')) { 
-    if(req.file){
-      // Request body is a file
-      const { filename, mimetype, path: filepath } = req.file;
-      console.log(filename);
-      console.log(filepath);
-      }
+  console.log(req.body.data);
+  if (req.body.data) { 
+    console.log("received an unzipped file");
   }
   // URL given
   else if (req.body.packageUrl){
+      console.log("received an url");
       const analyzerPath = path.join(__dirname, 'repo_analyzer', 'run'); // Get the path to your Rust program
       const url = req.body.packageUrl;
       // Spawn your analysis process
