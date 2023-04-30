@@ -1,10 +1,10 @@
 const mongoose = require('mongoose');
+const PackageMetadata = require('./packagemetadata');
+const PackageData = require('./packagedata');
 
 const packageSchema = new mongoose.Schema({
-  owner_name: { type: String, required: true },
-  repository_name: { type: String, required: true },
-  url: { type: String, required: true },
-  scores: {type: Map, of: String},
+  "metadata": { type: PackageMetadata},
+  "data": { type: PackageData},
 });
 
 // Define your Package model
