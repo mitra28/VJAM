@@ -37,17 +37,19 @@ app.get('/', (req, res) => {
   res.send('launch new port  8080');
 });
 
-app.post('/packages', (req, res) =>{
+app.post('/package', (req, res) =>{
+  //console.log(req);
   console.log(req.body);
-  console.log(req.body.data);
-  if (req.body.data) { 
+  console.log(req.body.Content);
+  if (req.body.Content) { 
+    // private ingest
     console.log("received an unzipped file");
   }
   // URL given
-  else if (req.body.packageUrl){
+  else if (req.body.URL){
       console.log("received an url");
       const analyzerPath = path.join(__dirname, 'repo_analyzer', 'run'); // Get the path to your Rust program
-      const url = req.body.packageUrl;
+      const url = req.body.URL;
       // Spawn your analysis process
       const process = spawn(analyzerPath, [url]);
 

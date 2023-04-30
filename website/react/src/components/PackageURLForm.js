@@ -9,12 +9,12 @@ function PackageURLForm() {
     console.log('Package handle submit!');
   
     
-    const response = await fetch('/packages', { // use fetch API to make a POST request to /api/packages endpoint
+    const response = await fetch('/package', { // use fetch API to make a POST request to /api/packages endpoint
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({ packageUrl }),
+      body: JSON.stringify({ URL: packageUrl }),
     });
     
     if (response.ok) {

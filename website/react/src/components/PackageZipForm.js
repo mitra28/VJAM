@@ -23,20 +23,32 @@ function PackageZipForm() {
     }
   
     // unzip file
-    //const unzippedData = await unzipFile(zipfile);
-    const data = encoder.encode(zipfile);
-    console.log(zipfile);
-    const base64 = window.btoa(String.fromCharCode(...new Uint8Array(data)));
-    console.log(base64);
+    const unzippedData = await unzipFile(zipfile);
+    console.log(unzippedData);
+
+    const allfiles = unzippedData.files;
+    let allfilesstring = '';
+
+    for (const filename in unzippedData.files) {
+      const file = unzippedData.files[filename];
+      const text = await file.async('text');
+      allfilesstring += text;
+    }
+
+    const string_data = encoder.encode(allfilesstring);
+    console.log(string_data);
+
+    const base64 = window.btoa(String.fromCharCode(...new Uint8Array(string_data)));
   
-    const response = await fetch('/packages', {
+    const response = await fetch('/package', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({data: base64}),
+      body: JSON.stringify({Content: base64}),
     });
-    
+
+
     console.log(response);
 
     if (response.ok) {
