@@ -6,7 +6,8 @@ const Layout = () => {
     <div>
       <h1>Welcome to Our Website</h1>
       <Link to="search">Search</Link>
-      <Link to="form">Form</Link>
+      <Link to="urlform">URLForm</Link>
+      <Link to="zipform">ZipForm</Link>
       <Outlet />
     </div>
   );

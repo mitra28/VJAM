@@ -22,24 +22,32 @@ function PackageZipForm() {
       return;
     }
   
-    // unzip file
-    const unzippedData = await unzipFile(zipfile);
-    console.log("unzippedData");
-    console.log(unzippedData);
-    // PRINT DATA
-    // GET PACKAGE.JSON
-    // PARSE
-    let url = '';
-
-    const allfiles = unzippedData.files;
-    let allfilesstring = '';
-
-    for (const filename in unzippedData.files) {
-      const file = unzippedData.files[filename];
-      const text = await file.async('text');
-      allfilesstring += text;
-    }
-
+      // unzip file
+      const unzippedData = await unzipFile(zipfile);
+      console.log("unzippedData");
+      console.log(unzippedData);
+      // PRINT DATA
+      // GET PACKAGE.JSON
+      const pattern = "\/package\.json/";
+      let packagejson = '';
+  
+      // PARSE
+      let url = '';
+  
+      const allfiles = unzippedData.files;
+      let allfilesstring = '';
+  
+      for (const filename in unzippedData.files) {
+        const file = unzippedData.files[filename];
+        const text = await file.async('text');
+        allfilesstring += text;
+  
+        // get package.json name while we are here
+        if(pattern.test(filename)){
+          packagejson = filename;
+          console.log(`Found package.json: ${filename}`);
+        }
+      }
     const string_data = encoder.encode(allfilesstring);
 
     let base64 = '';
