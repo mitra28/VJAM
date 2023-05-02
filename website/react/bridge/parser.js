@@ -5,7 +5,7 @@ function getUrlFromPackageJson() {
     assume the homepage URL is the github repository
     see https://github.com/nullivex/nodist/blob/master/package.json
   */
-
+  
   // check for package.json; if it doesnt exist return bad request
 
   // open the package.json file for parsing

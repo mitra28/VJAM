@@ -24,7 +24,12 @@ function PackageZipForm() {
   
     // unzip file
     const unzippedData = await unzipFile(zipfile);
+    console.log("unzippedData");
     console.log(unzippedData);
+    // PRINT DATA
+    // GET PACKAGE.JSON
+    // PARSE
+    let url = '';
 
     const allfiles = unzippedData.files;
     let allfilesstring = '';
@@ -36,19 +41,30 @@ function PackageZipForm() {
     }
 
     const string_data = encoder.encode(allfilesstring);
-    console.log(string_data);
 
-    const base64 = window.btoa(String.fromCharCode(...new Uint8Array(string_data)));
-  
+    let base64 = '';
+    const CHUNK_SIZE = 4096;
+    let content_length = 4; //string_data.length; **************************** CHANGE THIS
+    for (let i = 0; i < content_length; i += CHUNK_SIZE) {
+      const chunk = string_data.slice(i, i + CHUNK_SIZE);
+      base64 += btoa(chunk);
+    }
+
+    //const base64 = window.btoa(String.fromCharCode(...new Uint8Array(string_data)));
+    //console.log('encoded string:');
+    //console.log(base64);
+
+
+
     const response = await fetch('/package', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({Content: base64}),
+      body: JSON.stringify({Content: base64, url}),
     });
 
-
+    //console.log('');
     console.log(response);
 
     if (response.ok) {

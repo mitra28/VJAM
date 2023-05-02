@@ -4,6 +4,7 @@ const mysql = require('mysql');
 const multer = require('multer');
 const path = require('path');
 const bodyParser = require('body-parser');
+
 const { spawn } = require('child_process');
 const packageRoutes = require('./backend/routes/packageroutes');
 const Package = require('./backend/models/package');
@@ -25,10 +26,8 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 app.use('/packages', packageRoutes);
-
-app.use(bodyParser.urlencoded({ extended: false }));
-app.use(bodyParser.json());
-
+app.use(bodyParser.json({limit: '50mb', extended: true}));
+app.use(bodyParser.urlencoded({limit: '50mb', extended: true}));
 // Serve static files from the "build" directory
 app.use(express.static(path.join(__dirname, '.', 'react', 'build')));
 console.log("Serving static assets from directory: " + path.join(__dirname, '.', 'react', 'build'));
@@ -39,8 +38,11 @@ app.get('/', (req, res) => {
 
 app.post('/package', (req, res) =>{
   //console.log(req);
-  console.log(req.body);
-  console.log(req.body.Content);
+  //console.log(req.body);
+  //console.log(req.body.Content);
+
+  // error check
+
   if (req.body.Content) { 
     // private ingest
     console.log("received an unzipped file");
@@ -76,7 +78,7 @@ app.post('/package', (req, res) =>{
 
   // insert_repo_data(engine, repo_name, url, total_score, ramp_up_score, correctness_score, bus_factor, responsiveness_score, license_score, version_score, adherence_score);
   // insert_zipped_data(engine, file_name, url, zipped_file); 
-
+    //res.status(400).json({error: "error message"});
 });
 
 
