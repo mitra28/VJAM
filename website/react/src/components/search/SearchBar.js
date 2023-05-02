@@ -17,6 +17,7 @@ function SearchBar() {
           setValue(newText.target.value);
         }}
       />
+      <input type="checkbox"></input>
       <button onClick={() => {
         setValue("Search");
       }}>Search</button>
