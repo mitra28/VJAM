@@ -1,6 +1,7 @@
 const fs = require('fs');
 
-function getUrlFromPackageJson() {
+
+function getUrlFromPackageJson(filename) {
   /* https://piazza.com/class/lc9qx1w86k643t/post/230 
     assume the homepage URL is the github repository
     see https://github.com/nullivex/nodist/blob/master/package.json
@@ -9,7 +10,7 @@ function getUrlFromPackageJson() {
   // check for package.json; if it doesnt exist return bad request
 
   // open the package.json file for parsing
-  const packageJson = fs.readFileSync('package.json'); // package.json is in same directory as this file
+  const packageJson = fs.readFileSync(filename); // package.json is in same directory as this file
   const data = JSON.parse(packageJson);
 
   // check if repository field & repository url field (ex. browsify, cloudinary)
@@ -19,5 +20,6 @@ function getUrlFromPackageJson() {
       return url;
     }
   }
+  console.log("returning undefined");
   return undefined;
 }

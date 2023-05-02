@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import JSZip from 'jszip';
 const encoder = new TextEncoder();
+
+// Now you can use the getUrlFromPackageJson function in this module
+
 // const PackageData = require('../../../backend/models/packagedata');
 
 function PackageZipForm() {
@@ -26,13 +29,7 @@ function PackageZipForm() {
       const unzippedData = await unzipFile(zipfile);
       console.log("unzippedData");
       console.log(unzippedData);
-      // PRINT DATA
-      // GET PACKAGE.JSON
-      const pattern = "\/package\.json/";
-      let packagejson = '';
-  
-      // PARSE
-      let url = '';
+
   
       const allfiles = unzippedData.files;
       let allfilesstring = '';
@@ -41,12 +38,6 @@ function PackageZipForm() {
         const file = unzippedData.files[filename];
         const text = await file.async('text');
         allfilesstring += text;
-  
-        // get package.json name while we are here
-        if(pattern.test(filename)){
-          packagejson = filename;
-          console.log(`Found package.json: ${filename}`);
-        }
       }
     const string_data = encoder.encode(allfilesstring);
 
@@ -58,18 +49,13 @@ function PackageZipForm() {
       base64 += btoa(chunk);
     }
 
-    //const base64 = window.btoa(String.fromCharCode(...new Uint8Array(string_data)));
-    //console.log('encoded string:');
-    //console.log(base64);
-
-
-
+    // Send Request
     const response = await fetch('/package', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({Content: base64, url}),
+      body: JSON.stringify({Content: base64}),
     });
 
     //console.log('');
