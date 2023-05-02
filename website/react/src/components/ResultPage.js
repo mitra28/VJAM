@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import Package from './Package';
 
 function ResultPage(props) {
 
