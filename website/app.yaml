@@ -1,8 +1,11 @@
+service: backend-service
 runtime: nodejs16
 
 env_variables:
-  MY_VARIABLE: my-value
+  BACKEND_URL: https://backend-service-dot-ece-461-part-2-web-service.uk.r.appspot.com/
 
 handlers:
+  - url: /static
+    static_dir: react/build/static
   - url: /.*
     script: auto

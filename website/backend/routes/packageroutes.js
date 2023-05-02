@@ -2,7 +2,8 @@ const express = require('express');
 const router = express.Router();
 const Package = require('../models/package');
 
-router.post('/packages', async (req, res) => {
+router.post('/api/packages', async (req, res) => {
+  console.log('packageroutes.js post /packages');
   try {
     const package = new Package(req.body);
     await package.save();
