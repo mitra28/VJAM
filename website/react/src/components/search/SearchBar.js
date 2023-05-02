@@ -2,9 +2,11 @@ import React, { useState, useEffect } from 'react';
 
 function SearchBar() {
   const [value, setValue] = useState('');
+  const [checked, setChecked] = useState(false);
 
   useEffect(() => {
-  }, [value]);
+    console.log(`Checked state is ${checked}`);
+  }, [checked, value]);
   
   return (
     <div className="SearchBar">
@@ -17,7 +19,10 @@ function SearchBar() {
           setValue(newText.target.value);
         }}
       />
-      <input type="checkbox"></input>
+      <input type="checkbox"
+      onChange={(newCheck) => {
+        setChecked(newCheck.target.checked)
+      }}></input>
       <button onClick={() => {
         setValue("Search");
       }}>Search</button>
