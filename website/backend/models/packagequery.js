@@ -1,8 +1,9 @@
 const mongoose = require('mongoose');
-const PackageName = require('./packagename');
+const PackageName = require('./packagename').schema;
 
+//NOTE: Had to add .schema to imports to make this work
 const PackageQuerySchema = new mongoose.Schema({
-    "Name": { type: PackageName},
+    "Name": { type: String},
 });
 
 // Define your Package model

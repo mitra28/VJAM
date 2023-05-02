@@ -1,7 +1,8 @@
 const mongoose = require('mongoose');
-const PackageName = require('./packagename');
-const PackageID = require('./packageid');
+const PackageName = require('./packagename').schema;
+const PackageID = require('./packageid').schema;
 
+//NOTE: Had to add .schema to imports to make this work
 const PackageMetadataSchema = new mongoose.Schema({
   "Name": { type: PackageName},
   "Version": { type: String },

@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from "react";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import './App.css';
+import Layout from './Layout.jsx';
 import PackageForm from './components/PackageForm';
-
+import ResultPage from "./components/ResultPage.js";
+import SearchBar from './components/search/SearchBar.js';
 
 function App(prop) {
   const [message, setMessage] = useState("");
@@ -13,15 +16,22 @@ function App(prop) {
   }, []);
 
   return (
-    <div className="App">
-      {message}
-      Hello, World!
-      {/* {prop.children} */}
-      <PackageForm />
-    </div>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element = {<Layout />}>
+        <Route path="form" element = {<PackageForm />}/>
+        <Route path="search" element={<SearchBar />} />
+        <Route path="package" element={<ResultPage package={NaN}/>} />
+        </Route>
+      </Routes>
+    </BrowserRouter>
   );
 }
 
 export default App;
-
-// 
+/*
+          <div className="App">
+            {message}
+            Hello, World!
+          </div>
+*/
