@@ -1,0 +1,17 @@
+{
+  "name": "packagedirectory",
+  "version": "1.0.0",
+  "description": "",
+  "type": "module",
+  "main": "database.js",
+  "scripts": {
+    "start": "node database.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "mysql2": "^3.2.4",
+    "promise-mysql": "^5.2.0"
+  }
+}
