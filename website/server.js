@@ -21,7 +21,9 @@ const PackageData = require ('./backend/models/packagedata');
 // create_repo_table(engine);
 // create_zip_table(engine);
 
-const port = 7080; // process.env.PORT || 8080;
+path_to_index = path.join(__dirname, '.', 'react', 'build', 'index.html');
+
+const port = 8080; // process.env.PORT || 8080;
 const app = express();
 app.use(cors());
 app.use(express.json());
