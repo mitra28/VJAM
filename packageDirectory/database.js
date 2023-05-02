@@ -65,12 +65,14 @@ export async function createRepoTable(){
         responsiveness_score FLOAT,
         license_score FLOAT,
         version_score FLOAT,
-        adherence_score FLOAT
+        adherence_score FLOAT,
+        zip_id FLOAT,
       )
     `;
   await pool.query(stmt);
   console.log('Repo table was successfully created');
 }
+
 
 export async function deleteTable(table_name) {
     const stmt = `DROP TABLE IF EXISTS ${table_name}`;
@@ -178,32 +180,17 @@ async function retrieve_repo_data_url(url) {
 
 
 export async function retrieve_repo_data(){
-  //const result = await pool.query("SELECT * FROM repo_info");
-  //const row = result[0];
   const [result] = await pool.query("SELECT * FROM repo_info");
-
   return result;
 }
 
-/*export async function retrieve_repo_data(){
-  console.log("in retrieve");
-  const result = await pool.query('SELECT * FROM repo_info').then()
-  console.log("DATA was retrieved");
-  return result;
-}*/
-
-
-//myFunction();
-
+const output = await retrieve_repo_data();
+console.log(output[0].bus_factor);
 
 //deleteTable("repo_info");
 //createRepoTable();
 //insert_repo_data("my_repo", "https://github.com/LMAO", 0.8, 0.7, 0.9, 0.6, 0.85, 0.9, 0.75, 0.8);
 //console.log(result);
-
-const output = await retrieve_repo_data();
-console.log(output[0]);
-
 /*
 if (result) {
   console.log('Result:', result);
