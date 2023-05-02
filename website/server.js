@@ -31,6 +31,7 @@ app.use(bodyParser.urlencoded({limit: '50mb', extended: true}));
 // Serve static files from the "build" directory
 app.use(express.static(path.join(__dirname, '.', 'react', 'build')));
 console.log("Serving static assets from directory: " + path.join(__dirname, '.', 'react', 'build'));
+console.log("Serving index from: " + path_to_index);
 
 app.get('/', (req, res) => {
   res.send('launch new port  8080');

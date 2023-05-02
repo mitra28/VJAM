@@ -76,7 +76,7 @@ impl RepoList {
     /// Prints out the [Repo]s contained in [RepoList.repos] in NDJSON format
     pub fn display(&self) {
         for repo in &self.repos {
-            println!("{{\"URL\":\"{}\", \"NET_SCORE\":{:.2}, \"RAMP_UP_SCORE\":{:.2}, \"CORRECTNESS_SCORE\":{:.2}, \"BUS_FACTOR_SCORE\":{:.2}, \"RESPONSIVE_MAINTAINER_SCORE\":{:.2}, \"LICENSE_SCORE\":{:.2}, \"VERSION_PIN_SCORE\":{:.2}, \"ADHERENCE_SCORE\":{:.2}}}", 
+            println!("{{\"URL\":\"{}\", \"NET_SCORE\":{:.2}, \"RAMP_UP_SCORE\":{:.2}, \"CORRECTNESS_SCORE\":{:.2}, \"BUS_FACTOR_SCORE\":{:.2}, \"RESPONSIVE_MAINTAINER_SCORE\":{:.2}, \"LICENSE_SCORE\":{:.2}, \"GOOD_PINNING_PRACTICE\":{:.2}, \"PULL_REQUEST_SCORE\":{:.2}}}", 
                 repo.url, repo.net_score, repo.ramp_up, repo.correctness, repo.bus_factor, repo.responsive_maintainer, repo.license, repo.version_score, repo.adherence_score);
         }
     }
