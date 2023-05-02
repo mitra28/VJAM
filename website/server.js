@@ -33,10 +33,60 @@ app.get('*', (req, res) => {
 
 app.get("/message", (req, res) => {
     res.json({ message: "Hello from server! Version after download. " });
-  });
+});
+
+
+
+
+// authenticate endpoint
+app.put("/authenticate", (req, res) => {
+  res.status(501).json({ error: "Not Implemented." });
+});
+
+
+
+
+// reset endpoint
+app.put("/reset", (req, res) => {
+  // call reset for all 3 tables here
+});
+
+
+
+
+
+// package/{id} endpoint
+app.get("/package/{id}", (req, res) => {
+
+  // 404 if package doesn't exist
+  res.status(404).json({ error: "Package Does Not Exist." });
+});  // PackageRetrieve
+
+app.put("/package/{id}", (req, res) => {
+  // 404 if package doesn't exist
+  res.status(404).json({ error: "Package Does Not Exist." });
+});  // PackageUpdate
+
+app.delete("/package/{id}", (req, res) => {
+  // 404 if package doesn't exist
+  res.status(404).json({ error: "Package Does Not Exist." });
+});
+
+
+
+// package/{id}/rate endpoint
+app.get("/package/{id}", (req, res) => {
+
+  // 404 if package doesn't exist
+  res.status(404).json({ error: "Package Does Not Exist." });
+
+  // 500 if prating choked
+  res.status(500).json({ error: "The package rating system choked on at least one of the metrics." });
+});  // PackageRate
+
 
 
 // Start the server
 app.listen(port, () => {
-  console.log('Espress Server listening on port', port);
+  console.log('Espress Server listening on port.', port);
 });
