@@ -91,21 +91,20 @@ app.post('/package', (req, res) =>{
 app.get('/package/:ID', (req, res) =>{
   const packageID = req.params.ID;
   // get id from db
-  console.log("Get package/ID endpoint reached");
+  console.log(`Get package/${packageID} endpoint reached`);
 });
 
 app.put('/package/:ID', (req, res) =>{
   const packageID = req.params.ID;
   // get id from db
-  console.log("Put package/ID endpoint reached");
+  console.log(`Put package/${packageID} endpoint reached`);
 
 });
 
 app.delete('/package/:ID', (req, res) =>{
   const packageID = req.params.ID;
   // get id from db
-  console.log("Delete package/ID endpoint reached");
-
+  console.log(`Delete package/${packageID} endpoint reached`);
 });
 
 app.get("/message", (req, res) => {

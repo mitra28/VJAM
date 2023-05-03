@@ -8,7 +8,7 @@ function PackageIDForm() {
     console.log('Package handle submit!');
   
     
-    const response = await fetch('/package/${packageID}', { // use fetch API to make a POST request to /api/packages endpoint
+    const response = await fetch(`/package/${packageID}`, { // use fetch API to make a POST request to /api/packages endpoint
       method: 'GET',
       headers: {
         'Content-Type': 'application/json'
@@ -32,7 +32,7 @@ function PackageIDForm() {
         <label htmlFor="url">Enter a package ID:</label>
         <input type="text" id="id" name="id" value={packageID} onChange={handleIDChange} />
       </div>
-      <button type="submit">Create Package</button>
+      <button type="submit">Get Package</button>
     </form>
   );
 }
