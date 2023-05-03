@@ -87,7 +87,6 @@ app.post('/package', (req, res) =>{
       process.on('close', () => {
         console.log(`here are the scores: ${scores}`);
         const scoresObj = JSON.parse(scores);
-        console.log(`scoresObj: ${scoresObj}`);
         res.status(201).json({ success: 'success', output: scoresObj });
       });
       
@@ -102,8 +101,13 @@ app.post('/package', (req, res) =>{
 
 app.get('/package/:ID', (req, res) =>{
   const packageID = req.params.ID;
-  // get id from db
   console.log(`Get package/${packageID} endpoint reached`);
+
+  // get id from db
+  const scores = '{"URL":"https://github.com/marcelklehr/nodist", "NET_SCORE":0.48, "RAMP_UP_SCORE":0.78, "CORRECTNESS_SCORE":0.02, "BUS_FACTOR_SCORE":0.21, "RESPONSIVE_MAINTAINER_SCORE":0.18, "LICENSE_SCORE":1.00, "VERSION_PIN_SCORE":0.90, "ADHERENCE_SCORE":0.60}';
+  // format data to return
+  const scoresObj = JSON.parse(scores); // if scores is a string json
+  res.status(201).json({ success: 'success', output: scoresObj });
 
 });
 
