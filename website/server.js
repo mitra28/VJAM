@@ -4,27 +4,24 @@ const mysql = require('mysql');
 const multer = require('multer');
 const path = require('path');
 const bodyParser = require('body-parser');
-
 const { spawn } = require('child_process');
 const packageRoutes = require('./backend/routes/packageroutes');
 const Package = require('./backend/models/package');
 const upload = multer({ dest: 'temp/' });
 const formidable = require('formidable');
-
-
+//const { createRepoTable } = require('../packageDirectory/database.mjs');
 const PackageData = require ('./backend/models/packagedata');
 
 // initialize db
 // engine = init_engine();
 // delete_table(engine,"repo_info");
 // delete_table(engine,"zipped_table");
-import { deleteTable } from "../packageDirectory/database.py"
 // create_repo_table(engine);
 // create_zip_table(engine);
 
 path_to_index = path.join(__dirname, '.', 'react', 'build', 'index.html');
 
-const port = 8080; // process.env.PORT || 8080;
+const port = 9000; // process.env.PORT || 8080;
 const app = express();
 app.use(cors());
 app.use(express.json());
@@ -36,8 +33,15 @@ app.use(express.static(path.join(__dirname, '.', 'react', 'build')));
 console.log("Serving static assets from directory: " + path.join(__dirname, '.', 'react', 'build'));
 console.log("Serving index from: " + path_to_index);
 
+// initialize db
+// engine = init_engine();
+// delete_table(engine,"repo_info");
+// delete_table(engine,"zipped_table");
+// create_repo_table(engine);
+// create_zip_table(engine);
+
 app.get('/', (req, res) => {
-  res.send('launch new port  8080');
+  res.send('launch new port 8080');
 });
 
 app.post('/package', (req, res) =>{
@@ -45,11 +49,18 @@ app.post('/package', (req, res) =>{
   //console.log(req.body);
   //console.log(req.body.Content);
 
+  // TO-DO: 409 -> package exists
+  // TO-DO: 424 -> Package is not uploaded due to the disqualified rating
+
   // error check
+  if(req.body.Content & req.body.URL){
+    res.status(400).json({error: "both URL and Content are set."});
+  }
 
   if (req.body.Content) { 
     // private ingest
     console.log("received an unzipped file");
+    res.status(201).json({success: "success"});
   }
   // URL given
   else if (req.body.URL){
@@ -67,24 +78,51 @@ app.post('/package', (req, res) =>{
         console.log(`Child process exited with code ${code} and signal ${signal}`);
       });
       
+      let scores = '';
       process.stdout.on('data', (data) => {
         console.log(`stdout: ${data}`);
+        scores += data.toString();
       });
       
       process.stderr.on('data', (data) => {
         console.error(`stderr: ${data}`);
       }); 
 
+      
+      process.on('close', () => {
+        console.log(`here are the scores: ${scores}`);
+        const scoresObj = JSON.parse(scores);
+        console.log(`scoresObj: ${scoresObj}`);
+        res.status(201).json({ success: 'success', output: scoresObj });
+      });
+      
     }
-    else{
-      console.log('Content and URL cannot both be set');
-    }
+
+    
 
   // insert_repo_data(engine, repo_name, url, total_score, ramp_up_score, correctness_score, bus_factor, responsiveness_score, license_score, version_score, adherence_score);
   // insert_zipped_data(engine, file_name, url, zipped_file); 
     //res.status(400).json({error: "error message"});
 });
 
+app.get('/package/:ID', (req, res) =>{
+  const packageID = req.params.ID;
+  // get id from db
+  console.log(`Get package/${packageID} endpoint reached`);
+});
+
+app.put('/package/:ID', (req, res) =>{
+  const packageID = req.params.ID;
+  // get id from db
+  console.log(`Put package/${packageID} endpoint reached`);
+
+
+
+app.delete('/package/:ID', (req, res) =>{
+  const packageID = req.params.ID;
+  // get id from db
+  console.log(`Delete package/${packageID} endpoint reached`);
+});
 
 
 app.get("/message", (req, res) => {
