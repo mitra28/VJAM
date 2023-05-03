@@ -83,7 +83,9 @@ app.post('/package', (req, res) =>{
       
       process.on('close', () => {
         console.log(`here are the scores: ${scores}`);
-        res.status(201).json({ success: 'success', output: scores });
+        const scoresObj = JSON.parse(scores);
+        console.log(`scoresObj: ${scoresObj}`);
+        res.status(201).json({ success: 'success', output: scoresObj });
       });
       
     }

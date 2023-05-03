@@ -2,7 +2,9 @@ import React, { useState } from 'react';
 // const PackageData = require('../../../backend/models/packagedata');
 
 function PackageURLForm() {
-    const [packageUrl, setPackageUrl] = useState(''); // 
+    const [packageUrl, setPackageUrl] = useState(''); 
+    const [scores, setScores] = useState(null); 
+    const [errorMessage, setErrorMessage] = useState('');
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -20,9 +22,14 @@ function PackageURLForm() {
     if (response.ok) {
       console.log('Package created successfully!');
       const scores = await response.json();
-      console.log(`scores: ${scores.output}`);
+      setScores(scores.output);
+      setErrorMessage('');
+      
+      console.log(`url scores: ${scores.output.URL}`);
     } else {
       console.error('Failed to create package.');
+      setScores(null);
+      setErrorMessage('Failed to create package.');
     }
   };
 
@@ -37,6 +44,20 @@ function PackageURLForm() {
         <input type="text" id="url" name="url" value={packageUrl} onChange={handleUrlChange} />
       </div>
       <button type="submit">Create Package</button>
+      {errorMessage && <div>{errorMessage}</div>}
+      {scores && (
+        <div>
+          <p>URL: {scores.URL}</p>
+          <p>Overall Score: {scores.NET_SCORE}</p>
+          <p>Ramp Up Score: {scores.RAMP_UP_SCORE}</p>
+          <p>Correctness Score: {scores.CORRECTNESS_SCORE}</p>
+          <p>Bus Factor: {scores.BUS_FACTOR_SCORE}</p>
+          <p>Responsiveness Score: {scores.RESPONSIVE_MAINTAINER_SCORE}</p>
+          <p>License Score: {scores.LICENSE_SCORE}</p>
+          <p>Version Score: {scores.VERSION_PIN_SCORE}</p>
+          <p>Adherence Score: {scores.ADHERENCE_SCORE}</p>
+        </div>
+      )}
     </form>
   );
 }
