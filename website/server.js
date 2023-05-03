@@ -10,17 +10,7 @@ const Package = require('./backend/models/package');
 const upload = multer({ dest: 'temp/' });
 const formidable = require('formidable');
 //const { createRepoTable } = require('../packageDirectory/database.mjs');
-
-
 const PackageData = require ('./backend/models/packagedata');
-
-// initialize db
-// engine = init_engine();
-// delete_table(engine,"repo_info");
-// delete_table(engine,"zipped_table");
-// create_repo_table(engine);
-// create_zip_table(engine);
-
 path_to_index = path.join(__dirname, '.', 'react', 'build', 'index.html');
 
 const port = 9000; // process.env.PORT || 8080;
@@ -35,14 +25,24 @@ app.use(express.static(path.join(__dirname, '.', 'react', 'build')));
 console.log("Serving static assets from directory: " + path.join(__dirname, '.', 'react', 'build'));
 console.log("Serving index from: " + path_to_index);
 
+// initialize db
+// engine = init_engine();
+// delete_table(engine,"repo_info");
+// delete_table(engine,"zipped_table");
+// create_repo_table(engine);
+// create_zip_table(engine);
+
 app.get('/', (req, res) => {
-  res.send('launch new port  8080');
+  res.send('launch new port 8080');
 });
 
 app.post('/package', (req, res) =>{
   //console.log(req);
   //console.log(req.body);
   //console.log(req.body.Content);
+
+  // TO-DO: 409 -> package exists
+  // TO-DO: 424 -> Package is not uploaded due to the disqualified rating
 
   // error check
   if(req.body.Content & req.body.URL){
@@ -78,11 +78,10 @@ app.post('/package', (req, res) =>{
         console.error(`stderr: ${data}`);
       }); 
 
+      res.status(201).json({success: "success"});
     }
-    else{
-      console.log('Content and URL cannot both be set');
-    }
-    res.status(201).json({success: "success"});
+
+    
 
   // insert_repo_data(engine, repo_name, url, total_score, ramp_up_score, correctness_score, bus_factor, responsiveness_score, license_score, version_score, adherence_score);
   // insert_zipped_data(engine, file_name, url, zipped_file); 
@@ -92,16 +91,21 @@ app.post('/package', (req, res) =>{
 app.get('/package/:ID', (req, res) =>{
   const packageID = req.params.ID;
   // get id from db
+  console.log("Get package/ID endpoint reached");
 });
 
 app.put('/package/:ID', (req, res) =>{
   const packageID = req.params.ID;
   // get id from db
+  console.log("Put package/ID endpoint reached");
+
 });
 
 app.delete('/package/:ID', (req, res) =>{
   const packageID = req.params.ID;
   // get id from db
+  console.log("Delete package/ID endpoint reached");
+
 });
 
 app.get("/message", (req, res) => {

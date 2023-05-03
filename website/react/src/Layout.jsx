@@ -8,6 +8,7 @@ const Layout = () => {
       <Link to="search">Search</Link>
       <Link to="urlform">URLForm</Link>
       <Link to="zipform">ZipForm</Link>
+      <Link to="idform">IDForm</Link>
       <Outlet />
     </div>
   );
