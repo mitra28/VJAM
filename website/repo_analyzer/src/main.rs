@@ -158,42 +158,40 @@ async fn run_url(repo_url: &str) {
     // println!("number_of_forks: {}", number_of_forks);
 
     let mut version_score = metric_calculations::version_pin(_dependencies);
-    if version_score == -1.0 {
-        version_score = 0.0;
-        error!("Failed to get version score from {}/{}", &owner, &package);
-    }
-
+    // if version_score == -1.0 {
+    //     version_score = 0.0;
+    //     error!("Failed to get version score from {}/{}", &owner, &package);
+    // }
     let mut adherence_score = metric_calculations::get_adherence_score(Ok(total_pull_req),Ok(total_pull_req_reviewers ));
-    if adherence_score == -1.0 {
-        adherence_score = 0.0;
-        error!("Failed to get adherence score from {}/{}", &owner, &package);
-    }
-
+    // if adherence_score == -1.0 {
+    //     adherence_score = 0.0;
+    //     error!("Failed to get adherence score from {}/{}", &owner, &package);
+    // }
     let mut ru = metric_calculations::get_ramp_up_time(&opened_issues, &number_of_forks);
-    if ru == -1.0 {
-        ru = 0.0;
-        error!("Failed to get ramp up time from {}/{}", &owner, &package);
-    }
+    // if ru == -1.0 {
+    //     ru = 0.0;
+    //     error!("Failed to get ramp up time from {}/{}", &owner, &package);
+    // }
     let mut c = metric_calculations::get_correctness(&opened_issues);
-    if c == -1.0 {
-        c = 0.0;
-        error!("Failed to get number of open issues from {}/{}", &owner, &package);
-    }
+    // if c == -1.0 {
+    //     c = 0.0;
+    //     error!("Failed to get number of open issues from {}/{}", &owner, &package);
+    // }
     let mut bf = metric_calculations::get_bus_factor(&number_of_forks);
-    if bf == -1.0 {
-        bf =  0.0;
-        error!("Failed to get number of forks from {}/{}", &owner, &package);
-    }
+    // if bf == -1.0 {
+    //     bf =  0.0;
+    //     error!("Failed to get number of forks from {}/{}", &owner, &package);
+    // }
     let mut l = metric_calculations::get_license(license.await);
-    if l == -1.0 {
-        l =  0.0;
-        error!("Failed to get license from {}/{}", &owner, &package);
-    }
+    // if l == -1.0 {
+    //     l =  0.0;
+    //     error!("Failed to get license from {}/{}", &owner, &package);
+    // }
     let mut rm = metric_calculations::get_responsive_maintainer(&opened_issues, &total_issues);
-    if rm == -1.0 {
-        rm = 0.0;
-        error!("Failed to responsiveness from {}/{}", &owner, &package);
-    }
+    // if rm == -1.0 {
+    //     rm = 0.0;
+    //     error!("Failed to responsiveness from {}/{}", &owner, &package);
+    // }
 
     let metrics = [ru, c, bf, l, rm]; // responsive maintainer is omitted
     let o = metric_calculations::get_overall(&metrics);

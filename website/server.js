@@ -11,6 +11,14 @@ const upload = multer({ dest: 'temp/' });
 const formidable = require('formidable');
 //const { createRepoTable } = require('../packageDirectory/database.mjs');
 const PackageData = require ('./backend/models/packagedata');
+
+// initialize db
+// engine = init_engine();
+// delete_table(engine,"repo_info");
+// delete_table(engine,"zipped_table");
+// create_repo_table(engine);
+// create_zip_table(engine);
+
 path_to_index = path.join(__dirname, '.', 'react', 'build', 'index.html');
 
 const port = 9000; // process.env.PORT || 8080;
@@ -108,7 +116,7 @@ app.put('/package/:ID', (req, res) =>{
   // get id from db
   console.log(`Put package/${packageID} endpoint reached`);
 
-});
+
 
 app.delete('/package/:ID', (req, res) =>{
   const packageID = req.params.ID;
@@ -116,9 +124,100 @@ app.delete('/package/:ID', (req, res) =>{
   console.log(`Delete package/${packageID} endpoint reached`);
 });
 
+
 app.get("/message", (req, res) => {
   res.json({ message: "Hello from server! Version after download. " });
 });
+
+
+// authenticate endpoint
+app.put("/authenticate", (req, res) => {
+  res.status(501).json({ error: "Not Implemented." });
+});
+
+
+
+// reset endpoint
+app.put("/reset", (req, res) => {
+  // call reset for all 3 tables here
+});
+
+
+
+
+// package/{id} endpoint
+app.get("/package/:id", (req, res) => {
+  const packageId = req.params.id;
+
+
+
+  if (!packageExists(packageId)) {// 404 if package doesn't exist
+    res.status(404).json({ error: "Package Does Not Exist." });
+  }
+
+  // Otherwise, return a success response with the package information
+  else {
+    res.status(200).json({  });
+  }
+});  // PackageRetrieve
+
+
+
+app.put("/package/:id", (req, res) => {
+  const packageId = req.params.id;
+
+
+  // 404 if package doesn't exist
+  if (!packageExists(packageId)) {
+    res.status(404).json({ error: "Package Does Not Exist." });
+  }
+
+  // Otherwise, return a success response 
+  else {
+    res.status(200).json({ message: "Version is Updated." });
+  }
+});  // PackageUpdate
+
+
+
+app.delete("/package/:id", (req, res) => {
+  const packageId = req.params.id;
+
+
+  // 404 if package doesn't exist
+  if (!packageExists(packageId)) {
+    res.status(404).json({ error: "Package Does Not Exist." });
+  }
+
+  // Otherwise, return a success response
+  else {
+    res.status(200).json({ message: "Package Deleted." });
+  }
+});
+
+
+
+// package/{id}/rate endpoint
+app.get("/package/:id/rate", (req, res) => {
+  const packageId = req.params.id;
+
+  // 404 if package doesn't exist
+  if (!packageExists(packageId)) {
+    res.status(404).json({ error: "Package Does Not Exist." });
+  }
+
+  // If the package rating system choked, return a 500 error response
+  else if (packageRatingChoked(packageId)) {
+    res.status(500).json({ error: "The package rating system choked on at least one of the metrics." });
+  }
+
+  // Otherwise, return a success response
+  else {
+    res.status(200).json({ packageId });
+  }
+});  // PackageRate
+
+
 
 // Start the server
 app.listen(port, () => {
