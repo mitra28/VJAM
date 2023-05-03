@@ -70,15 +70,22 @@ app.post('/package', (req, res) =>{
         console.log(`Child process exited with code ${code} and signal ${signal}`);
       });
       
+      let scores = '';
       process.stdout.on('data', (data) => {
         console.log(`stdout: ${data}`);
+        scores += data.toString();
       });
       
       process.stderr.on('data', (data) => {
         console.error(`stderr: ${data}`);
       }); 
 
-      res.status(201).json({success: "success"});
+      
+      process.on('close', () => {
+        console.log(`here are the scores: ${scores}`);
+        res.status(201).json({ success: 'success', output: scores });
+      });
+      
     }
 
     
