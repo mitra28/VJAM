@@ -10,6 +10,7 @@ const Package = require('./backend/models/package');
 const upload = multer({ dest: 'temp/' });
 const formidable = require('formidable');
 //const { createRepoTable } = require('../packageDirectory/database.mjs');
+import { deleteTable } from "../packageDirectory/database.mjs";
 const PackageData = require ('./backend/models/packagedata');
 
 // initialize db
@@ -36,9 +37,11 @@ console.log("Serving index from: " + path_to_index);
 // initialize db
 // engine = init_engine();
 // delete_table(engine,"repo_info");
-// delete_table(engine,"zipped_table");
+// // delete_table(engine,"zipped_table");
+// import { deleteTable } from "../packageDirectory/database.mjs";
 // create_repo_table(engine);
 // create_zip_table(engine);
+
 
 app.get('/', (req, res) => {
   res.send('launch new port 8080');
@@ -109,19 +112,49 @@ app.get('/package/:ID', (req, res) =>{
   const packageID = req.params.ID;
   // get id from db
   console.log(`Get package/${packageID} endpoint reached`);
+
+  // 404 if package doesn't exist
+  if (!packageExists(packageId)) {
+    res.status(404).json({ error: "Package Does Not Exist." });
+  }
+
+  // Otherwise, return a success response with the package information
+  else {
+    res.status(200).json({  });
+  }
 });
 
-app.put('/package/:ID', (req, res) =>{
+app.put('/package/:ID', (req, res) => {
   const packageID = req.params.ID;
   // get id from db
   console.log(`Put package/${packageID} endpoint reached`);
 
 
+  // 404 if package doesn't exist
+  if (!packageExists(packageId)) {
+    res.status(404).json({ error: "Package Does Not Exist." });
+  }
+
+  // Otherwise, return a success response with the package information
+  else {
+    res.status(200).json({  });
+  }
+});
 
 app.delete('/package/:ID', (req, res) =>{
   const packageID = req.params.ID;
   // get id from db
   console.log(`Delete package/${packageID} endpoint reached`);
+
+  // 404 if package doesn't exist
+  if (!packageExists(packageId)) {
+    res.status(404).json({ error: "Package Does Not Exist." });
+  }
+
+  // Otherwise, return a success response with the package information
+  else {
+    res.status(200).json({  });
+  }
 });
 
 
@@ -136,66 +169,13 @@ app.put("/authenticate", (req, res) => {
 });
 
 
-
 // reset endpoint
 app.put("/reset", (req, res) => {
   // call reset for all 3 tables here
+  deleteTable(repo_table);
+  deleteTable(score_table);
+  deleteTable(main_table);
 });
-
-
-
-
-// package/{id} endpoint
-app.get("/package/:id", (req, res) => {
-  const packageId = req.params.id;
-
-
-
-  if (!packageExists(packageId)) {// 404 if package doesn't exist
-    res.status(404).json({ error: "Package Does Not Exist." });
-  }
-
-  // Otherwise, return a success response with the package information
-  else {
-    res.status(200).json({  });
-  }
-});  // PackageRetrieve
-
-
-
-app.put("/package/:id", (req, res) => {
-  const packageId = req.params.id;
-
-
-  // 404 if package doesn't exist
-  if (!packageExists(packageId)) {
-    res.status(404).json({ error: "Package Does Not Exist." });
-  }
-
-  // Otherwise, return a success response 
-  else {
-    res.status(200).json({ message: "Version is Updated." });
-  }
-});  // PackageUpdate
-
-
-
-app.delete("/package/:id", (req, res) => {
-  const packageId = req.params.id;
-
-
-  // 404 if package doesn't exist
-  if (!packageExists(packageId)) {
-    res.status(404).json({ error: "Package Does Not Exist." });
-  }
-
-  // Otherwise, return a success response
-  else {
-    res.status(200).json({ message: "Package Deleted." });
-  }
-});
-
-
 
 // package/{id}/rate endpoint
 app.get("/package/:id/rate", (req, res) => {
