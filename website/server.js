@@ -18,6 +18,7 @@ const PackageData = require ('./backend/models/packagedata');
 // engine = init_engine();
 // delete_table(engine,"repo_info");
 // delete_table(engine,"zipped_table");
+import { deleteTable } from "../packageDirectory/database.py"
 // create_repo_table(engine);
 // create_zip_table(engine);
 
@@ -86,10 +87,99 @@ app.post('/package', (req, res) =>{
 
 
 
-
 app.get("/message", (req, res) => {
   res.json({ message: "Hello from server! Version after download. " });
 });
+
+
+// authenticate endpoint
+app.put("/authenticate", (req, res) => {
+  res.status(501).json({ error: "Not Implemented." });
+});
+
+
+
+// reset endpoint
+app.put("/reset", (req, res) => {
+  // call reset for all 3 tables here
+});
+
+
+
+
+// package/{id} endpoint
+app.get("/package/:id", (req, res) => {
+  const packageId = req.params.id;
+
+
+
+  if (!packageExists(packageId)) {// 404 if package doesn't exist
+    res.status(404).json({ error: "Package Does Not Exist." });
+  }
+
+  // Otherwise, return a success response with the package information
+  else {
+    res.status(200).json({  });
+  }
+});  // PackageRetrieve
+
+
+
+app.put("/package/:id", (req, res) => {
+  const packageId = req.params.id;
+
+
+  // 404 if package doesn't exist
+  if (!packageExists(packageId)) {
+    res.status(404).json({ error: "Package Does Not Exist." });
+  }
+
+  // Otherwise, return a success response 
+  else {
+    res.status(200).json({ message: "Version is Updated." });
+  }
+});  // PackageUpdate
+
+
+
+app.delete("/package/:id", (req, res) => {
+  const packageId = req.params.id;
+
+
+  // 404 if package doesn't exist
+  if (!packageExists(packageId)) {
+    res.status(404).json({ error: "Package Does Not Exist." });
+  }
+
+  // Otherwise, return a success response
+  else {
+    res.status(200).json({ message: "Package Deleted." });
+  }
+});
+
+
+
+// package/{id}/rate endpoint
+app.get("/package/:id/rate", (req, res) => {
+  const packageId = req.params.id;
+
+  // 404 if package doesn't exist
+  if (!packageExists(packageId)) {
+    res.status(404).json({ error: "Package Does Not Exist." });
+  }
+
+  // If the package rating system choked, return a 500 error response
+  else if (packageRatingChoked(packageId)) {
+    res.status(500).json({ error: "The package rating system choked on at least one of the metrics." });
+  }
+
+  // Otherwise, return a success response
+  else {
+    res.status(200).json({ packageId });
+  }
+});  // PackageRate
+
+
 
 // Start the server
 app.listen(port, () => {
