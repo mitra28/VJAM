@@ -4,12 +4,12 @@ const mysql = require('mysql');
 const multer = require('multer');
 const path = require('path');
 const bodyParser = require('body-parser');
-
 const { spawn } = require('child_process');
 const packageRoutes = require('./backend/routes/packageroutes');
 const Package = require('./backend/models/package');
 const upload = multer({ dest: 'temp/' });
 const formidable = require('formidable');
+//const { createRepoTable } = require('../packageDirectory/database.mjs');
 
 
 const PackageData = require ('./backend/models/packagedata');
@@ -45,10 +45,14 @@ app.post('/package', (req, res) =>{
   //console.log(req.body.Content);
 
   // error check
+  if(req.body.Content & req.body.URL){
+    res.status(400).json({error: "both URL and Content are set."});
+  }
 
   if (req.body.Content) { 
     // private ingest
     console.log("received an unzipped file");
+    res.status(201).json({success: "success"});
   }
   // URL given
   else if (req.body.URL){
@@ -78,14 +82,27 @@ app.post('/package', (req, res) =>{
     else{
       console.log('Content and URL cannot both be set');
     }
+    res.status(201).json({success: "success"});
 
   // insert_repo_data(engine, repo_name, url, total_score, ramp_up_score, correctness_score, bus_factor, responsiveness_score, license_score, version_score, adherence_score);
   // insert_zipped_data(engine, file_name, url, zipped_file); 
     //res.status(400).json({error: "error message"});
 });
 
+app.get('/package/:ID', (req, res) =>{
+  const packageID = req.params.ID;
+  // get id from db
+});
 
+app.put('/package/:ID', (req, res) =>{
+  const packageID = req.params.ID;
+  // get id from db
+});
 
+app.delete('/package/:ID', (req, res) =>{
+  const packageID = req.params.ID;
+  // get id from db
+});
 
 app.get("/message", (req, res) => {
   res.json({ message: "Hello from server! Version after download. " });
