@@ -6,10 +6,15 @@ const Layout = () => {
     <div>
       <h1>Welcome to Our Website</h1>
       <div><Link to="search">Search</Link></div>
-      <div><Link to="idform">IDForm</Link></div>
-      <div><Link to="deleteidform">Delete Package</Link></div>
-      <div><Link to="putidform">Put Package</Link></div>
-      <div><Link to="packageform">PackageForm</Link></div>
+      <div><Link to="resetform">Registry Reset</Link></div>
+      <div><Link to="idform">Package Retrieve</Link></div>
+      <div><Link to="putidform">Package Update</Link></div>
+      <div><Link to="deleteidform">Package Delete</Link></div>
+      <div><Link to="packageform">Package Create</Link></div>
+      <div><Link to="rateform">Package Rate</Link></div>
+      <div><Link to="bynamegetform">Package By Name Get</Link></div>
+      <div><Link to="bynamedeleteform">Package By Name Delete</Link></div>
+      <div><Link to="regexform">Package By RegEx Get</Link></div>
       <Outlet />
     </div>
   );
