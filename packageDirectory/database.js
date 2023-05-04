@@ -237,20 +237,8 @@ export async function retrieveAllTables(name_tag) {
     MainData
   }; //return an object 
 }
-/*
-export async function insertALLTable(name, version, name_tag, url, zip,
-  readme, total_score,ramp_up_score,correctness_score,bus_factor,responsiveness_score,
-  license_score,version_score,adherence_score){
-
-  const repo_id =  await insertRepoTable(url, zip, readme);
-  const score_id = await insertScoreTable(total_score,ramp_up_score,correctness_score,bus_factor,responsiveness_score,license_score,version_score,adherence_score);
-  console.log(repo_id);
-  console.log(score_id);
-  await insertMainTable(name, version, name_tag, repo_id, score_id);
-}*/
 
 
-/*
 await deleteTable("main_table");
 await deleteTable("repo_table");
 await deleteTable("score_table");
@@ -266,7 +254,11 @@ await insertALLTable("name1", "version1", "name_tag1", "url1", "zip1",
   0.5,0.6,0.7);
 await insertALLTable("name", "version", "name_tag", "url", "zip",
   "readme", 0.0,0.1,0.2,0.3,0.4,
-  0.5,0.6,0.7); */
+  0.5,0.6,0.7);
+
+await deleteTable("main_table");
+await deleteTable("repo_table");
+await deleteTable("score_table"); 
 //await retrieveAllTables("name_tag");
 //await deleteID("name_tag");
 //await retrieveAllTables("name_tag");
