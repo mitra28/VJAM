@@ -23,9 +23,13 @@ function PackageURLForm() {
       console.log('Package created successfully!');
       const scores = await response.json();
       setScores(scores.output);
+<<<<<<< HEAD
       setErrorMessage('');
       
       console.log(`url scores: ${scores.output.URL}`);
+=======
+      setErrorMessage('');      
+>>>>>>> main
     } else {
       console.error('Failed to create package.');
       setScores(null);
