@@ -9,6 +9,7 @@ const Layout = () => {
       <Link to="urlform">URLForm</Link>
       <Link to="zipform">ZipForm</Link>
       <Link to="idform">IDForm</Link>
+      <Link to="packageform">PackageForm</Link>
       <Outlet />
     </div>
   );

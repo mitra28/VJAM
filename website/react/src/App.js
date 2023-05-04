@@ -5,6 +5,7 @@ import Layout from './Layout.jsx';
 import PackageURLForm from './components/PackageURLForm';
 import PackageZipForm from './components/PackageZipForm';
 import PackageIDForm from './components/PackageIDForm';
+import PackageForm from './components/PackageForm';
 import ResultPage from "./components/ResultPage.js";
 import SearchBar from './components/search/SearchBar.js';
 
@@ -26,6 +27,7 @@ function App(prop) {
         <Route path="search" element={<SearchBar />} />
         <Route path="package" element={<ResultPage package={NaN}/>} />
         <Route path="idform" element = {<PackageIDForm />}/>
+        <Route path="packageform"element = {<PackageForm />}/>
         </Route>
       </Routes>
     </BrowserRouter>
