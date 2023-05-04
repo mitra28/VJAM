@@ -10,7 +10,7 @@ function PackageRateForm() {
     console.log('Package rate handle submit!');
   
     
-    const response = await fetch(`/reset`, { // use fetch API to make a POST request to /api/packages endpoint
+    const response = await fetch(`/package/${packageID}/rate`, { // use fetch API to make a POST request to /api/packages endpoint
       method: 'GET',
       headers: {
         'Content-Type': 'application/json'
@@ -19,9 +19,10 @@ function PackageRateForm() {
     
     if (response.ok) {
       console.log('Package rated successfully!');
-
+      setErrorMessage('');
     } else {
       console.error('Failed to rate package.');
+      setErrorMessage('Failed to create package.');
     }
   };
 

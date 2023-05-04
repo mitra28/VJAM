@@ -67,7 +67,26 @@ app.get('/', (req, res) => {
   res.send('launch new port 8080');
 });
 
+// /packages
+app.post("/packages", (req, res) => {
+  console.log('/packages enpoint reached');
+  const offset = req.params.offset;
+
+  // 413 if too many packages returned 
+  if (length > offset) {
+    res.status(404).json({ error: "Too many packages returned." });
+  }
+
+  // Otherwise, return a success response, list of packages
+  else {
+    res.status(200).json({  });
+  }
+});
+
+
+// /package
 app.post('/package', (req, res) =>{
+  console.log('/package endpoint reached');
   //console.log(req);
   //console.log(req.body);
   //console.log(req.body.Content);
@@ -76,6 +95,7 @@ app.post('/package', (req, res) =>{
   // TO-DO: 424 -> Package is not uploaded due to the disqualified rating
 
   // error check
+  
 
   if (req.body.Content) { 
     if(req.body.URL){
@@ -115,8 +135,23 @@ app.post('/package', (req, res) =>{
       process.on('close', () => {
         console.log(`here are the scores: ${scores}`);
         const scoresObj = JSON.parse(scores);
+
+        // ******************************************************************
+        // TO-DO: create package object
+        const package = create_package();
+        // TO-DO: save scores and url in package object
+        // TO-DO: save to db
+        if(insert_repo_data(package) == -1){
+          res.status(409).json({ error: 'The package exists already'});
+        }
+        // ******************************************************************
+        
         res.status(201).json({ success: 'success', output: scoresObj });
+        
       });
+
+      
+
       
     }
 
@@ -125,6 +160,8 @@ app.post('/package', (req, res) =>{
     //res.status(400).json({error: "error message"});
 });
 
+
+// /package/{ID}
 app.get('/package/:ID', (req, res) =>{
   const packageID = req.params.ID;
   console.log(`Get package/${packageID} endpoint reached`);
@@ -136,9 +173,6 @@ app.get('/package/:ID', (req, res) =>{
   res.status(201).json({ success: 'success', output: scoresObj });
 
 });
-
-
-// Package Delete
 app.delete('/package/:ID', (req, res) =>{
   const packageID = req.params.ID;
   // get id from db
@@ -155,7 +189,6 @@ app.delete('/package/:ID', (req, res) =>{
     res.status(200).json({ message : "Package is Deleted." });
   }
 });
-
 app.put('/package/:ID', (req, res) =>{
   const packageID = req.params.ID;
   // get id from db
@@ -177,29 +210,10 @@ app.put('/package/:ID', (req, res) =>{
 });
 
 
-
-app.get("/message", (req, res) => {
-  res.json({ message: "Hello from server! Version after download. " });
-});
-
-
-// authenticate endpoint
-app.put("/authenticate", (req, res) => {
-  res.status(501).json({ error: "Not Implemented." });
-});
-
-
-// reset endpoint
-app.put("/reset", (req, res) => {
-  // call reset for all 3 tables here
-  deleteTable(repo_table);
-  deleteTable(score_table);
-  deleteTable(main_table);
-});
-
 // package/{id}/rate endpoint
 app.get("/package/:id/rate", (req, res) => {
-  const packageId = req.params.id;
+  const packageID = req.params.ID;
+  console.log(`package/${packageID}/rate endpoint reached`);
 
   // 404 if package doesn't exist
   if (!packageExists(packageId)) {
@@ -215,11 +229,17 @@ app.get("/package/:id/rate", (req, res) => {
   else {
     res.status(200).json({ packageId });
   }
-});  // PackageRate
+});
 
-// search endpoint
-app.put("/package/ByName/:Name", (req, res) => {
-  const packageName = req.params.Name;
+
+// /package/byName/{name}
+app.get("/package/byName/:name", (req, res) => {
+  console.log('GET /package/byName/:name enpoint reached');
+
+});
+app.delete("/package/byName/:name", (req, res) => {
+  console.log('DELETE /package/byName/:name enpoint reached');
+  const packageName = req.params.name;
 
   // 404 if package doesn't exist
   if (!packageExists(packageName)) {
@@ -233,9 +253,9 @@ app.put("/package/ByName/:Name", (req, res) => {
 });
 
 
-app.put("/package/ByRegEx", (req, res) => {
-  const packageRegEx = req.params.RegEx;
-
+// /package/byRegEx
+app.post("/package/byRegEx", (req, res) => {
+  console.log('/package/byRegEx enpoint reached');
   // 404 if package doesn't exist
   if (!packageExists(packageRegEx)) {
     res.status(404).json({ error: "No package found under this regex." });
@@ -247,18 +267,29 @@ app.put("/package/ByRegEx", (req, res) => {
   }
 });
 
-app.put("/packages", (req, res) => {
-  const offset = req.params.offset;
 
-  // 413 if too many packages returned 
-  if (length > offset) {
-    res.status(404).json({ error: "Too many packages returned." });
-  }
+// reset endpoint
+app.delete("/reset", (req, res) => {
+  // call reset for all 3 tables here
+  console.log('/reset enpoint reached');
+  deleteTable(repo_table);
+  deleteTable(score_table);
+  deleteTable(main_table);
+});
 
-  // Otherwise, return a success response, list of packages
-  else {
-    res.status(200).json({  });
-  }
+// authenticate endpoint
+app.put("/authenticate", (req, res) => {
+  console.log('/authenticate enpoint reached');
+  res.status(501).json({ error: "Not Implemented." });
+});
+
+
+
+
+
+
+app.get("/message", (req, res) => {
+  res.json({ message: "Hello from server! Version after download. " });
 });
 
 // Start the server
