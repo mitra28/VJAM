@@ -74,12 +74,10 @@ app.post('/package', (req, res) =>{
   // TO-DO: 409 -> package exists
   // TO-DO: 424 -> Package is not uploaded due to the disqualified rating
 
-  // error check
-  if(req.body.Content & req.body.URL){
-    res.status(400).json({error: "both URL and Content are set."});
-  }
-
   if (req.body.Content) { 
+    if(req.body.URL){
+    res.status(400).json({error: "Error: both URL and Content are set. Please only set one field."});
+    }
     // private ingest
     console.log("received an unzipped file");
 
@@ -138,31 +136,6 @@ app.get('/package/:ID', (req, res) =>{
   const scoresObj = JSON.parse(scores); // if scores is a string json
   res.status(201).json({ success: 'success', output: scoresObj });
 
-});
-
-app.put('/package/:ID', (req, res) =>{
-  const packageID = req.params.ID;
-  // get id from db
-  console.log(`Put package/${packageID} endpoint reached`);
-
-
-
-app.delete('/package/:ID', (req, res) =>{
-  const packageID = req.params.ID;
-  // get id from db
-  console.log(`Delete package/${packageID} endpoint reached`);
-});
-
-
-  // 404 if package doesn't exist
-  if (!packageExists(packageId)) {
-    res.status(404).json({ error: "Package Does Not Exist." });
-  }
-
-  // Otherwise, return a success response with the package information
-  else {
-    res.status(200).json({  });
-  }
 });
 
 app.put('/package/:ID', (req, res) => {
