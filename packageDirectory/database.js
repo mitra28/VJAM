@@ -238,7 +238,7 @@ export async function retrieveAllTables(name_tag) {
   }; //return an object 
 }
 
-
+/*
 await deleteTable("main_table");
 await deleteTable("repo_table");
 await deleteTable("score_table");
@@ -258,7 +258,7 @@ await insertALLTable("name", "version", "name_tag", "url", "zip",
 
 await deleteTable("main_table");
 await deleteTable("repo_table");
-await deleteTable("score_table"); 
+await deleteTable("score_table");*/ 
 //await retrieveAllTables("name_tag");
 //await deleteID("name_tag");
 //await retrieveAllTables("name_tag");
