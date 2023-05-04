@@ -8,7 +8,8 @@
     "dev": "nodemon server.js",
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "cd react && npm run build",
-    "setup": "cd react && npm install && npm run build"
+    "setup": "cd react && npm install && npm run build",
+    "docker": "docker build . -t 461-docker"
   },
   "author": "",
   "license": "ISC",
