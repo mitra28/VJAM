@@ -109,31 +109,6 @@ app.get('/package/:ID', (req, res) =>{
 
 });
 
-app.put('/package/:ID', (req, res) =>{
-  const packageID = req.params.ID;
-  // get id from db
-  console.log(`Put package/${packageID} endpoint reached`);
-
-
-
-app.delete('/package/:ID', (req, res) =>{
-  const packageID = req.params.ID;
-  // get id from db
-  console.log(`Delete package/${packageID} endpoint reached`);
-});
-
-
-  // 404 if package doesn't exist
-  if (!packageExists(packageId)) {
-    res.status(404).json({ error: "Package Does Not Exist." });
-  }
-
-  // Otherwise, return a success response with the package information
-  else {
-    res.status(200).json({  });
-  }
-});
-
 app.put('/package/:ID', (req, res) => {
   const packageID = req.params.ID;
   // get id from db
