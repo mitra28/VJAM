@@ -5,28 +5,36 @@ function SearchBar() {
   const [checked, setChecked] = useState(false);
 
   useEffect(() => {
-    console.log(`Checked state is ${checked}`);
   }, [checked, value]);
-  
+
+  const getResults = (event) =>{
+    event.preventDefault();
+    if(checked){
+      console.log(`Searching for regex: '${value}'!`);
+    }
+    else{
+      console.log(`Searching for name: '${value}'!`);
+    }
+  }
+
   return (
-    <div className="SearchBar">
-      <input
-        type="text"
-        className="SearchBar_text"
-        placeholder="Search data..."
-        value={value}
-        onChange={(newText) => {
-          setValue(newText.target.value);
-        }}
-      />
+    <form className="SearchBar" onSubmit={getResults}>
+      <label>Enter the package to search for here:
+        <input
+          type="text"
+          placeholder="Search data..."
+          value={value}
+          onChange={ (newText) => {
+            setValue(newText.target.value);
+          }}
+        />
+      </label>
       <input type="checkbox"
       onChange={(newCheck) => {
         setChecked(newCheck.target.checked)
       }}></input>
-      <button onClick={() => {
-        setValue("Search");
-      }}>Search</button>
-    </div>
+      <input type="submit"></input>
+    </form>
   );
 }
 
