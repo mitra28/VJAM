@@ -116,6 +116,23 @@ export async function insertMainTable(name, version, name_tag) {
     return result.insertId;
   }
 }
+export async function insertZippedString(zip){
+  const stmt = `INSERT INTO repo_table (zip) VALUES (?)`;
+  console.log(stmt);
+  const [result] = await pool.query(stmt, [zip]);
+  return result.insertId;
+
+}
+export async function retrieveZippedString(id){
+  const stmt = `SELECT zip FROM repo_table WHERE id = ?`;
+  const [result] = await pool.query(stmt, [id]);
+
+  if (result.length === 0) {
+    throw new Error(`No entry with id ${id} found in repo_table`);
+  }
+  //console.log(result);
+  return result[0].zip;
+}
 
 export async function updateMainTableWithRepoScoreIds(mainId, repo_id, score_id) {
   const stmt = `UPDATE main_table SET repo_id = ?, score_id = ? WHERE id = ?`;
@@ -237,6 +254,13 @@ export async function retrieveAllTables(name_tag) {
     MainData
   }; //return an object 
 }
+//await createRepoTable();
+//const textValue = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. ".repeat(100);
+//const id = await insertZippedString(textValue);
+//console.log(id);
+//const retrievedValue = await retrieveZippedString(4);
+//console.log(retrievedValue);
+//await deleteTable("repo_table");
 
 /*
 await deleteTable("main_table");
