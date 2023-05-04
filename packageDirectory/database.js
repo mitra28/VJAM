@@ -83,6 +83,14 @@ export async function createScoreTable(){
   await pool.query(stmt);
   console.log('Repo table was successfully created');
 }
+
+/*
+export async function insertMainTable(name, version, name_tag, repo_id, score_id) {
+  const stmt = `INSERT INTO main_table (name, version, name_tag, repo_id, score_id) VALUES (?, ?, ?, ?, ?)`;
+  const result = await pool.query(stmt, [name, version, name_tag, repo_id, score_id]);
+  console.log(`Inserted into Main Table: ${name}, ${version}, ${name_tag}, ${repo_id}, ${score_id}`);
+}*/
+
 export async function insertScoreTable(total_score, ramp_up_score, correctness_score, bus_factor, responsiveness_score, license_score, version_score, adherence_score) {
   const stmt = `INSERT INTO score_table (total_score, ramp_up_score, correctness_score, bus_factor, responsiveness_score, license_score, version_score, adherence_score) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`;
   const [result] = await pool.query(stmt, [total_score, ramp_up_score, correctness_score, bus_factor, responsiveness_score, license_score, version_score, adherence_score]);
@@ -93,11 +101,44 @@ export async function insertRepoTable(url, zip, readme) {
   const [result] = await pool.query(stmt, [url, zip, readme]);
   return result.insertId;
 }
-export async function insertMainTable(name, version, name_tag, repo_id, score_id) {
-  const stmt = `INSERT INTO main_table (name, version, name_tag, repo_id, score_id) VALUES (?, ?, ?, ?, ?)`;
-  const result = await pool.query(stmt, [name, version, name_tag, repo_id, score_id]);
-  console.log(`Inserted into Main Table: ${name}, ${version}, ${name_tag}, ${repo_id}, ${score_id}`);
+
+export async function insertMainTable(name, version, name_tag) {
+  const checkStmt = `SELECT COUNT(*) as count FROM main_table WHERE name_tag = ?`;
+  const [checkResult] = await pool.query(checkStmt, [name_tag]);
+
+  if (checkResult[0].count > 0) {
+    //throw new Error(`Entry for ${name_tag} already exists in Main Table`);
+    return -1;
+  } else {
+    const stmt = `INSERT INTO main_table (name, version, name_tag) VALUES (?, ?, ?)`;
+    const [result] = await pool.query(stmt, [name, version, name_tag]);
+    console.log(`Inserted into Main Table: ${name}, ${version}, ${name_tag}`);
+    return result.insertId;
+  }
 }
+
+export async function updateMainTableWithRepoScoreIds(mainId, repo_id, score_id) {
+  const stmt = `UPDATE main_table SET repo_id = ?, score_id = ? WHERE id = ?`;
+  const result = await pool.query(stmt, [repo_id, score_id, mainId]);
+  console.log(`Updated Main Table with repo_id=${repo_id} and score_id=${score_id} for id=${mainId}`);
+}
+export async function insertALLTable(name, version, name_tag, url, zip, readme, total_score, ramp_up_score, correctness_score, bus_factor, responsiveness_score, license_score, version_score, adherence_score) {
+  try {
+    const mainID = await insertMainTable(name, version, name_tag);
+    console.log(mainID);
+    if(mainID != -1){
+      const repo_id = await insertRepoTable(url, zip, readme);
+      console.log(`Repo ID: ${repo_id}`);
+      const score_id = await insertScoreTable(total_score, ramp_up_score, correctness_score, bus_factor, responsiveness_score, license_score, version_score, adherence_score);
+      console.log(`Score ID: ${score_id}`);
+      await updateMainTableWithRepoScoreIds(mainID, repo_id, score_id);
+    }
+    return mainID; //will be -1 if the entry already exists, will be an actul value from 1-inf if it doesnt
+  } catch (err) {
+    console.error(err);
+  }
+}
+
 
 export async function deleteID(name_tag){
   try {
@@ -128,11 +169,6 @@ export async function deleteID(name_tag){
   }
 }
 
-// export async function deleteTable(table_name) {
-//     const stmt = `DROP TABLE IF EXISTS ${table_name}`;
-//     await pool.query(stmt);
-//     console.log(`Table ${table_name} has been deleted.`);
-// }
 export async function deleteTable(table_name) {
   console.log("In delete Table function");
   const stmt = `DROP TABLE IF EXISTS ${table_name}`;
@@ -212,17 +248,7 @@ export async function insertALLTable(name, version, name_tag, url, zip,
   console.log(score_id);
   await insertMainTable(name, version, name_tag, repo_id, score_id);
 }*/
-export async function insertALLTable(name, version, name_tag, url, zip, readme, total_score, ramp_up_score, correctness_score, bus_factor, responsiveness_score, license_score, version_score, adherence_score) {
-  try {
-    const repo_id = await insertRepoTable(url, zip, readme);
-    console.log(`Repo ID: ${repo_id}`);
-    const score_id = await insertScoreTable(total_score, ramp_up_score, correctness_score, bus_factor, responsiveness_score, license_score, version_score, adherence_score);
-    console.log(`Score ID: ${score_id}`);
-    await insertMainTable(name, version, name_tag, repo_id, score_id);
-  } catch (err) {
-    console.error(err);
-  }
-}
+
 
 /*
 await deleteTable("main_table");
@@ -237,8 +263,11 @@ await insertALLTable("name", "version", "name_tag", "url", "zip",
 
 await insertALLTable("name1", "version1", "name_tag1", "url1", "zip1",
   "readme1", 0.0,0.1,0.2,0.3,0.4,
-  0.5,0.6,0.7); 
-await retrieveAllTables("name_tag");*/
+  0.5,0.6,0.7);
+await insertALLTable("name", "version", "name_tag", "url", "zip",
+  "readme", 0.0,0.1,0.2,0.3,0.4,
+  0.5,0.6,0.7); */
+//await retrieveAllTables("name_tag");
 //await deleteID("name_tag");
 //await retrieveAllTables("name_tag");
 //await retrieveAllTables("name_tag");
