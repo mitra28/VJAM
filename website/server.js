@@ -47,12 +47,10 @@ app.post('/package', (req, res) =>{
   // TO-DO: 409 -> package exists
   // TO-DO: 424 -> Package is not uploaded due to the disqualified rating
 
-  // error check
-  if(req.body.Content & req.body.URL){
-    res.status(400).json({error: "both URL and Content are set."});
-  }
-
   if (req.body.Content) { 
+    if(req.body.URL){
+    res.status(400).json({error: "Error: both URL and Content are set. Please only set one field."});
+    }
     // private ingest
     console.log("received an unzipped file");
     res.status(201).json({success: "success"});

@@ -16,7 +16,7 @@ function PackageForm() {
       return blob;
     };
 
-    const handleUrlSubmit = async (event) => {
+  const handleUrlSubmit = async (event) => {
       console.log('Package handle url submit!');
       event.preventDefault();
     
@@ -99,9 +99,41 @@ function PackageForm() {
     }
   };
 
+  // callback for when file is uploaded
+  const handleFileChange = (event) => {
+    setFile(event.target.files[0]);
+  }
+
+  const handleErrorSubmit = async (event) => {
+    console.log('Package handle error submit!');
+    event.preventDefault();
+    const base64 = 'base64 string';
+  
+    const response = await fetch('/package', { // use fetch API to make a POST request to /api/packages endpoint
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ URL: packageUrl , Content: base64}),
+    });
+  
+    if (response.ok) {
+      console.log('Package created successfully!');
+      const scores = await response.json();
+      setScores(scores.output);
+      setErrorMessage('');
+    } else {
+      console.error('Failed to create package.');
+      const errormsg = await response.json();
+      setScores(null);
+      setErrorMessage(`${errormsg.error}`);
+    }
+};
+
   const handleSubmit = (event) => {
     event.preventDefault();
     if (packageUrl && zipfile) {
+      handleErrorSubmit(event);
       setErrorMessage("Only one field can be filled at a time");
       return;
     }
@@ -111,11 +143,6 @@ function PackageForm() {
       handleZipSubmit(event);
     }
   };
-
-    // callback for when file is uploaded
-    const handleFileChange = (event) => {
-      setFile(event.target.files[0]);
-    }
 
   return (
     <form onSubmit={handleSubmit}>
