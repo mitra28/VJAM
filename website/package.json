@@ -30,5 +30,7 @@
     "react-scripts": "^5.0.1",
     "side-channel": "^1.0.4",
     "web-vitals": "^3.3.1"
+    "side-channel": "^1.0.4"
+
   }
 }

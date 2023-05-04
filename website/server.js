@@ -10,7 +10,7 @@ const Package = require('./backend/models/package');
 const upload = multer({ dest: 'temp/' });
 const formidable = require('formidable');
 //const { createRepoTable } = require('../packageDirectory/database.mjs');
-import { deleteTable } from "../packageDirectory/database.mjs";
+
 const PackageData = require ('./backend/models/packagedata');
 
 // initialize db
@@ -33,14 +33,6 @@ app.use(bodyParser.urlencoded({limit: '50mb', extended: true}));
 app.use(express.static(path.join(__dirname, '.', 'react', 'build')));
 console.log("Serving static assets from directory: " + path.join(__dirname, '.', 'react', 'build'));
 console.log("Serving index from: " + path_to_index);
-
-// initialize db
-// engine = init_engine();
-// delete_table(engine,"repo_info");
-// // delete_table(engine,"zipped_table");
-// import { deleteTable } from "../packageDirectory/database.mjs";
-// create_repo_table(engine);
-// create_zip_table(engine);
 
 
 app.get('/', (req, res) => {
@@ -112,6 +104,22 @@ app.get('/package/:ID', (req, res) =>{
   const packageID = req.params.ID;
   // get id from db
   console.log(`Get package/${packageID} endpoint reached`);
+
+});
+
+app.put('/package/:ID', (req, res) =>{
+  const packageID = req.params.ID;
+  // get id from db
+  console.log(`Put package/${packageID} endpoint reached`);
+
+
+
+app.delete('/package/:ID', (req, res) =>{
+  const packageID = req.params.ID;
+  // get id from db
+  console.log(`Delete package/${packageID} endpoint reached`);
+});
+
 
   // 404 if package doesn't exist
   if (!packageExists(packageId)) {
