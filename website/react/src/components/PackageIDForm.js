@@ -1,29 +1,26 @@
 import React, { useState } from 'react';
-// const PackageData = require('../../../backend/models/packagedata');
 
-function PackageURLForm() {
-    const [packageUrl, setPackageUrl] = useState(''); 
-    const [scores, setScores] = useState(null); 
-    const [errorMessage, setErrorMessage] = useState('');
+function PackageIDForm() {
+  const [packageID, setPackageID] = useState(''); // 
+  const [scores, setScores] = useState(null); 
+  const [errorMessage, setErrorMessage] = useState('');
 
   const handleSubmit = async (event) => {
     event.preventDefault();
     console.log('Package handle submit!');
   
     
-    const response = await fetch('/package', { // use fetch API to make a POST request to /api/packages endpoint
-      method: 'POST',
+    const response = await fetch(`/package/${packageID}`, { // use fetch API to make a POST request to /api/packages endpoint
+      method: 'GET',
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({ URL: packageUrl }),
     });
     
     if (response.ok) {
       console.log('Package created successfully!');
-      const scores = await response.json();
       setScores(scores.output);
-      setErrorMessage('');      
+      setErrorMessage('');
     } else {
       console.error('Failed to create package.');
       setScores(null);
@@ -31,17 +28,17 @@ function PackageURLForm() {
     }
   };
 
-  const handleUrlChange = (event) => {
-    setPackageUrl(event.target.value);
+  const handleIDChange = (event) => {
+    setPackageID(event.target.value);
   }
 
   return (
     <form onSubmit={handleSubmit}>
       <div>
-        <label htmlFor="url">Enter a package URL:</label>
-        <input type="text" id="url" name="url" value={packageUrl} onChange={handleUrlChange} />
+        <label htmlFor="url">Enter a package ID:</label>
+        <input type="text" id="id" name="id" value={packageID} onChange={handleIDChange} />
       </div>
-      <button type="submit">Create Package</button>
+      <button type="submit">Get Package</button>
       {errorMessage && <div>{errorMessage}</div>}
       {scores && (
         <div>
@@ -60,5 +57,4 @@ function PackageURLForm() {
   );
 }
 
-export default PackageURLForm;
-
+export default PackageIDForm;
