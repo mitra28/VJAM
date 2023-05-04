@@ -68,7 +68,7 @@ app.get('/', (req, res) => {
 });
 
 // /packages
-app.put("/packages", (req, res) => {
+app.post("/packages", (req, res) => {
   const offset = req.params.offset;
 
   // 413 if too many packages returned 
@@ -219,18 +219,36 @@ app.get("/package/byName/:name", (req, res) => {
 
 });
 app.delete("/package/byName/:name", (req, res) => {
+  const packageName = req.params.name;
 
+  // 404 if package doesn't exist
+  if (!packageExists(packageName)) {
+    res.status(404).json({ error: "No package found under this name." });
+  }
+
+  // Otherwise, return a success response, list of packages
+  else {
+    res.status(200).json({  });
+  }
 });
 
 
 // /package/byRegEx
 app.post("/package/byRegEx", (req, res) => {
+  // 404 if package doesn't exist
+  if (!packageExists(packageRegEx)) {
+    res.status(404).json({ error: "No package found under this regex." });
+  }
 
+  // Otherwise, return a success response, list of packages
+  else {
+    res.status(200).json({  });
+  }
 });
 
 
 // reset endpoint
-app.put("/reset", (req, res) => {
+app.delete("/reset", (req, res) => {
   // call reset for all 3 tables here
   deleteTable(repo_table);
   deleteTable(score_table);
@@ -245,33 +263,9 @@ app.put("/authenticate", (req, res) => {
 
 // search endpoint
 app.put("/package/ByName/:Name", (req, res) => {
-  const packageName = req.params.Name;
-
-  // 404 if package doesn't exist
-  if (!packageExists(packageName)) {
-    res.status(404).json({ error: "No package found under this name." });
-  }
-
-  // Otherwise, return a success response, list of packages
-  else {
-    res.status(200).json({  });
-  }
+  
 });
 
-
-app.put("/package/ByRegEx", (req, res) => {
-  const packageRegEx = req.params.RegEx;
-
-  // 404 if package doesn't exist
-  if (!packageExists(packageRegEx)) {
-    res.status(404).json({ error: "No package found under this regex." });
-  }
-
-  // Otherwise, return a success response, list of packages
-  else {
-    res.status(200).json({  });
-  }
-});
 
 
 
