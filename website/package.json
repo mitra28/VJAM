@@ -7,7 +7,8 @@
     "start": "node server.js",
     "dev": "nodemon server.js",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "cd react && npm run build"
+    "build": "cd react && npm run build",
+    "setup": "cd react && npm install && npm run build"
   },
   "author": "",
   "license": "ISC",

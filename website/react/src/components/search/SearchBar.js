@@ -8,6 +8,10 @@ function SearchBar() {
     console.log(`Checked state is ${checked}`);
   }, [checked, value]);
   
+  function getResults() {
+    setValue("Search");
+  }
+
   return (
     <div className="SearchBar">
       <input
@@ -24,7 +28,7 @@ function SearchBar() {
         setChecked(newCheck.target.checked)
       }}></input>
       <button onClick={() => {
-        setValue("Search");
+        getResults();
       }}>Search</button>
     </div>
   );
