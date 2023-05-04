@@ -1,3 +1,4 @@
+
 const express = require('express');
 const cors = require("cors");
 const mysql = require('mysql');
@@ -10,17 +11,43 @@ const Package = require('./backend/models/package');
 const upload = multer({ dest: 'temp/' });
 const formidable = require('formidable');
 //const { createRepoTable } = require('../packageDirectory/database.mjs');
-
 const PackageData = require ('./backend/models/packagedata');
+// const databaseFunctions = require('../packageDirectory/database.js');
+//const { deleteTable } = require('../packageDirectory/database.js');
 
-// initialize db
-// engine = init_engine();
-// delete_table(engine,"repo_info");
-// delete_table(engine,"zipped_table");
-// create_repo_table(engine);
-// create_zip_table(engine);
+async function main() {
+  const databaseFunctions = await import('../packageDirectory/database.js');
+  return databaseFunctions;
+}
+async function reset(string) {
+  const db = await main();
+  const { deleteTable } = db;
+  deleteTable("main_table");
+  deleteTable("score_table");
+  deleteTable("repo_table");
+}
+async function createMainTable() {
+  const db = await main();
+  const { createMainTable,createRepoTable,createScoreTable} = db;
+  createMainTable();
+  createRepoTable();
+  createScoreTable();
+}
+async function addAllTables(name, version, name_tag, url, zip, readme, total_score, ramp_up_score, correctness_score, bus_factor, responsiveness_score, license_score, version_score, adherence_score){
+  const db = await main();
+  const { insertALLTable} = db;
+  insertALLTable(name, version, name_tag, url, zip, readme, total_score, ramp_up_score, correctness_score, bus_factor, responsiveness_score, license_score, version_score, adherence_score);
+}
+async function getAllTables(name_tag){
+  const db = await main();
+  const { retrieveAllTables} = db;
+  retrieveAllTables(name_tag);
+}
 
-path_to_index = path.join(__dirname, '.', 'react', 'build', 'index.html');
+// reset();
+// createMainTable();
+
+const path_to_index = path.join(__dirname, '.', 'react', 'build', 'index.html');
 
 const port = 9000; // process.env.PORT || 8080;
 const app = express();
@@ -47,14 +74,14 @@ app.post('/package', (req, res) =>{
   // TO-DO: 409 -> package exists
   // TO-DO: 424 -> Package is not uploaded due to the disqualified rating
 
-  // error check
-  if(req.body.Content & req.body.URL){
-    res.status(400).json({error: "both URL and Content are set."});
-  }
-
   if (req.body.Content) { 
+    if(req.body.URL){
+    res.status(400).json({error: "Error: both URL and Content are set. Please only set one field."});
+    }
     // private ingest
     console.log("received an unzipped file");
+
+
     res.status(201).json({success: "success"});
   }
   // URL given
@@ -109,31 +136,6 @@ app.get('/package/:ID', (req, res) =>{
   const scoresObj = JSON.parse(scores); // if scores is a string json
   res.status(201).json({ success: 'success', output: scoresObj });
 
-});
-
-app.put('/package/:ID', (req, res) =>{
-  const packageID = req.params.ID;
-  // get id from db
-  console.log(`Put package/${packageID} endpoint reached`);
-
-
-
-app.delete('/package/:ID', (req, res) =>{
-  const packageID = req.params.ID;
-  // get id from db
-  console.log(`Delete package/${packageID} endpoint reached`);
-});
-
-
-  // 404 if package doesn't exist
-  if (!packageExists(packageId)) {
-    res.status(404).json({ error: "Package Does Not Exist." });
-  }
-
-  // Otherwise, return a success response with the package information
-  else {
-    res.status(200).json({  });
-  }
 });
 
 app.put('/package/:ID', (req, res) => {

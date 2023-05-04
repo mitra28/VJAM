@@ -195,6 +195,11 @@ export async function retrieveAllTables(name_tag) {
   console.log(repoData);
   console.log(scoreData);
   console.log(MainData);
+  return {
+    repoData,
+    scoreData,
+    MainData
+  }; //return an object 
 }
 /*
 export async function insertALLTable(name, version, name_tag, url, zip,
