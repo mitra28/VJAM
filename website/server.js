@@ -133,8 +133,23 @@ app.post('/package', (req, res) =>{
       process.on('close', () => {
         console.log(`here are the scores: ${scores}`);
         const scoresObj = JSON.parse(scores);
+
+        // ******************************************************************
+        // TO-DO: create package object
+        const package = create_package();
+        // TO-DO: save scores and url in package object
+        // TO-DO: save to db
+        if(insert_repo_data(package) == -1){
+          res.status(409).json({ error: 'The package exists already'});
+        }
+        // ******************************************************************
+        
         res.status(201).json({ success: 'success', output: scoresObj });
+        
       });
+
+      
+
       
     }
 
@@ -258,12 +273,6 @@ app.delete("/reset", (req, res) => {
 // authenticate endpoint
 app.put("/authenticate", (req, res) => {
   res.status(501).json({ error: "Not Implemented." });
-});
-
-
-// search endpoint
-app.put("/package/ByName/:Name", (req, res) => {
-  
 });
 
 
