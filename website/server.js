@@ -10,8 +10,9 @@ const Package = require('./backend/models/package');
 const upload = multer({ dest: 'temp/' });
 const formidable = require('formidable');
 //const { createRepoTable } = require('../packageDirectory/database.mjs');
-import { deleteTable } from "../packageDirectory/database.mjs";
+// import { deleteTable } from "../packageDirectory/database.mjs";
 const PackageData = require ('./backend/models/packagedata');
+const { deleteID, retrieveMainTable, retrieveRepoTable } = require('../packageDirectory/database.mjs');
 
 // initialize db
 // engine = init_engine();
@@ -108,6 +109,8 @@ app.post('/package', (req, res) =>{
     //res.status(400).json({error: "error message"});
 });
 
+
+// Package Retrieve
 app.get('/package/:ID', (req, res) =>{
   const packageID = req.params.ID;
   // get id from db
@@ -120,10 +123,17 @@ app.get('/package/:ID', (req, res) =>{
 
   // Otherwise, return a success response with the package information
   else {
+    retrieveMainTable(packageID);
+    retrieveRepoTable(packageID);
+
+    // return contents from the retrieve functions below
     res.status(200).json({  });
   }
 });
 
+
+
+// Package Update 
 app.put('/package/:ID', (req, res) => {
   const packageID = req.params.ID;
   // get id from db
@@ -141,6 +151,9 @@ app.put('/package/:ID', (req, res) => {
   }
 });
 
+
+
+// Package Delete
 app.delete('/package/:ID', (req, res) =>{
   const packageID = req.params.ID;
   // get id from db
@@ -153,7 +166,8 @@ app.delete('/package/:ID', (req, res) =>{
 
   // Otherwise, return a success response with the package information
   else {
-    res.status(200).json({  });
+    deleteID(packageID);
+    res.status(200).json({ message : "Package is Deleted." });
   }
 });
 
@@ -197,7 +211,50 @@ app.get("/package/:id/rate", (req, res) => {
   }
 });  // PackageRate
 
+// search endpoint
+app.put("/package/ByName/:Name", (req, res) => {
+  const packageName = req.params.Name;
 
+  // 404 if package doesn't exist
+  if (!packageExists(packageName)) {
+    res.status(404).json({ error: "No package found under this name." });
+  }
+
+  // Otherwise, return a success response, list of packages
+  else {
+    res.status(200).json({  });
+  }
+});
+
+// reset endpoint
+app.put("/package/ByRegEx", (req, res) => {
+  const packageRegEx = req.params.RegEx;
+
+  // 404 if package doesn't exist
+  if (!packageExists(packageRegEx)) {
+    res.status(404).json({ error: "No package found under this regex." });
+  }
+
+  // Otherwise, return a success response, list of packages
+  else {
+    res.status(200).json({  });
+  }
+});
+
+// reset endpoint
+app.put("/packages", (req, res) => {
+  const offset = req.params.offset;
+
+  // 413 if too many packages returned 
+  if (length > offset) {
+    res.status(404).json({ error: "Too many packages returned." });
+  }
+
+  // Otherwise, return a success response, list of packages
+  else {
+    res.status(200).json({  });
+  }
+});
 
 // Start the server
 app.listen(port, () => {
