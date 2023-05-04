@@ -33,9 +33,7 @@ function App(prop) {
         <Route path="packageform"element = {<PackageForm />}/>
 
         <Route path="rateform"element = {<PackageRateForm />}/>
-        <Route path="bynamegetform"element = {<PackageForm />}/>
         <Route path="bynamedeleteform"element = {<PackageForm />}/>
-        <Route path="regexform"element = {<PackageForm />}/>
 
         </Route>
       </Routes>
