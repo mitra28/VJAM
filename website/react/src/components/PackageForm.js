@@ -1,4 +1,39 @@
 import React, { useState } from 'react';
+<<<<<<< HEAD
+// const PackageData = require('../../../backend/models/packagedata');
+
+function PackageURLForm() {
+    const [packageUrl, setPackageUrl] = useState(''); 
+    const [packageID, setPackageID] = useState('');
+    const [scores, setScores] = useState(null); 
+    const [errorMessage, setErrorMessage] = useState('');
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    console.log('Package handle submit!');
+  
+    
+    const response = await fetch('/package', { // use fetch API to make a POST request to /api/packages endpoint
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ URL: packageUrl }),
+    });
+    
+    if (response.ok) {
+      console.log('Package created successfully!');
+      const scores = await response.json();
+      setScores(scores.output);
+      setErrorMessage('');
+      
+      console.log(`url scores: ${scores.output.URL}`);
+    } else {
+      console.error('Failed to create package.');
+      setScores(null);
+      setErrorMessage('Failed to create package.');
+    }
+=======
 import JSZip from 'jszip';
 const encoder = new TextEncoder();
 
@@ -40,12 +75,15 @@ function PackageForm() {
         setScores(null);
         setErrorMessage('Failed to create package.');
       }
+>>>>>>> main
   };
 
   const handleUrlChange = (event) => {
     setPackageUrl(event.target.value);
   }
 
+<<<<<<< HEAD
+=======
   const handleZipSubmit = async (event) => {
     console.log('Package handle zip submit!');
     event.preventDefault();
@@ -144,18 +182,23 @@ function PackageForm() {
     }
   };
 
+>>>>>>> main
   return (
     <form onSubmit={handleSubmit}>
       <div>
         <label htmlFor="url">Enter a package URL:</label>
         <input type="text" id="url" name="url" value={packageUrl} onChange={handleUrlChange} />
       </div>
+<<<<<<< HEAD
+      <button type="submit">Create Package</button>
+=======
       <div>
         <label htmlFor="file">Choose a zipfile:</label>
         <input type="file" id="file" name="file" onChange={handleFileChange} />
       </div>
       <button type="submit">Create Package</button>
 
+>>>>>>> main
       {errorMessage && <div>{errorMessage}</div>}
       {scores && (
         <div>
@@ -174,5 +217,9 @@ function PackageForm() {
   );
 }
 
+<<<<<<< HEAD
+export default PackageURLForm;
+=======
 export default PackageForm;
+>>>>>>> main
 

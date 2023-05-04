@@ -2,10 +2,16 @@ import React, { useState, useEffect } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import './App.css';
 import Layout from './Layout.jsx';
+<<<<<<< HEAD
+import PackageURLForm from './components/PackageURLForm';
+import PackageZipForm from './components/PackageZipForm';
+import PackageIDForm from './components/PackageIDForm';
+=======
 import PackageDeleteIDForm from './components/PackageDeleteIDForm';
 import PackagePutIDForm from './components/PackagePutIDForm';
 import PackageIDForm from './components/PackageIDForm';
 import PackageForm from './components/PackageForm';
+>>>>>>> main
 import ResultPage from "./components/ResultPage.js";
 import SearchBar from './components/search/SearchBar.js';
 
@@ -22,12 +28,20 @@ function App(prop) {
     <BrowserRouter>
       <Routes>
         <Route path="/" element = {<Layout />}>
+<<<<<<< HEAD
+        <Route path="zipform" element = {<PackageZipForm />}/>
+        <Route path="urlform" element = {<PackageURLForm />}/>
+        <Route path="search" element={<SearchBar />} />
+        <Route path="package" element={<ResultPage package={NaN}/>} />
+        <Route path="idform" element = {<PackageIDForm />}/>
+=======
         <Route path="search" element={<SearchBar />} />
         <Route path="package" element={<ResultPage package={NaN}/>} />
         <Route path="idform" element = {<PackageIDForm />}/>
         <Route path="deleteidform" element = {<PackageDeleteIDForm />}/>
         <Route path="putidform" element = {<PackagePutIDForm />}/>
         <Route path="packageform"element = {<PackageForm />}/>
+>>>>>>> main
         </Route>
       </Routes>
     </BrowserRouter>

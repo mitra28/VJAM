@@ -62,6 +62,7 @@ console.log("Serving static assets from directory: " + path.join(__dirname, '.',
 console.log("Serving index from: " + path_to_index);
 
 
+
 app.get('/', (req, res) => {
   res.send('launch new port 8080');
 });
@@ -74,14 +75,14 @@ app.post('/package', (req, res) =>{
   // TO-DO: 409 -> package exists
   // TO-DO: 424 -> Package is not uploaded due to the disqualified rating
 
+  // error check
+
   if (req.body.Content) { 
     if(req.body.URL){
     res.status(400).json({error: "Error: both URL and Content are set. Please only set one field."});
     }
     // private ingest
     console.log("received an unzipped file");
-
-
     res.status(201).json({success: "success"});
   }
   // URL given
@@ -119,8 +120,6 @@ app.post('/package', (req, res) =>{
       
     }
 
-    
-
   // insert_repo_data(engine, repo_name, url, total_score, ramp_up_score, correctness_score, bus_factor, responsiveness_score, license_score, version_score, adherence_score);
   // insert_zipped_data(engine, file_name, url, zipped_file); 
     //res.status(400).json({error: "error message"});
@@ -138,23 +137,8 @@ app.get('/package/:ID', (req, res) =>{
 
 });
 
-app.put('/package/:ID', (req, res) => {
-  const packageID = req.params.ID;
-  // get id from db
-  console.log(`Put package/${packageID} endpoint reached`);
 
-
-  // 404 if package doesn't exist
-  if (!packageExists(packageId)) {
-    res.status(404).json({ error: "Package Does Not Exist." });
-  }
-
-  // Otherwise, return a success response with the package information
-  else {
-    res.status(200).json({  });
-  }
-});
-
+// Package Delete
 app.delete('/package/:ID', (req, res) =>{
   const packageID = req.params.ID;
   // get id from db
@@ -167,9 +151,31 @@ app.delete('/package/:ID', (req, res) =>{
 
   // Otherwise, return a success response with the package information
   else {
+    deleteID(packageID);
+    res.status(200).json({ message : "Package is Deleted." });
+  }
+});
+
+app.put('/package/:ID', (req, res) =>{
+  const packageID = req.params.ID;
+  // get id from db
+  console.log(`Put package/${packageID} endpoint reached`);
+
+  // 404 if package doesn't exist
+  if (!packageExists(packageId)) {
+    res.status(404).json({ error: "Package Does Not Exist." });
+  }
+
+  // Otherwise, return a success response with the package information
+  else {
+    retrieveMainTable(packageID);
+    retrieveRepoTable(packageID);
+
+    // return contents from the retrieve functions below
     res.status(200).json({  });
   }
 });
+
 
 
 app.get("/message", (req, res) => {
@@ -211,7 +217,49 @@ app.get("/package/:id/rate", (req, res) => {
   }
 });  // PackageRate
 
+// search endpoint
+app.put("/package/ByName/:Name", (req, res) => {
+  const packageName = req.params.Name;
 
+  // 404 if package doesn't exist
+  if (!packageExists(packageName)) {
+    res.status(404).json({ error: "No package found under this name." });
+  }
+
+  // Otherwise, return a success response, list of packages
+  else {
+    res.status(200).json({  });
+  }
+});
+
+
+app.put("/package/ByRegEx", (req, res) => {
+  const packageRegEx = req.params.RegEx;
+
+  // 404 if package doesn't exist
+  if (!packageExists(packageRegEx)) {
+    res.status(404).json({ error: "No package found under this regex." });
+  }
+
+  // Otherwise, return a success response, list of packages
+  else {
+    res.status(200).json({  });
+  }
+});
+
+app.put("/packages", (req, res) => {
+  const offset = req.params.offset;
+
+  // 413 if too many packages returned 
+  if (length > offset) {
+    res.status(404).json({ error: "Too many packages returned." });
+  }
+
+  // Otherwise, return a success response, list of packages
+  else {
+    res.status(200).json({  });
+  }
+});
 
 // Start the server
 app.listen(port, () => {
