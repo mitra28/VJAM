@@ -96,7 +96,7 @@ async function reset() {
   await deleteTable("score_table");
   await deleteTable("repo_table");
 }
-async function createMainTable() {
+async function createTables() {
   const db = await main();
   const { createMainTable,createRepoTable,createScoreTable} = db;
   await createMainTable();
@@ -155,7 +155,7 @@ app.post("/packages", (req, res) => {
 
 
 // /package
-app.post('/package', (req, res) =>{
+app.post('/package', async (req, res) =>{
   console.log('/package endpoint reached');
   //console.log(req);
   //console.log(req.body);
@@ -171,8 +171,16 @@ app.post('/package', (req, res) =>{
     if(req.body.URL){
     res.status(400).json({error: "Error: both URL and Content are set. Please only set one field."});
     }
+    // decode content
+    // unzip
+    // get package.json
+    // get name, version, url
+    // ingetst
+
     // private ingest
     console.log("received an unzipped file");
+    await post_zip('name', 'version', 'name_tag', null, req.body.Content, null);
+
     res.status(201).json({success: "success"});
   }
 
@@ -384,6 +392,7 @@ app.delete("/reset", async (req, res) => {
   console.log('/reset enpoint reached');
 
   await reset();
+  await createTables();
   res.status(200).json({ msg: "Registry Reset!" });
 
 });
