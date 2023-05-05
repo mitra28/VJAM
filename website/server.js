@@ -12,6 +12,7 @@ const upload = multer({ dest: 'temp/' });
 const formidable = require('formidable');
 //const { createRepoTable } = require('../packageDirectory/database.mjs');
 const PackageData = require ('./backend/models/packagedata');
+const { retrieveScoreTable } = require('../packageDirectory/database.js');
 // const databaseFunctions = require('../packageDirectory/database.js');
 //const { deleteTable } = require('../packageDirectory/database.js');
 
@@ -88,6 +89,12 @@ async function packageRegExGet(){
   return result;
 
 }
+async function getScore(name_tag){
+  const db = await main();
+  const { retrieveScoreTable } = db;
+  const result = await retrieveScoreTable(name_tag);
+  return result;
+}
 
 async function reset() {
   const db = await main();
@@ -138,7 +145,7 @@ app.get('/', (req, res) => {
 });
 
 // /packages
-app.post("/packages", (req, res) => {
+app.post("/packages", async (req, res) => {
   console.log('/packages enpoint reached');
   const offset = req.params.offset;
 
@@ -149,7 +156,10 @@ app.post("/packages", (req, res) => {
 
   // Otherwise, return a success response, list of packages
   else {
-    res.status(200).json({  });
+
+    const packageslist = await post_list();
+    console.log(packageslist);
+    res.status(200).json({packages: packageslist});
   }
 });
 
@@ -289,21 +299,21 @@ app.get('/package/:ID', async (req, res) =>{
   res.status(201).json({ success: 'success', output: value });
 
 });
-app.delete('/package/:ID', (req, res) =>{
+app.delete('/package/:ID', async (req, res) =>{
   const packageID = req.params.ID;
   // get id from db
   console.log(`Delete package/${packageID} endpoint reached`);
 
   // 404 if package doesn't exist
-  if (!packageExists(packageId)) {
-    res.status(404).json({ error: "Package Does Not Exist." });
-  }
+  // if (!packageExists(packageId)) {
+  //   res.status(404).json({ error: "Package Does Not Exist." });
+  // }
 
-  // Otherwise, return a success response with the package information
-  else {
-    deleteID(packageID);
+  // // Otherwise, return a success response with the package information
+  // else {
+    await delete_nameTag(packageID);
     res.status(200).json({ message : "Package is Deleted." });
-  }
+  //}
 });
 app.put('/package/:ID', (req, res) =>{
   const packageID = req.params.ID;
@@ -311,78 +321,101 @@ app.put('/package/:ID', (req, res) =>{
   console.log(`Put package/${packageID} endpoint reached`);
 
   // 404 if package doesn't exist
-  if (!packageExists(packageId)) {
-    res.status(404).json({ error: "Package Does Not Exist." });
-  }
+  // if (!packageExists(packageId)) {
+  //   res.status(404).json({ error: "Package Does Not Exist." });
+  // }
 
   // Otherwise, return a success response with the package information
-  else {
+  // else {
     retrieveMainTable(packageID);
     retrieveRepoTable(packageID);
 
     // return contents from the retrieve functions below
     res.status(200).json({  });
-  }
+  // }
 });
 
 
 // package/{id}/rate endpoint
-app.get("/package/:id/rate", (req, res) => {
+app.get("/package/:id/rate", async (req, res) => {
   const packageID = req.params.ID;
   console.log(`package/${packageID}/rate endpoint reached`);
-
+  const output = await getScore(packageID);
   // 404 if package doesn't exist
-  if (!packageExists(packageId)) {
+  if (output === -404) {
     res.status(404).json({ error: "Package Does Not Exist." });
   }
 
-  // If the package rating system choked, return a 500 error response
-  else if (packageRatingChoked(packageId)) {
-    res.status(500).json({ error: "The package rating system choked on at least one of the metrics." });
+  
+
+  // rate package if there is not scored for it
+  if (output === -1){
+    console.log('package does not have scores set. calculating...');
+    // If the package rating system choked, return a 500 error response
+    //if (packageRatingChoked(packageId)) {
+    //  res.status(500).json({ error: "The package rating system choked on at least one of the metrics." });
+    //}
   }
 
-  // Otherwise, return a success response
-  else {
-    res.status(200).json({ packageId });
-  }
+  const totalscore = output.total_score;
+  const rampupscore = output.ramp_up_score;
+  const correctnessscore = output.correctness_score;
+  const busfactor = output.bus_factor;
+  const responsivescore = output.responsiveness_score;
+  const licensescore = output.license_score;
+  const versionscore = output.version_score;
+  const adherencescore = output.ladherence_score;
+
+  allscores = {
+          'NET_SCORE':totalscore,
+          'RAMP_UP_SCORE':rampupscore,
+          'CORRECTNESS_SCORE':correctnessscore,
+          'BUS_FACTOR_SCORE': busfactor,
+          'RESPONSIVE_MAINTAINER_SCORE':responsivescore,
+          'LICENSE_SCORE': licensescore,
+          'VERSION_PIN_SCORE': versionscore,
+          'ADHERENCE_SCORE': adherencescore}
+
+  res.status(200).json({ output: allscores});
 });
 
 
-// /package/byName/{name}
+// /package/byName/{name} ************ JASON ****************************
 app.get("/package/byName/:name", (req, res) => {
   const packageName = req.params.name;
   console.log(`GET /package/byName/${packageName} enpoint reached`);
 });
-
-app.delete("/package/byName/:name", (req, res) => {
+// ************ JASON ****************************
+app.delete("/package/byName/:name", async (req, res) => {
   const packageName = req.params.name;
   console.log(`DELETE /package/byName/${packageName} enpoint reached`);
   
-
+  await delete_name(packageName);
   // 404 if package doesn't exist
-  if (!packageExists(packageName)) {
-    res.status(404).json({ error: "No package found under this name." });
-  }
+  // if (!packageExists(packageName)) {
+  //   res.status(404).json({ error: "No package found under this name." });
+  // }
 
   // Otherwise, return a success response, list of packages
-  else {
-    res.status(200).json({  });
-  }
+  // else {
+    
+  res.status(200).json({  });
+  // }
 });
 
 
-// /package/byRegEx
+// /package/byRegEx ************ JASON ****************************
 app.post("/package/byRegEx", (req, res) => {
   console.log('/package/byRegEx enpoint reached');
   // 404 if package doesn't exist
-  if (!packageExists(packageRegEx)) {
-    res.status(404).json({ error: "No package found under this regex." });
-  }
+  // if (!packageExists(packageRegEx)) {
+  //   res.status(404).json({ error: "No package found under this regex." });
+  // }
 
   // Otherwise, return a success response, list of packages
-  else {
+  // else {
     res.status(200).json({  });
-  }
+  // }
 });
 
 
