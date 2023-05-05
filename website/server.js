@@ -20,6 +20,13 @@ async function main() {
   return databaseFunctions;
 }
 
+async function packageExist(name_tag){
+  const db = await main();
+  const {packageCount} = db;
+  const result = await packageCount(name_tag);
+  return result;
+}
+
 async function post_url(name, version, name_tag, url, zip, readme, total_score, ramp_up_score, correctness_score, bus_factor, responsiveness_score, license_score, version_score, adherence_score){
   const db = await main();
   const {insertScoreTable, insertMainTable, insertRepoTable,updateMainTableWithRepoScoreIds} = db;

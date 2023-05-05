@@ -315,7 +315,7 @@ export async function retrieveAllZip(){
 export async function updateZip(name_tag, newZip) {
   const mainStmt = `SELECT repo_id FROM main_table WHERE name_tag = ?`;
   const [mainRes] = await pool.query(mainStmt, [name_tag]);
-  if (mainRes.length === 0) {
+  if (mainRes.length == 0) {
     throw new Error(`No rows found for nameTag: ${name_tag}`);
   }
   const id = mainRes[0].repo_id;
@@ -341,6 +341,16 @@ export async function retrieveZippedString(name_tag){
   return result[0].zip;
 }
 
+export async function packageCount(name_tag){
+  const stmt = "SELECT COUNT(*) AS count FROM main_table WHERE nametag = ?";
+  const [result] = await pool.query(stmt, [name_tag]);
+  const count = result[0].count;
+  if(count > 0){
+    return 1;
+  }else{
+    return -404;
+  }
+}
 
 
 
