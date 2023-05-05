@@ -122,7 +122,7 @@ async function getAllTables(name_tag){
 
 const path_to_index = path.join(__dirname, '.', 'react', 'build', 'index.html');
 
-const port = 9090; // process.env.PORT || 8080;
+const port = 9000; // process.env.PORT || 8080;
 const app = express();
 app.use(cors());
 app.use(express.json());
