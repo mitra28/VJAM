@@ -267,13 +267,17 @@ export async function retrieveScoreTable(name_tag) {
   const mainStmt = `SELECT score_id FROM main_table WHERE name_tag = ?`;
   const [mainRes] = await pool.query(mainStmt, [name_tag]);
   if (mainRes.length === 0) {
-    throw new Error(`No rows found for nameTag: ${name_tag}`);
+    //return 404
+    // throw new Error(`No rows found for nameTag: ${name_tag}`);
+    return -404;
   }
+  //we could make this return -1 and if the value returned is -1 we know it doesnt exist in scores
   const score_id = mainRes[0].score_id;
 
   const scoreStmt = `SELECT * FROM score_table WHERE id = ?`;
   const [scoreRes] = await pool.query(scoreStmt, [score_id]);
   if (scoreRes.length === 0) {
+    return -1; // if -1 then rate package
     throw new Error(`No rows found in score_table for scoreID: ${score_id}`);
   }
 

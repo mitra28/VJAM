@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 
 function RegistryResetForm() {
-  const [errorMessage, setErrorMessage] = useState('');
+  const [message, setMessage] = useState('');
   const handleSubmit = async (event) => {
     event.preventDefault();
     console.log('Package delete handle submit!');
@@ -16,6 +16,9 @@ function RegistryResetForm() {
     
     if (response.ok) {
       console.log('Registry reset successfully!');
+      const output = await response.json();
+      setMessage(output);
+      console.log(output);
 
     } else {
       console.error('Failed to reset registry.');
@@ -25,7 +28,7 @@ function RegistryResetForm() {
   return (
     <form onSubmit={handleSubmit}>
       <button type="submit">Reset Registry</button>
-      {errorMessage && <div>{errorMessage}</div>}
+      {message && <div>{message.msg}</div>}
     </form>
   );
 }

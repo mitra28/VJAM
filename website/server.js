@@ -12,6 +12,7 @@ const upload = multer({ dest: 'temp/' });
 const formidable = require('formidable');
 //const { createRepoTable } = require('../packageDirectory/database.mjs');
 const PackageData = require ('./backend/models/packagedata');
+const { retrieveScoreTable } = require('../packageDirectory/database.js');
 // const databaseFunctions = require('../packageDirectory/database.js');
 //const { deleteTable } = require('../packageDirectory/database.js');
 
@@ -95,15 +96,21 @@ async function packageRegExGet(){
   return result;
 
 }
+async function getScore(name_tag){
+  const db = await main();
+  const { retrieveScoreTable } = db;
+  const result = await retrieveScoreTable(name_tag);
+  return result;
+}
 
-async function reset(string) {
+async function reset() {
   const db = await main();
   const { deleteTable } = db;
   await deleteTable("main_table");
   await deleteTable("score_table");
   await deleteTable("repo_table");
 }
-async function createMainTable() {
+async function createTables() {
   const db = await main();
   const { createMainTable,createRepoTable,createScoreTable} = db;
   await createMainTable();
@@ -145,7 +152,7 @@ app.get('/', (req, res) => {
 });
 
 // /packages
-app.post("/packages", (req, res) => {
+app.post("/packages", async (req, res) => {
   console.log('/packages enpoint reached');
   const offset = req.params.offset;
 
@@ -156,13 +163,16 @@ app.post("/packages", (req, res) => {
 
   // Otherwise, return a success response, list of packages
   else {
-    res.status(200).json({  });
+
+    const packageslist = await post_list();
+    console.log(packageslist);
+    res.status(200).json({packages: packageslist});
   }
 });
 
 
 // /package
-app.post('/package', (req, res) =>{
+app.post('/package', async (req, res) =>{
   console.log('/package endpoint reached');
   //console.log(req);
   //console.log(req.body);
@@ -189,8 +199,16 @@ app.post('/package', (req, res) =>{
     if(req.body.URL){
     res.status(400).json({error: "Error: both URL and Content are set. Please only set one field."});
     }
+    // decode content
+    // unzip
+    // get package.json
+    // get name, version, url
+    // ingetst
+
     // private ingest
     console.log("received an unzipped file");
+    await post_zip('name', 'version', 'name_tag', null, req.body.Content, null);
+
     res.status(201).json({success: "success"});
   }
 
@@ -297,28 +315,28 @@ app.get('/package/:ID', async (req, res) =>{
   const url = result.repo_row.url;
   console.log(`name: ${name}, version: ${version}, id: ${id}, contents: ${contents}, url: ${url}`);
 
+
   // get id from db
-  const scores = '{"URL":"https://github.com/marcelklehr/nodist", "NET_SCORE":0.48, "RAMP_UP_SCORE":0.78, "CORRECTNESS_SCORE":0.02, "BUS_FACTOR_SCORE":0.21, "RESPONSIVE_MAINTAINER_SCORE":0.18, "LICENSE_SCORE":1.00, "VERSION_PIN_SCORE":0.90, "ADHERENCE_SCORE":0.60}';
+  const value = {'metadata': {'Name': name, 'Version': version, 'ID': id}, 'Data': {'Content': contents}};
   // format data to return
-  const scoresObj = JSON.parse(scores); // if scores is a string json
-  res.status(201).json({ success: 'success', output: scoresObj });
+  res.status(201).json({ success: 'success', output: value });
 
 });
-app.delete('/package/:ID', (req, res) =>{
+app.delete('/package/:ID', async (req, res) =>{
   const packageID = req.params.ID;
   // get id from db
   console.log(`Delete package/${packageID} endpoint reached`);
 
   // 404 if package doesn't exist
-  if (!packageExists(packageId)) {
-    res.status(404).json({ error: "Package Does Not Exist." });
-  }
+  // if (!packageExists(packageId)) {
+  //   res.status(404).json({ error: "Package Does Not Exist." });
+  // }
 
-  // Otherwise, return a success response with the package information
-  else {
-    deleteID(packageID);
+  // // Otherwise, return a success response with the package information
+  // else {
+    await delete_nameTag(packageID);
     res.status(200).json({ message : "Package is Deleted." });
-  }
+  //}
 });
 app.put('/package/:ID', (req, res) =>{
   const packageID = req.params.ID;
@@ -326,89 +344,113 @@ app.put('/package/:ID', (req, res) =>{
   console.log(`Put package/${packageID} endpoint reached`);
 
   // 404 if package doesn't exist
-  if (!packageExists(packageId)) {
-    res.status(404).json({ error: "Package Does Not Exist." });
-  }
+  // if (!packageExists(packageId)) {
+  //   res.status(404).json({ error: "Package Does Not Exist." });
+  // }
 
   // Otherwise, return a success response with the package information
-  else {
+  // else {
     retrieveMainTable(packageID);
     retrieveRepoTable(packageID);
 
     // return contents from the retrieve functions below
     res.status(200).json({  });
-  }
+  // }
 });
 
 
 // package/{id}/rate endpoint
-app.get("/package/:id/rate", (req, res) => {
+app.get("/package/:id/rate", async (req, res) => {
   const packageID = req.params.ID;
   console.log(`package/${packageID}/rate endpoint reached`);
-
+  const output = await getScore(packageID);
   // 404 if package doesn't exist
-  if (!packageExists(packageId)) {
+  if (output === -404) {
     res.status(404).json({ error: "Package Does Not Exist." });
   }
 
-  // If the package rating system choked, return a 500 error response
-  else if (packageRatingChoked(packageId)) {
-    res.status(500).json({ error: "The package rating system choked on at least one of the metrics." });
+  
+
+  // rate package if there is not scored for it
+  if (output === -1){
+    console.log('package does not have scores set. calculating...');
+    // If the package rating system choked, return a 500 error response
+    //if (packageRatingChoked(packageId)) {
+    //  res.status(500).json({ error: "The package rating system choked on at least one of the metrics." });
+    //}
   }
 
-  // Otherwise, return a success response
-  else {
-    res.status(200).json({ packageId });
-  }
+  const totalscore = output.total_score;
+  const rampupscore = output.ramp_up_score;
+  const correctnessscore = output.correctness_score;
+  const busfactor = output.bus_factor;
+  const responsivescore = output.responsiveness_score;
+  const licensescore = output.license_score;
+  const versionscore = output.version_score;
+  const adherencescore = output.ladherence_score;
+
+  allscores = {
+          'NET_SCORE':totalscore,
+          'RAMP_UP_SCORE':rampupscore,
+          'CORRECTNESS_SCORE':correctnessscore,
+          'BUS_FACTOR_SCORE': busfactor,
+          'RESPONSIVE_MAINTAINER_SCORE':responsivescore,
+          'LICENSE_SCORE': licensescore,
+          'VERSION_PIN_SCORE': versionscore,
+          'ADHERENCE_SCORE': adherencescore}
+
+  res.status(200).json({ output: allscores});
 });
 
 
-// /package/byName/{name}
+// /package/byName/{name} ************ JASON ****************************
 app.get("/package/byName/:name", (req, res) => {
   const packageName = req.params.name;
   console.log(`GET /package/byName/${packageName} enpoint reached`);
-
 });
-app.delete("/package/byName/:name", (req, res) => {
+// ************ JASON ****************************
+app.delete("/package/byName/:name", async (req, res) => {
   const packageName = req.params.name;
   console.log(`DELETE /package/byName/${packageName} enpoint reached`);
   
-
+  await delete_name(packageName);
   // 404 if package doesn't exist
-  if (!packageExists(packageName)) {
-    res.status(404).json({ error: "No package found under this name." });
-  }
+  // if (!packageExists(packageName)) {
+  //   res.status(404).json({ error: "No package found under this name." });
+  // }
 
   // Otherwise, return a success response, list of packages
-  else {
-    res.status(200).json({  });
-  }
+  // else {
+    
+  res.status(200).json({  });
+  // }
 });
 
 
-// /package/byRegEx
+// /package/byRegEx ************ JASON ****************************
 app.post("/package/byRegEx", (req, res) => {
   console.log('/package/byRegEx enpoint reached');
   // 404 if package doesn't exist
-  if (!packageExists(packageRegEx)) {
-    res.status(404).json({ error: "No package found under this regex." });
-  }
+  // if (!packageExists(packageRegEx)) {
+  //   res.status(404).json({ error: "No package found under this regex." });
+  // }
 
   // Otherwise, return a success response, list of packages
-  else {
+  // else {
     res.status(200).json({  });
-  }
+  // }
 });
 
 
 // reset endpoint
-app.delete("/reset", (req, res) => {
+app.delete("/reset", async (req, res) => {
   // call reset for all 3 tables here
   console.log('/reset enpoint reached');
 
-  deleteTable(repo_table);
-  deleteTable(score_table);
-  deleteTable(main_table);
+  await reset();
+  await createTables();
+  res.status(200).json({ msg: "Registry Reset!" });
+
 });
 
 // authenticate endpoint

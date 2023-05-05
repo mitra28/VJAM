@@ -19,7 +19,9 @@ function PackageRateForm() {
     
     if (response.ok) {
       console.log('Package rated successfully!');
+      const score = await response.json();
       setErrorMessage('');
+      setScores(score);
     } else {
       console.error('Failed to rate package.');
       setErrorMessage('Failed to create package.');
@@ -38,6 +40,19 @@ function PackageRateForm() {
       </div>
       <button type="submit">Rate Package</button>
       {errorMessage && <div>{errorMessage}</div>}
+      {scores && (
+        <div>
+          <p>URL: {scores.URL}</p>
+          <p>Overall Score: {scores.NET_SCORE}</p>
+          <p>Ramp Up Score: {scores.RAMP_UP_SCORE}</p>
+          <p>Correctness Score: {scores.CORRECTNESS_SCORE}</p>
+          <p>Bus Factor: {scores.BUS_FACTOR_SCORE}</p>
+          <p>Responsiveness Score: {scores.RESPONSIVE_MAINTAINER_SCORE}</p>
+          <p>License Score: {scores.LICENSE_SCORE}</p>
+          <p>Version Score: {scores.VERSION_PIN_SCORE}</p>
+          <p>Adherence Score: {scores.ADHERENCE_SCORE}</p>
+        </div>
+      )}
     </form>
   );
 }
