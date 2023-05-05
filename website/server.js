@@ -238,13 +238,20 @@ app.post('/package', (req, res) =>{
 
 
 // /package/{ID}
-app.get('/package/:ID', (req, res) =>{
+app.get('/package/:ID', async (req, res) =>{
   const packageID = req.params.ID;
   console.log(`Get package/${packageID} endpoint reached`);
-  const result = await getPackage(packageID);
+  const result =  await getPackage(packageID);
+
   console.log(result);
-  //console.log(`nameObj: ${nameObj}, dataObj: ${dataObj}`);
-  
+  console.log(`nameObj: ${result.main_row}, dataObj: ${result.repo_row}`);
+  const name = result.main_row.name;
+  const version = result.main_row.version;
+  const id = result.main_row.name_tag;
+  const contents = result.repo_row.zip;
+  const url = result.repo_row.url;
+  console.log(`name: ${name}, version: ${version}, id: ${id}, contents: ${contents}, url: ${url}`);
+
   // get id from db
   const scores = '{"URL":"https://github.com/marcelklehr/nodist", "NET_SCORE":0.48, "RAMP_UP_SCORE":0.78, "CORRECTNESS_SCORE":0.02, "BUS_FACTOR_SCORE":0.21, "RESPONSIVE_MAINTAINER_SCORE":0.18, "LICENSE_SCORE":1.00, "VERSION_PIN_SCORE":0.90, "ADHERENCE_SCORE":0.60}';
   // format data to return
