@@ -27,7 +27,7 @@ function App(prop) {
         <Route path="idform" element = {<PackageIDForm />}/>
         <Route path="deleteidform" element = {<PackageDeleteIDForm />}/>
         <Route path="putidform" element = {<PackagePutIDForm />}/>
-        <Route path="packageform"element = {<PackageForm />}/>
+        <Route path="packageform" element = {<PackageForm />}/>
         </Route>
       </Routes>
     </BrowserRouter>
