@@ -234,12 +234,14 @@ app.get("/package/:id/rate", (req, res) => {
 
 // /package/byName/{name}
 app.get("/package/byName/:name", (req, res) => {
-  console.log('GET /package/byName/:name enpoint reached');
+  const packageName = req.params.name;
+  console.log(`GET /package/byName/${packageName} enpoint reached`);
 
 });
 app.delete("/package/byName/:name", (req, res) => {
-  console.log('DELETE /package/byName/:name enpoint reached');
   const packageName = req.params.name;
+  console.log(`DELETE /package/byName/${packageName} enpoint reached`);
+  
 
   // 404 if package doesn't exist
   if (!packageExists(packageName)) {

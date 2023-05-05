@@ -4,6 +4,7 @@ import './App.css';
 import Layout from './Layout.jsx';
 import PackageDeleteIDForm from './components/PackageDeleteIDForm';
 import PackagePutIDForm from './components/PackagePutIDForm';
+import PackageByNameDeleteForm from './components/PackageByNameDeleteForm';
 import PackageIDForm from './components/PackageIDForm';
 import PackageForm from './components/PackageForm';
 import PackageRateForm from './components/PackageRateForm';
@@ -33,7 +34,7 @@ function App(prop) {
         <Route path="packageform"element = {<PackageForm />}/>
 
         <Route path="rateform"element = {<PackageRateForm />}/>
-        <Route path="bynamedeleteform"element = {<PackageForm />}/>
+        <Route path="bynamedeleteform"element = {<PackageByNameDeleteForm />}/>
 
         </Route>
       </Routes>
