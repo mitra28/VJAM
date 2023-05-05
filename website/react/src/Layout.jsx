@@ -12,10 +12,12 @@ const Layout = () => {
       <div><Link to="deleteidform">Package Delete</Link></div>
       <div><Link to="packageform">Package Create</Link></div>
       <div><Link to="rateform">Package Rate</Link></div>
-      <div><Link to="bynamedeleteform">Package By Name Delete</Link></div>
+      
       <Outlet />
     </div>
   );
 };
 
 export default Layout;
+
+//<div><Link to="bynamedeleteform">Package By Name Delete</Link></div>
