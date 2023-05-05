@@ -8,6 +8,10 @@ function PackageForm() {
     const [packageUrl, setPackageUrl] = useState('');
     const  [zipfile, setFile] = useState(null); 
     const [scores, setScores] = useState(null); 
+    const [id, setID] = useState(null); 
+    const [name, setName] = useState(null); 
+    const [version, setVersion] = useState(null); 
+    const [url, setURL] = useState(null);
     const [errorMessage, setErrorMessage] = useState('');
 
     const unzipFile = async (file) => {
@@ -30,14 +34,19 @@ function PackageForm() {
     
       if (response.ok) {
         console.log('Package created successfully!');
-        const scores = await response.json();
-        setScores(scores.output);
+        const output = await response.json();
+        setID(output.id);
+        setName(output.name);
+        setVersion(output.version);
+        setURL(output.URL);
         setErrorMessage('');
         
-        console.log(`url scores: ${scores.output.URL}`);
+        // console.log(`url scores: ${scores.scores.URL}`);
       } else {
         console.error('Failed to create package.');
-        setScores(null);
+        setID(null);
+        setName(null);
+        setVersion(null);
         setErrorMessage('Failed to create package.');
       }
   };
@@ -157,17 +166,12 @@ function PackageForm() {
       <button type="submit">Create Package</button>
 
       {errorMessage && <div>{errorMessage}</div>}
-      {scores && (
+      {name && version && id && (
         <div>
-          <p>URL: {scores.URL}</p>
-          <p>Overall Score: {scores.NET_SCORE}</p>
-          <p>Ramp Up Score: {scores.RAMP_UP_SCORE}</p>
-          <p>Correctness Score: {scores.CORRECTNESS_SCORE}</p>
-          <p>Bus Factor: {scores.BUS_FACTOR_SCORE}</p>
-          <p>Responsiveness Score: {scores.RESPONSIVE_MAINTAINER_SCORE}</p>
-          <p>License Score: {scores.LICENSE_SCORE}</p>
-          <p>Version Score: {scores.VERSION_PIN_SCORE}</p>
-          <p>Adherence Score: {scores.ADHERENCE_SCORE}</p>
+          <p>Name: {name}</p>
+          <p>Version: {version}</p>
+          <p>ID: {id}</p>
+          <p>URL: {url}</p>
         </div>
       )}
     </form>
