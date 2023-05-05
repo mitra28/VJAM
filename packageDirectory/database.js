@@ -116,6 +116,7 @@ export async function insertMainTable(name, version, name_tag) {
     return result.insertId;
   }
 }
+
 export async function insertZippedString(zip){
   const stmt = `INSERT INTO repo_table (zip) VALUES (?)`;
   console.log(stmt);
@@ -123,15 +124,14 @@ export async function insertZippedString(zip){
   return result.insertId;
 
 }
-export async function retrieveZippedString(id){
-  const stmt = `SELECT zip FROM repo_table WHERE id = ?`;
-  const [result] = await pool.query(stmt, [id]);
-
-  if (result.length === 0) {
-    throw new Error(`No entry with id ${id} found in repo_table`);
+export async function AddScoreMain(name_tag, score_id){
+  const stmt = `UPDATE main_table SET score_id = ? WHERE name_tag = ?`;
+  const [result] = await pool.query(stmt, [score_id, name_tag]);
+  if (result.affectedRows === 0) {
+    throw new Error(`No rows were updated for name tag: ${name_tag}`);
   }
-  //console.log(result);
-  return result[0].zip;
+  console.log(`Updated score_id for name tag: ${name_tag} to ${score_id}`);
+
 }
 
 export async function updateMainTableWithRepoScoreIds(mainId, repo_id, score_id) {
@@ -156,8 +156,14 @@ export async function insertALLTable(name, version, name_tag, url, zip, readme, 
   }
 }
 
+export async function retrieveMainTableRowByNametag(nametag) {
+  const stmt = `SELECT * FROM main_table WHERE name_tag = ?`;
+  const [result] = await pool.query(stmt, [nametag]);
+  return result[0];
+}
 
-export async function deleteID(name_tag){
+
+export async function deleteID_nametag(name_tag){
   try {
     const mainQuery = 'SELECT repo_id, score_id FROM main_table WHERE name_tag = ?';
     const [mainResults] = await pool.query(mainQuery, [name_tag]);
@@ -186,6 +192,36 @@ export async function deleteID(name_tag){
   }
 }
 
+export async function deleteID_name(name){
+  try {
+    const mainQuery = 'SELECT repo_id, score_id FROM main_table WHERE name = ?';
+    const [mainResults] = await pool.query(mainQuery, [name]);
+    if (mainResults.length === 0) {
+      console.log(`No row found in the main_table for name_tag ${name}`);
+      return;
+    }
+    const repoId = mainResults[0].repo_id;
+    const scoreId = mainResults[0].score_id;
+
+    // Delete row from main_table
+    const deleteMainQuery = 'DELETE FROM main_table WHERE name = ?';
+    await pool.query(deleteMainQuery, [name]);
+
+    // Delete row from repo_table
+    const deleteRepoQuery = 'DELETE FROM repo_table WHERE id = ?';
+    await pool.query(deleteRepoQuery, [repoId]);
+
+    // Delete row from score_table
+    const deleteScoreQuery = 'DELETE FROM score_table WHERE id = ?';
+    await pool.query(deleteScoreQuery, [scoreId]);
+
+    console.log(`Deleted row with name_tag ${name} from main_table and corresponding rows from repo_table and score_table`);
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+
 export async function deleteTable(table_name) {
   console.log("In delete Table function");
   const stmt = `DROP TABLE IF EXISTS ${table_name}`;
@@ -212,6 +248,20 @@ export async function retrieveRepoTable(name_tag) {
   return repoRes[0];
 }
 
+//retrieve all names
+export async function retrieveAllNames() {
+  const stmt = `SELECT name FROM main_table`;
+  const [rows] = await pool.query(stmt);
+  return rows;
+}
+//retrieve all namesTag
+export async function retrieveAllNameTag() {
+  const stmt = `SELECT name_tag FROM main_table`;
+  const [rows] = await pool.query(stmt);
+  return rows;
+}
+
+//package get my name
 export async function retrieveScoreTable(name_tag) {
   const mainStmt = `SELECT score_id FROM main_table WHERE name_tag = ?`;
   const [mainRes] = await pool.query(mainStmt, [name_tag]);
@@ -254,6 +304,45 @@ export async function retrieveAllTables(name_tag) {
     MainData
   }; //return an object 
 }
+//post package list
+export async function retrieveAllZip(){
+  const stmt = `SELECT zip FROM repo_table`;
+  const [result] = await pool.query(stmt);
+  console.log(result);
+}
+//put package update using id(name or rowID)
+export async function updateZip(name_tag, newZip) {
+  const mainStmt = `SELECT repo_id FROM main_table WHERE name_tag = ?`;
+  const [mainRes] = await pool.query(mainStmt, [name_tag]);
+  if (mainRes.length === 0) {
+    throw new Error(`No rows found for nameTag: ${name_tag}`);
+  }
+  const id = mainRes[0].repo_id;
+  const stmt = `UPDATE repo_table SET zip = ? WHERE id = ?`;
+  const [result] = await pool.query(stmt, [newZip, id]);
+  console.log(`Updated zip for id=${id} in repo_table`);
+}
+export async function retrieveZippedString(name_tag){
+  const mainStmt = `SELECT repo_id FROM main_table WHERE name_tag = ?`;
+  const [mainRes] = await pool.query(mainStmt, [name_tag]);
+  if (mainRes.length === 0) {
+    throw new Error(`No rows found for nameTag: ${name_tag}`);
+  }
+  const id = mainRes[0].repo_id;
+
+  const stmt = `SELECT zip FROM repo_table WHERE id = ?`;
+  const [result] = await pool.query(stmt, [id]);
+
+  if (result.length === 0) {
+    throw new Error(`No entry with id ${id} found in repo_table`);
+  }
+  //console.log(result);
+  return result[0].zip;
+}
+
+
+
+
 //await createRepoTable();
 //const textValue = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. ".repeat(100);
 //const id = await insertZippedString(textValue);
