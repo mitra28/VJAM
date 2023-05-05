@@ -108,8 +108,30 @@ app.post('/package', (req, res) =>{
   // URL given
   else if (req.body.URL){
       console.log("received an url");
-      const analyzerPath = path.join(__dirname, 'repo_analyzer', 'run'); // Get the path to your Rust program
+      const { exec } = require('child_process');
+
+      // const githubUrl = 'https://github.com/npm/cli';
       const url = req.body.URL;
+
+      exec(`npm view ${url} --json name version`, (error, stdout, stderr) => {
+        if (error) {
+          console.error(`Error running command: ${error.message}`);
+          return;
+        }
+        if (stderr) {
+          console.error(`Command stderr: ${stderr}`);
+          return;
+        }
+        const packageInfo = JSON.parse(stdout);
+        const packageName = packageInfo.name;
+        const packageVersion = packageInfo.version;
+        console.log(`Package name: ${packageName}`);
+        console.log(`Package version: ${packageVersion}`);
+      });
+
+
+      const analyzerPath = path.join(__dirname, 'repo_analyzer', 'run'); // Get the path to your Rust program
+      // const url = req.body.URL;
       // Spawn your analysis process
       const process = spawn(analyzerPath, [url]);
 
@@ -146,7 +168,7 @@ app.post('/package', (req, res) =>{
         }
         // ******************************************************************
         
-        res.status(201).json({ success: 'success', output: scoresObj });
+        res.status(201).json({ name: packageInfo.name, version: packageInfo.version, scores: scoresObj });
         
       });
 
