@@ -106,11 +106,19 @@ app.post('/package', (req, res) =>{
     // private ingest
     console.log("received an unzipped file");
     // uncompress
-    const uncompressed = pako.inflate(req.body.Content);
-    console.log(`uncompressed: ${uncompressed}`);
+    let buffer = [];
 
+    req.on('data', chunk => {
+      console.log(`recieved chunk of size ${chunk.length}`);
+      buffer.push(chunk);
+    });
 
-    res.status(201).json({success: "success"});
+    req.on('end', () => {
+      const compressed = Buffer.concat(buffer);
+      const uncompressed = pako.inflate(compressed);
+      console.log(`uncompressed: ${uncompressed}`);
+      res.status(201).json({success: "success"});
+    });
   }
   // URL given
   else if (req.body.URL){

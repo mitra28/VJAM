@@ -55,7 +55,7 @@ function PackageForm() {
 
       // compress zip
       const compressed = pako.deflate(zipfile);
-
+      console.log(compressed);
     // Send Request
     const response = await fetch('/package', {
       method: 'POST',
