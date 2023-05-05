@@ -2,7 +2,9 @@ import React, { useState } from 'react';
 
 function PackagePutIDForm() {
   const [packageID, setPackageID] = useState(''); // 
-  const [scores, setScores] = useState(null); 
+  const [metadata, setMetadata] = useState(null); 
+  const [data, setData] = useState(null); 
+
   const [errorMessage, setErrorMessage] = useState('');
 
   const handleSubmit = async (event) => {
@@ -19,11 +21,15 @@ function PackagePutIDForm() {
     
     if (response.ok) {
       console.log('Package put successfully!');
-      setScores(scores.output);
+      const value = await response.json();
+      setMetadata(value.output.metadata);
+      setData(value.Data)
       setErrorMessage('');
     } else {
+      //const errormsg = await response.json();
       console.error('Failed to put package.');
-      setScores(null);
+      setMetadata(null);
+      setData(null);
       setErrorMessage('Failed to put package.');
     }
   };
@@ -40,6 +46,14 @@ function PackagePutIDForm() {
       </div>
       <button type="submit">Put Package</button>
       {errorMessage && <div>{errorMessage}</div>}
+      {metadata && data && (
+      <div>
+          <p>Name: {metadata.name}</p>
+          <p>Version: {metadata.version}</p>
+          <p>ID: {metadata.id}</p>
+          <p>Content: {data.content}</p>
+        </div>
+        )}
     </form>
   );
 }

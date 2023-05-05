@@ -273,11 +273,11 @@ app.get('/package/:ID', async (req, res) =>{
   const url = result.repo_row.url;
   console.log(`name: ${name}, version: ${version}, id: ${id}, contents: ${contents}, url: ${url}`);
 
+
   // get id from db
-  const scores = '{"URL":"https://github.com/marcelklehr/nodist", "NET_SCORE":0.48, "RAMP_UP_SCORE":0.78, "CORRECTNESS_SCORE":0.02, "BUS_FACTOR_SCORE":0.21, "RESPONSIVE_MAINTAINER_SCORE":0.18, "LICENSE_SCORE":1.00, "VERSION_PIN_SCORE":0.90, "ADHERENCE_SCORE":0.60}';
+  const value = {'metadata': {'Name': name, 'Version': version, 'ID': id}, 'Data': {'Content': contents}};
   // format data to return
-  const scoresObj = JSON.parse(scores); // if scores is a string json
-  res.status(201).json({ success: 'success', output: scoresObj });
+  res.status(201).json({ success: 'success', output: value });
 
 });
 app.delete('/package/:ID', (req, res) =>{
