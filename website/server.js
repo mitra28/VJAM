@@ -1,6 +1,7 @@
 
 const express = require('express');
 const cors = require("cors");
+const pako = require('pako');
 const mysql = require('mysql');
 const multer = require('multer');
 const path = require('path');
@@ -14,6 +15,8 @@ const formidable = require('formidable');
 const PackageData = require ('./backend/models/packagedata');
 // const databaseFunctions = require('../packageDirectory/database.js');
 //const { deleteTable } = require('../packageDirectory/database.js');
+
+
 
 async function main() {
   const databaseFunctions = await import('../packageDirectory/database.js');
@@ -96,13 +99,17 @@ app.post('/package', (req, res) =>{
 
   // error check
   
-
   if (req.body.Content) { 
     if(req.body.URL){
     res.status(400).json({error: "Error: both URL and Content are set. Please only set one field."});
     }
     // private ingest
     console.log("received an unzipped file");
+    // uncompress
+    const uncompressed = pako.inflate(req.body.Content);
+    console.log(`uncompressed: ${uncompressed}`);
+
+
     res.status(201).json({success: "success"});
   }
   // URL given

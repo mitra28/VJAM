@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import JSZip from 'jszip';
+const pako = require('pako');
 const encoder = new TextEncoder();
 
 // const PackageData = require('../../../backend/models/packagedata');
@@ -9,12 +9,6 @@ function PackageForm() {
     const  [zipfile, setFile] = useState(null); 
     const [scores, setScores] = useState(null); 
     const [errorMessage, setErrorMessage] = useState('');
-
-    const unzipFile = async (file) => {
-      const zip = new JSZip();
-      const blob = await zip.loadAsync(file);
-      return blob;
-    };
 
   const handleUrlSubmit = async (event) => {
       console.log('Package handle url submit!');
@@ -56,29 +50,11 @@ function PackageForm() {
       return;
     }
   
-      // unzip file
-      const unzippedData = await unzipFile(zipfile);
       console.log("unzippedData");
-      console.log(unzippedData);
+      console.log(zipfile);
 
-  
-      const allfiles = unzippedData.files;
-      let allfilesstring = '';
-  
-      for (const filename in unzippedData.files) {
-        const file = unzippedData.files[filename];
-        const text = await file.async('text');
-        allfilesstring += text;
-      }
-    const string_data = encoder.encode(allfilesstring);
-
-    let base64 = '';
-    const CHUNK_SIZE = 4096;
-    let content_length = 4; //string_data.length; **************************** CHANGE THIS
-    for (let i = 0; i < content_length; i += CHUNK_SIZE) {
-      const chunk = string_data.slice(i, i + CHUNK_SIZE);
-      base64 += btoa(chunk);
-    }
+      // compress zip
+      const compressed = pako.deflate(zipfile);
 
     // Send Request
     const response = await fetch('/package', {
@@ -86,7 +62,7 @@ function PackageForm() {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({Content: base64}),
+      body: JSON.stringify({Content: compressed}),
     });
 
     //console.log('');
@@ -100,8 +76,8 @@ function PackageForm() {
   };
 
   // callback for when file is uploaded
-  const handleFileChange = (event) => {
-    setFile(event.target.files[0]);
+  const handleZipChange = (event) => {
+    setFile(event.target.value);
   }
 
   const handleErrorSubmit = async (event) => {
@@ -152,7 +128,7 @@ function PackageForm() {
       </div>
       <div>
         <label htmlFor="file">Choose a zipfile:</label>
-        <input type="file" id="file" name="file" onChange={handleFileChange} />
+        <input type="text" id="file" name="file" onChange={handleZipChange} />
       </div>
       <button type="submit">Create Package</button>
 
