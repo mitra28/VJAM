@@ -119,7 +119,7 @@ async function getAllTables(name_tag){
 
 const path_to_index = path.join(__dirname, '.', 'react', 'build', 'index.html');
 
-const port = 9000; // process.env.PORT || 8080;
+const port = 9090; // process.env.PORT || 8080;
 const app = express();
 app.use(cors());
 app.use(express.json());
@@ -139,6 +139,7 @@ app.get('/', (req, res) => {
 
 // /packages
 app.post("/packages", (req, res) => {
+  console.log('/packages enpoint reached');
   const offset = req.params.offset;
 
   // 413 if too many packages returned 
@@ -155,6 +156,7 @@ app.post("/packages", (req, res) => {
 
 // /package
 app.post('/package', (req, res) =>{
+  console.log('/package endpoint reached');
   //console.log(req);
   //console.log(req.body);
   //console.log(req.body.Content);
@@ -173,11 +175,35 @@ app.post('/package', (req, res) =>{
     console.log("received an unzipped file");
     res.status(201).json({success: "success"});
   }
+
   // URL given
   else if (req.body.URL){
-      console.log("received an url");
+    console.log("received an url");
+    const { exec } = require('child_process');
+
+    const url = req.body.URL;
+    let packageName;
+    let packageVersion;
+    let scoresObj;
+    let nameTag;
+
+    exec(`npm view ${url} --json name version`, (error, stdout, stderr) => {
+      if (error) {
+        console.error(`Error running command: ${error.message}`);
+        return;
+      }
+      if (stderr) {
+        console.error(`Command stderr: ${stderr}`);
+        return;
+      }
+      const packageInfo = JSON.parse(stdout);
+      packageName = packageInfo.name;
+      packageVersion = packageInfo.version;
+      nameTag = packageName.toLowerCase();
+      console.log(`Package name: ${packageName}`);
+      console.log(`Package version: ${packageVersion}`);
       const analyzerPath = path.join(__dirname, 'repo_analyzer', 'run'); // Get the path to your Rust program
-      const url = req.body.URL;
+      // const url = req.body.URL;
       // Spawn your analysis process
       const process = spawn(analyzerPath, [url]);
 
@@ -202,7 +228,7 @@ app.post('/package', (req, res) =>{
       
       process.on('close', () => {
         console.log(`here are the scores: ${scores}`);
-        const scoresObj = JSON.parse(scores);
+        scoresObj = JSON.parse(scores);
         const netscore = parseFloat(scoresObj.NET_SCORE);
         if(netscore > 0.3){
           console.log('score is passing, ingest!');
@@ -225,19 +251,14 @@ app.post('/package', (req, res) =>{
         res.status(201).json({ success: 'success', output: scoresObj });
         
       });
-
-      
-
-      
+ 
     }
 
-  // insert_repo_data(engine, repo_name, url, total_score, ramp_up_score, correctness_score, bus_factor, responsiveness_score, license_score, version_score, adherence_score);
-  // insert_zipped_data(engine, file_name, url, zipped_file); 
-    //res.status(400).json({error: "error message"});
 });
 
 
 // /package/{ID}
+
 app.get('/package/:ID', async (req, res) =>{
   const packageID = req.params.ID;
   console.log(`Get package/${packageID} endpoint reached`);
@@ -298,7 +319,8 @@ app.put('/package/:ID', (req, res) =>{
 
 // package/{id}/rate endpoint
 app.get("/package/:id/rate", (req, res) => {
-  const packageId = req.params.id;
+  const packageID = req.params.ID;
+  console.log(`package/${packageID}/rate endpoint reached`);
 
   // 404 if package doesn't exist
   if (!packageExists(packageId)) {
@@ -319,10 +341,14 @@ app.get("/package/:id/rate", (req, res) => {
 
 // /package/byName/{name}
 app.get("/package/byName/:name", (req, res) => {
+  const packageName = req.params.name;
+  console.log(`GET /package/byName/${packageName} enpoint reached`);
 
 });
 app.delete("/package/byName/:name", (req, res) => {
   const packageName = req.params.name;
+  console.log(`DELETE /package/byName/${packageName} enpoint reached`);
+  
 
   // 404 if package doesn't exist
   if (!packageExists(packageName)) {
@@ -338,6 +364,7 @@ app.delete("/package/byName/:name", (req, res) => {
 
 // /package/byRegEx
 app.post("/package/byRegEx", (req, res) => {
+  console.log('/package/byRegEx enpoint reached');
   // 404 if package doesn't exist
   if (!packageExists(packageRegEx)) {
     res.status(404).json({ error: "No package found under this regex." });
@@ -353,6 +380,8 @@ app.post("/package/byRegEx", (req, res) => {
 // reset endpoint
 app.delete("/reset", (req, res) => {
   // call reset for all 3 tables here
+  console.log('/reset enpoint reached');
+
   deleteTable(repo_table);
   deleteTable(score_table);
   deleteTable(main_table);
@@ -360,6 +389,8 @@ app.delete("/reset", (req, res) => {
 
 // authenticate endpoint
 app.put("/authenticate", (req, res) => {
+  console.log('/authenticate enpoint reached');
+
   res.status(501).json({ error: "Not Implemented." });
 });
 
