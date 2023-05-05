@@ -22,19 +22,89 @@ async function main() {
   const databaseFunctions = await import('../packageDirectory/database.js');
   return databaseFunctions;
 }
+
+async function post_url(name, version, name_tag, url, zip, readme, total_score, ramp_up_score, correctness_score, bus_factor, responsiveness_score, license_score, version_score, adherence_score){
+  const db = await main();
+  const {insertScoreTable, insertMainTable, insertRepoTable,updateMainTableWithRepoScoreIds} = db;
+  const score_id = await insertScoreTable(total_score, ramp_up_score, correctness_score, bus_factor, responsiveness_score, license_score, version_score, adherence_score);
+  const repo_id = await insertRepoTable(url, zip, readme);//zip and readme null
+  const main_id = await insertMainTable(name, version, name_tag);
+  await updateMainTableWithRepoScoreIds(main_id, repo_id, score_id);
+  console.log('post_url');
+}
+
+async function post_zip(name, version, name_tag, url, zip, readme){
+  const db = await main();
+  const {insertZippedString, insertMainTable, insertRepoTable,updateMainTableWithRepoScoreIds} = db;
+  const repo_id = await insertRepoTable(url, zip, readme);
+  // or
+  //const repo_id = insertZippedString(zip);
+  const main_id = await insertMainTable(name, version, name_tag);
+  await updateMainTableWithRepoScoreIds(main_id, repo_id, -1);
+}
+async function post_list(){
+  const db = await main();
+  const {retrieveAllZip} = db;
+  const result = await retrieveAllZip();
+  return result;
+}
+async function delete_name(name){
+  const db = await main();
+  const {deleteID_name} = db;
+  await deleteID_name(name);
+}
+async function delete_nameTag(name_tag){
+  const db = await main();
+  const {deleteID_nametag} = db;
+  await deleteID_nametag(name_tag);
+}
+async function getPackage(name_tag){
+  const db = await main();
+  const {retrieveRepoTable, retrieveMainTableRowByNametag} = db;
+  const main_row = await retrieveMainTableRowByNametag(name_tag);
+  const repo_row = await retrieveRepoTable(name_tag);
+  //console.log(repo_row);
+  //console.log(main_row);
+
+
+  //const zip_content = await retrieveZippedString(name_tag);
+  return {
+    main_row,
+    repo_row,
+  };
+}
+async function updatePackage(name_tag, newZip){
+  const db = await main();
+  const {updateZip} = db;
+  const zip_content = await updateZip(name_tag, newZip);
+}
+async function packageRate(name_tag){
+  const db = await main();
+  const {retrieveScoreTable} = db;
+  const result = retrieveScoreTable(name_tag);
+  return result;
+}
+async function packageRegExGet(){
+  const db = await main();
+  const {retrieveAllNames} = db;
+  const result = retrieveAllNames();
+  return result;
+
+}
+
 async function reset(string) {
   const db = await main();
   const { deleteTable } = db;
-  deleteTable("main_table");
-  deleteTable("score_table");
-  deleteTable("repo_table");
+  await deleteTable("main_table");
+  await deleteTable("score_table");
+  await deleteTable("repo_table");
 }
 async function createMainTable() {
   const db = await main();
   const { createMainTable,createRepoTable,createScoreTable} = db;
-  createMainTable();
-  createRepoTable();
-  createScoreTable();
+  await createMainTable();
+  await createRepoTable();
+  await createScoreTable();
 }
 async function addAllTables(name, version, name_tag, url, zip, readme, total_score, ramp_up_score, correctness_score, bus_factor, responsiveness_score, license_score, version_score, adherence_score){
   const db = await main();
@@ -98,6 +168,17 @@ app.post('/package', (req, res) =>{
   // TO-DO: 424 -> Package is not uploaded due to the disqualified rating
 
   // error check
+  const axios = require('axios');
+
+  const getReadme = async (url) => {
+    try {
+      const response = await axios.get(`${url}/raw/master/README.md`);
+      const readme = response.data.split('\n').slice(0, 200).join('\n');
+      return readme;
+    } catch (error) {
+      console.error(error);
+    }
+  };
   
   if (req.body.Content) { 
     if(req.body.URL){
@@ -120,11 +201,42 @@ app.post('/package', (req, res) =>{
       res.status(201).json({success: "success"});
     });
   }
+
   // URL given
   else if (req.body.URL){
-      console.log("received an url");
+    console.log("received an url");
+    const { exec } = require('child_process');
+
+    const url = req.body.URL;
+    let packageName;
+    let packageVersion;
+    let scoresObj;
+    let nameTag;
+    let readme;
+
+    exec(`npm view ${url} --json name version`, (error, stdout, stderr) => {
+      if (error) {
+        console.error(`Error running command: ${error.message}`);
+        return;
+      }
+      if (stderr) {
+        console.error(`Command stderr: ${stderr}`);
+        return;
+      }
+      const packageInfo = JSON.parse(stdout);
+      packageName = packageInfo.name;
+      packageVersion = packageInfo.version;
+      nameTag = packageName.toLowerCase();
+      console.log(`Package name: ${packageName}`);
+      console.log(`Package version: ${packageVersion}`);
+
+      getReadme(url).then((value) => {
+        readme = value; // Assign the resolved value to the readme variable
+        console.log(readme); // Log the readme to the console
+      });
+
       const analyzerPath = path.join(__dirname, 'repo_analyzer', 'run'); // Get the path to your Rust program
-      const url = req.body.URL;
+      // const url = req.body.URL;
       // Spawn your analysis process
       const process = spawn(analyzerPath, [url]);
 
@@ -149,37 +261,49 @@ app.post('/package', (req, res) =>{
       
       process.on('close', () => {
         console.log(`here are the scores: ${scores}`);
-        const scoresObj = JSON.parse(scores);
+        scoresObj = JSON.parse(scores);
+        const netscore = parseFloat(scoresObj.NET_SCORE);
+        if(netscore > 0.3){
+          console.log('score is passing, ingest!');
+          // call db function here
+          post_url('name', 'version', 'name_tag', scoresObj.URL, 'zip', 'readme',
+            scoresObj.NET_SCORE, scoresObj.RAMP_UP_SCORE, scoresObj.CORRECTNESS_SCORE, scoresObj.BUS_FACTOR_SCORE,
+            scoresObj.RESPONSIVE_MAINTAINER_SCORE, scoresObj.LICENSE_SCORE, scoresObj.VERSION_PIN_SCORE, scoresObj.ADHERENCE_SCORE);
+        }
 
         // ******************************************************************
         // TO-DO: create package object
-        const package = create_package();
+        //const package = create_package();
         // TO-DO: save scores and url in package object
         // TO-DO: save to db
-        if(insert_repo_data(package) == -1){
-          res.status(409).json({ error: 'The package exists already'});
-        }
+        //if(insert_repo_data(package) == -1){
+        //  res.status(409).json({ error: 'The package exists already'});
+        //}
         // ******************************************************************
         
-        res.status(201).json({ success: 'success', output: scoresObj });
+        res.status(201).json({ success: 'success', name: packageName, version: packageVersion, id: nameTag, URL: url });
         
       });
-
-      
-
-      
-    }
-
-  // insert_repo_data(engine, repo_name, url, total_score, ramp_up_score, correctness_score, bus_factor, responsiveness_score, license_score, version_score, adherence_score);
-  // insert_zipped_data(engine, file_name, url, zipped_file); 
-    //res.status(400).json({error: "error message"});
+    });
+  }
 });
 
 
 // /package/{ID}
-app.get('/package/:ID', (req, res) =>{
+
+app.get('/package/:ID', async (req, res) =>{
   const packageID = req.params.ID;
   console.log(`Get package/${packageID} endpoint reached`);
+  const result =  await getPackage(packageID);
+
+  console.log(result);
+  console.log(`nameObj: ${result.main_row}, dataObj: ${result.repo_row}`);
+  const name = result.main_row.name;
+  const version = result.main_row.version;
+  const id = result.main_row.name_tag;
+  const contents = result.repo_row.zip;
+  const url = result.repo_row.url;
+  console.log(`name: ${name}, version: ${version}, id: ${id}, contents: ${contents}, url: ${url}`);
 
   // get id from db
   const scores = '{"URL":"https://github.com/marcelklehr/nodist", "NET_SCORE":0.48, "RAMP_UP_SCORE":0.78, "CORRECTNESS_SCORE":0.02, "BUS_FACTOR_SCORE":0.21, "RESPONSIVE_MAINTAINER_SCORE":0.18, "LICENSE_SCORE":1.00, "VERSION_PIN_SCORE":0.90, "ADHERENCE_SCORE":0.60}';
@@ -251,8 +375,8 @@ app.get("/package/:id/rate", (req, res) => {
 app.get("/package/byName/:name", (req, res) => {
   const packageName = req.params.name;
   console.log(`GET /package/byName/${packageName} enpoint reached`);
-
 });
+
 app.delete("/package/byName/:name", (req, res) => {
   const packageName = req.params.name;
   console.log(`DELETE /package/byName/${packageName} enpoint reached`);
@@ -289,6 +413,7 @@ app.post("/package/byRegEx", (req, res) => {
 app.delete("/reset", (req, res) => {
   // call reset for all 3 tables here
   console.log('/reset enpoint reached');
+
   deleteTable(repo_table);
   deleteTable(score_table);
   deleteTable(main_table);
@@ -297,6 +422,7 @@ app.delete("/reset", (req, res) => {
 // authenticate endpoint
 app.put("/authenticate", (req, res) => {
   console.log('/authenticate enpoint reached');
+
   res.status(501).json({ error: "Not Implemented." });
 });
 
