@@ -8,10 +8,12 @@ function PackageForm() {
     const [packageUrl, setPackageUrl] = useState('');
     const  [zipfile, setFile] = useState(null); 
     const [scores, setScores] = useState(null); 
-    const [id, setID] = useState(null); 
-    const [name, setName] = useState(null); 
-    const [version, setVersion] = useState(null); 
-    const [url, setURL] = useState(null);
+    // const [id, setID] = useState(null); 
+    // const [name, setName] = useState(null); 
+    // const [version, setVersion] = useState(null); 
+    // const [url, setURL] = useState(null);
+    const [metadata, setMetaData] = useState('');
+    const [data, setData] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
 
     const unzipFile = async (file) => {
@@ -35,18 +37,26 @@ function PackageForm() {
       if (response.ok) {
         console.log('Package created successfully!');
         const output = await response.json();
-        setID(output.id);
-        setName(output.name);
-        setVersion(output.version);
-        setURL(output.URL);
+        console.log(output);
+        const val = output.value;
+        // setID(output.id);
+        // setName(output.name);
+        // setVersion(output.version);
+        // setURL(output.URL);
+        setMetaData(val.metadata);
+        console.log(metadata);
+        setData(val.data);
+        console.log(data);
         setErrorMessage('');
         
         // console.log(`url scores: ${scores.scores.URL}`);
       } else {
         console.error('Failed to create package.');
-        setID(null);
-        setName(null);
-        setVersion(null);
+        // setID(null);
+        // setName(null);
+        // setVersion(null);
+        setMetaData('');
+        setData('');
         setErrorMessage('Failed to create package.');
       }
   };
@@ -166,12 +176,13 @@ function PackageForm() {
       <button type="submit">Create Package</button>
 
       {errorMessage && <div>{errorMessage}</div>}
-      {name && version && id && (
+      {metadata && data && (
         <div>
-          <p>Name: {name}</p>
-          <p>Version: {version}</p>
-          <p>ID: {id}</p>
-          <p>URL: {url}</p>
+          <p>Name: {metadata.Name}</p>
+          <p>Version: {metadata.Version}</p>
+          <p>ID: {metadata.ID}</p>
+          <p>URL: {data.URL}</p>
+          
         </div>
       )}
     </form>
