@@ -89,7 +89,7 @@ async function packageRegExGet(){
 
 }
 
-async function reset(string) {
+async function reset() {
   const db = await main();
   const { deleteTable } = db;
   await deleteTable("main_table");
@@ -251,6 +251,7 @@ app.post('/package', (req, res) =>{
         res.status(201).json({ success: 'success', output: scoresObj });
         
       });
+    });
  
     }
 
@@ -378,13 +379,13 @@ app.post("/package/byRegEx", (req, res) => {
 
 
 // reset endpoint
-app.delete("/reset", (req, res) => {
+app.delete("/reset", async (req, res) => {
   // call reset for all 3 tables here
   console.log('/reset enpoint reached');
 
-  deleteTable(repo_table);
-  deleteTable(score_table);
-  deleteTable(main_table);
+  await reset();
+  res.status(200).json({ msg: "Registry Reset!" });
+
 });
 
 // authenticate endpoint
