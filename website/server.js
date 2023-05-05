@@ -12,7 +12,7 @@ const upload = multer({ dest: 'temp/' });
 const formidable = require('formidable');
 //const { createRepoTable } = require('../packageDirectory/database.mjs');
 const PackageData = require ('./backend/models/packagedata');
-const { retrieveScoreTable } = require('../packageDirectory/database.js');
+//const { retrieveScoreTable } = require('../packageDirectory/database.js');
 // const databaseFunctions = require('../packageDirectory/database.js');
 //const { deleteTable } = require('../packageDirectory/database.js');
 
