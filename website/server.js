@@ -105,31 +105,33 @@ app.post('/package', (req, res) =>{
     console.log("received an unzipped file");
     res.status(201).json({success: "success"});
   }
+
   // URL given
   else if (req.body.URL){
-      console.log("received an url");
-      const { exec } = require('child_process');
+    console.log("received an url");
+    const { exec } = require('child_process');
 
-      // const githubUrl = 'https://github.com/npm/cli';
-      const url = req.body.URL;
+    const url = req.body.URL;
+    let packageName;
+    let packageVersion;
+    let scoresObj;
+    let nameTag;
 
-      exec(`npm view ${url} --json name version`, (error, stdout, stderr) => {
-        if (error) {
-          console.error(`Error running command: ${error.message}`);
-          return;
-        }
-        if (stderr) {
-          console.error(`Command stderr: ${stderr}`);
-          return;
-        }
-        const packageInfo = JSON.parse(stdout);
-        const packageName = packageInfo.name;
-        const packageVersion = packageInfo.version;
-        console.log(`Package name: ${packageName}`);
-        console.log(`Package version: ${packageVersion}`);
-      });
-
-
+    exec(`npm view ${url} --json name version`, (error, stdout, stderr) => {
+      if (error) {
+        console.error(`Error running command: ${error.message}`);
+        return;
+      }
+      if (stderr) {
+        console.error(`Command stderr: ${stderr}`);
+        return;
+      }
+      const packageInfo = JSON.parse(stdout);
+      packageName = packageInfo.name;
+      packageVersion = packageInfo.version;
+      nameTag = packageName.toLowerCase();
+      console.log(`Package name: ${packageName}`);
+      console.log(`Package version: ${packageVersion}`);
       const analyzerPath = path.join(__dirname, 'repo_analyzer', 'run'); // Get the path to your Rust program
       // const url = req.body.URL;
       // Spawn your analysis process
@@ -156,30 +158,24 @@ app.post('/package', (req, res) =>{
       
       process.on('close', () => {
         console.log(`here are the scores: ${scores}`);
-        const scoresObj = JSON.parse(scores);
+        scoresObj = JSON.parse(scores);
 
-        // ******************************************************************
-        // TO-DO: create package object
-        const package = create_package();
-        // TO-DO: save scores and url in package object
-        // TO-DO: save to db
-        if(insert_repo_data(package) == -1){
-          res.status(409).json({ error: 'The package exists already'});
-        }
-        // ******************************************************************
+        // // ******************************************************************
+        // // TO-DO: create package object
+        // const package = create_package();
+        // // TO-DO: save scores and url in package object
+        // // TO-DO: save to db
+        // if(insert_repo_data(package) == -1){
+        //   res.status(409).json({ error: 'The package exists already'});
+        // }
+        // // ******************************************************************
         
-        res.status(201).json({ name: packageInfo.name, version: packageInfo.version, scores: scoresObj });
+        // res.status(201).json({ success: 'success', name: packageName, version: packageVersion, scores: scoresObj });
+        res.status(201).json({ success: 'success', name: packageName, version: packageVersion, id: nameTag, URL: url });
         
       });
-
-      
-
-      
-    }
-
-  // insert_repo_data(engine, repo_name, url, total_score, ramp_up_score, correctness_score, bus_factor, responsiveness_score, license_score, version_score, adherence_score);
-  // insert_zipped_data(engine, file_name, url, zipped_file); 
-    //res.status(400).json({error: "error message"});
+    }); 
+  }
 });
 
 
