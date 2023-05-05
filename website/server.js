@@ -343,8 +343,8 @@ app.get("/package/:id/rate", (req, res) => {
 app.get("/package/byName/:name", (req, res) => {
   const packageName = req.params.name;
   console.log(`GET /package/byName/${packageName} enpoint reached`);
-
 });
+
 app.delete("/package/byName/:name", (req, res) => {
   const packageName = req.params.name;
   console.log(`DELETE /package/byName/${packageName} enpoint reached`);
