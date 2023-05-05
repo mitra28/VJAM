@@ -81,7 +81,7 @@ export async function createScoreTable(){
       )
     `;
   await pool.query(stmt);
-  console.log('Repo table was successfully created');
+  console.log('Score table was successfully created');
 }
 
 /*
@@ -159,6 +159,7 @@ export async function insertALLTable(name, version, name_tag, url, zip, readme, 
 export async function retrieveMainTableRowByNametag(nametag) {
   const stmt = `SELECT * FROM main_table WHERE name_tag = ?`;
   const [result] = await pool.query(stmt, [nametag]);
+  //console.log(result[0]);
   return result[0];
 }
 
@@ -355,9 +356,12 @@ export async function retrieveZippedString(name_tag){
 await deleteTable("main_table");
 await deleteTable("repo_table");
 await deleteTable("score_table");
+
 await createMainTable();
 await createRepoTable();
 await createScoreTable();
+
+
 await insertALLTable("name", "version", "name_tag", "url", "zip",
   "readme", 0.0,0.1,0.2,0.3,0.4,
   0.5,0.6,0.7);
@@ -371,7 +375,7 @@ await insertALLTable("name", "version", "name_tag", "url", "zip",
 
 await deleteTable("main_table");
 await deleteTable("repo_table");
-await deleteTable("score_table");*/ 
+await deleteTable("score_table");*/
 //await retrieveAllTables("name_tag");
 //await deleteID("name_tag");
 //await retrieveAllTables("name_tag");

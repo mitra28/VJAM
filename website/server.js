@@ -19,19 +19,89 @@ async function main() {
   const databaseFunctions = await import('../packageDirectory/database.js');
   return databaseFunctions;
 }
+
+async function post_url(name, version, name_tag, url, zip, readme, total_score, ramp_up_score, correctness_score, bus_factor, responsiveness_score, license_score, version_score, adherence_score){
+  const db = await main();
+  const {insertScoreTable, insertMainTable, insertRepoTable,updateMainTableWithRepoScoreIds} = db;
+  const score_id = await insertScoreTable(total_score, ramp_up_score, correctness_score, bus_factor, responsiveness_score, license_score, version_score, adherence_score);
+  const repo_id = await insertRepoTable(url, zip, readme);//zip and readme null
+  const main_id = await insertMainTable(name, version, name_tag);
+  await updateMainTableWithRepoScoreIds(main_id, repo_id, score_id);
+  console.log('post_url');
+}
+
+async function post_zip(name, version, name_tag, url, zip, readme){
+  const db = await main();
+  const {insertZippedString, insertMainTable, insertRepoTable,updateMainTableWithRepoScoreIds} = db;
+  const repo_id = await insertRepoTable(url, zip, readme);
+  // or
+  //const repo_id = insertZippedString(zip);
+  const main_id = await insertMainTable(name, version, name_tag);
+  await updateMainTableWithRepoScoreIds(main_id, repo_id, -1);
+}
+async function post_list(){
+  const db = await main();
+  const {retrieveAllZip} = db;
+  const result = await retrieveAllZip();
+  return result;
+}
+async function delete_name(name){
+  const db = await main();
+  const {deleteID_name} = db;
+  await deleteID_name(name);
+}
+async function delete_nameTag(name_tag){
+  const db = await main();
+  const {deleteID_nametag} = db;
+  await deleteID_nametag(name_tag);
+}
+async function getPackage(name_tag){
+  const db = await main();
+  const {retrieveRepoTable, retrieveMainTableRowByNametag} = db;
+  const main_row = await retrieveMainTableRowByNametag(name_tag);
+  const repo_row = await retrieveRepoTable(name_tag);
+  //console.log(repo_row);
+  //console.log(main_row);
+
+
+  //const zip_content = await retrieveZippedString(name_tag);
+  return {
+    main_row,
+    repo_row,
+  };
+}
+async function updatePackage(name_tag, newZip){
+  const db = await main();
+  const {updateZip} = db;
+  const zip_content = await updateZip(name_tag, newZip);
+}
+async function packageRate(name_tag){
+  const db = await main();
+  const {retrieveScoreTable} = db;
+  const result = retrieveScoreTable(name_tag);
+  return result;
+}
+async function packageRegExGet(){
+  const db = await main();
+  const {retrieveAllNames} = db;
+  const result = retrieveAllNames();
+  return result;
+
+}
+
 async function reset(string) {
   const db = await main();
   const { deleteTable } = db;
-  deleteTable("main_table");
-  deleteTable("score_table");
-  deleteTable("repo_table");
+  await deleteTable("main_table");
+  await deleteTable("score_table");
+  await deleteTable("repo_table");
 }
 async function createMainTable() {
   const db = await main();
   const { createMainTable,createRepoTable,createScoreTable} = db;
-  createMainTable();
-  createRepoTable();
-  createScoreTable();
+  await createMainTable();
+  await createRepoTable();
+  await createScoreTable();
 }
 async function addAllTables(name, version, name_tag, url, zip, readme, total_score, ramp_up_score, correctness_score, bus_factor, responsiveness_score, license_score, version_score, adherence_score){
   const db = await main();
@@ -133,15 +203,23 @@ app.post('/package', (req, res) =>{
       process.on('close', () => {
         console.log(`here are the scores: ${scores}`);
         const scoresObj = JSON.parse(scores);
+        const netscore = parseFloat(scoresObj.NET_SCORE);
+        if(netscore > 0.3){
+          console.log('score is passing, ingest!');
+          // call db function here
+          post_url('name', 'version', 'name_tag', scoresObj.URL, 'zip', 'readme',
+            scoresObj.NET_SCORE, scoresObj.RAMP_UP_SCORE, scoresObj.CORRECTNESS_SCORE, scoresObj.BUS_FACTOR_SCORE,
+            scoresObj.RESPONSIVE_MAINTAINER_SCORE, scoresObj.LICENSE_SCORE, scoresObj.VERSION_PIN_SCORE, scoresObj.ADHERENCE_SCORE);
+        }
 
         // ******************************************************************
         // TO-DO: create package object
-        const package = create_package();
+        //const package = create_package();
         // TO-DO: save scores and url in package object
         // TO-DO: save to db
-        if(insert_repo_data(package) == -1){
-          res.status(409).json({ error: 'The package exists already'});
-        }
+        //if(insert_repo_data(package) == -1){
+        //  res.status(409).json({ error: 'The package exists already'});
+        //}
         // ******************************************************************
         
         res.status(201).json({ success: 'success', output: scoresObj });
@@ -163,7 +241,10 @@ app.post('/package', (req, res) =>{
 app.get('/package/:ID', (req, res) =>{
   const packageID = req.params.ID;
   console.log(`Get package/${packageID} endpoint reached`);
-
+  const result = await getPackage(packageID);
+  console.log(result);
+  //console.log(`nameObj: ${nameObj}, dataObj: ${dataObj}`);
+  
   // get id from db
   const scores = '{"URL":"https://github.com/marcelklehr/nodist", "NET_SCORE":0.48, "RAMP_UP_SCORE":0.78, "CORRECTNESS_SCORE":0.02, "BUS_FACTOR_SCORE":0.21, "RESPONSIVE_MAINTAINER_SCORE":0.18, "LICENSE_SCORE":1.00, "VERSION_PIN_SCORE":0.90, "ADHERENCE_SCORE":0.60}';
   // format data to return
