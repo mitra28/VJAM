@@ -360,8 +360,8 @@ app.put('/package/:ID', (req, res) =>{
 
 
 // package/{id}/rate endpoint
-app.get("/package/:id/rate", async (req, res) => {
-  const packageID = req.params.ID;
+app.get("/package/:packageID/rate", async (req, res) => {
+  const packageID = req.params.packageID;
   console.log(`package/${packageID}/rate endpoint reached`);
   const output = await getScore(packageID);
   // 404 if package doesn't exist
@@ -398,7 +398,7 @@ app.get("/package/:id/rate", async (req, res) => {
           'LICENSE_SCORE': licensescore,
           'VERSION_PIN_SCORE': versionscore,
           'ADHERENCE_SCORE': adherencescore}
-
+  console.log(allscores);
   res.status(200).json({ output: allscores});
 });
 
