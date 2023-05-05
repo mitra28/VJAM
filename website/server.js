@@ -165,6 +165,17 @@ app.post('/package', (req, res) =>{
   // TO-DO: 424 -> Package is not uploaded due to the disqualified rating
 
   // error check
+  const axios = require('axios');
+
+  const getReadme = async (url) => {
+    try {
+      const response = await axios.get(`${url}/raw/master/README.md`);
+      const readme = response.data.split('\n').slice(0, 200).join('\n');
+      return readme;
+    } catch (error) {
+      console.error(error);
+    }
+  };
   
 
   if (req.body.Content) { 
@@ -186,6 +197,7 @@ app.post('/package', (req, res) =>{
     let packageVersion;
     let scoresObj;
     let nameTag;
+    let readme;
 
     exec(`npm view ${url} --json name version`, (error, stdout, stderr) => {
       if (error) {
@@ -202,6 +214,12 @@ app.post('/package', (req, res) =>{
       nameTag = packageName.toLowerCase();
       console.log(`Package name: ${packageName}`);
       console.log(`Package version: ${packageVersion}`);
+
+      getReadme(url).then((value) => {
+        readme = value; // Assign the resolved value to the readme variable
+        console.log(readme); // Log the readme to the console
+      });
+
       const analyzerPath = path.join(__dirname, 'repo_analyzer', 'run'); // Get the path to your Rust program
       // const url = req.body.URL;
       // Spawn your analysis process
@@ -248,12 +266,11 @@ app.post('/package', (req, res) =>{
         //}
         // ******************************************************************
         
-        res.status(201).json({ success: 'success', output: scoresObj });
+        res.status(201).json({ success: 'success', name: packageName, version: packageVersion, id: nameTag, URL: url });
         
       });
- 
-    }
-
+    });
+  }
 });
 
 
