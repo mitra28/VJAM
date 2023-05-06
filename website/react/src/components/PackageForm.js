@@ -74,8 +74,6 @@ function PackageForm() {
       body: JSON.stringify({Content: compressed}),
     });
 
-    //console.log('');
-
     if (response.ok) {
       console.log('Package created successfully!');
       const res = await response.json();
