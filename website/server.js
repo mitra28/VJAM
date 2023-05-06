@@ -584,22 +584,20 @@ app.delete("/package/byName/:name", async (req, res) => {
 });
 
 
-// /package/byRegEx ************ JASON ****************************
+// /package/byRegEx
 app.post("/package/byRegEx", (req, res) => {
   const packageRegEx = req.content;
   console.log('/package/byRegEx enpoint reached');
   const matching_pkgs = packageRegExGet(packageRegEx);
   // 404 if package doesn't exist
-
-  // if (!packageExists(packageRegEx)) {
-  //   res.status(404).json({ error: "No package found under this regex." });
-  // }
+  if (!matching_pkgs) {
+    res.status(404).json({ error: "No package found under this regex." });
+  }
 
   // Otherwise, return a success response, list of packages
-  // else {
-    res.status(200).json({  });
-  // }
-
+  else {
+    res.status(200).json({matching_pkgs});
+  }
 });
 
 
