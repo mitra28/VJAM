@@ -211,7 +211,7 @@ app.post('/package', async (req, res) =>{
   const getReadme = async (url) => {
     try {
       const response = await axios.get(`${url}/raw/master/README.md`);
-      const readme = response.data.split('\n').slice(0, 200).join('\n');
+      const readme = response.data.toString().slice(0, 100);
       return readme;
     } catch (error) {
       console.error(error);
@@ -318,7 +318,7 @@ app.post('/package', async (req, res) =>{
           }
           else {
             console.log(key + "'s score is lower than 0.5");
-            scoreFlag = 0;
+            scoreFlag = 1;
           }
         }
         console.log(`Score flag is ${scoreFlag}`);
