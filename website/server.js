@@ -1,6 +1,7 @@
 
 const express = require('express');
 const cors = require("cors");
+const pako = require('pako');
 const mysql = require('mysql');
 const multer = require('multer');
 const path = require('path');
@@ -10,10 +11,9 @@ const packageRoutes = require('./backend/routes/packageroutes');
 const Package = require('./backend/models/package');
 const upload = multer({ dest: 'temp/' });
 const formidable = require('formidable');
-//const { createRepoTable } = require('../packageDirectory/database.mjs');
+
 const PackageData = require ('./backend/models/packagedata');
-// const databaseFunctions = require('../packageDirectory/database.js');
-//const { deleteTable } = require('../packageDirectory/database.js');
+
 
 async function main() {
   const databaseFunctions = await import('../packageDirectory/database.js');
@@ -119,7 +119,7 @@ async function getAllTables(name_tag){
 
 const path_to_index = path.join(__dirname, '.', 'react', 'build', 'index.html');
 
-const port = 9090; // process.env.PORT || 8080;
+const port = 9000; // process.env.PORT || 8080;
 const app = express();
 app.use(cors());
 app.use(express.json());
@@ -184,12 +184,26 @@ app.post('/package', (req, res) =>{
     }
     // private ingest
     console.log("received an unzipped file");
-    res.status(201).json({success: "success"});
+    // uncompress
+    const compresseddata = JSON.stringify(req.body.Content);
+    const compressedObj = JSON.parse(compresseddata);
+    const compressedString = Object.values(compressedObj).join('');
+    
+    
+    console.log(`compressed string received: ${compressedString}`);
+    
+    
+    res.status(424).json({error: "Package is not uploaded due to the disqualified rating." });    
   }
 
   // URL given
   else if (req.body.URL){
     console.log("received an url");
+
+    //////////////////////////////////////  CHECK IF PACKAGE EXISTS //////////////////////////////////////////////////////
+
+
+
     const { exec } = require('child_process');
 
     const url = req.body.URL;
@@ -214,11 +228,10 @@ app.post('/package', (req, res) =>{
       nameTag = packageName.toLowerCase();
       console.log(`Package name: ${packageName}`);
       console.log(`Package version: ${packageVersion}`);
-
       getReadme(url).then((value) => {
-        readme = value; // Assign the resolved value to the readme variable
-        console.log(readme); // Log the readme to the console
+        readme = JSON.stringify(value); // Assign the resolved value to the readme variable
       });
+
 
       const analyzerPath = path.join(__dirname, 'repo_analyzer', 'run'); // Get the path to your Rust program
       // const url = req.body.URL;
@@ -247,32 +260,39 @@ app.post('/package', (req, res) =>{
       process.on('close', () => {
         console.log(`here are the scores: ${scores}`);
         scoresObj = JSON.parse(scores);
-        const netscore = parseFloat(scoresObj.NET_SCORE);
-        if(netscore > 0.3){
+      
+        let scoreFlag;
+        for (let key in scoresObj) {
+          if (key === "URL" || key === "NET_SCORE") {
+            console.log(key + " so skip");
+            continue;
+          }
+          if (scoresObj[key] >= 0.5) {
+            console.log(key + "'s score is higher than 0.5");
+          }
+          else {
+            console.log(key + "'s score is lower than 0.5");
+            scoreFlag = 0;
+          }
+        }
+        console.log(`Score flag is ${scoreFlag}`);
+        if( scoreFlag == 1) {
+          res.status(424).json({ error: "Package is not uploaded due to the disqualified rating." });
+        }
+        else {
           console.log('score is passing, ingest!');
           // call db function here
-          post_url('name', 'version', 'name_tag', scoresObj.URL, 'zip', 'readme',
+          post_url(packageName, packageVersion, nameTag, scoresObj.URL, 'zip', readme,
             scoresObj.NET_SCORE, scoresObj.RAMP_UP_SCORE, scoresObj.CORRECTNESS_SCORE, scoresObj.BUS_FACTOR_SCORE,
             scoresObj.RESPONSIVE_MAINTAINER_SCORE, scoresObj.LICENSE_SCORE, scoresObj.VERSION_PIN_SCORE, scoresObj.ADHERENCE_SCORE);
-        }
 
-        // ******************************************************************
-        // TO-DO: create package object
-        //const package = create_package();
-        // TO-DO: save scores and url in package object
-        // TO-DO: save to db
-        //if(insert_repo_data(package) == -1){
-        //  res.status(409).json({ error: 'The package exists already'});
-        //}
-        // ******************************************************************
-        
-        res.status(201).json({ success: 'success', name: packageName, version: packageVersion, id: nameTag, URL: url });
-        
+            res.status(201).json({ success: 'success', name: packageName, version: packageVersion, id: nameTag, URL: url });
+          
+        }       
       });
     });
   }
 });
-
 
 // /package/{ID}
 
@@ -360,8 +380,8 @@ app.get("/package/:id/rate", (req, res) => {
 app.get("/package/byName/:name", (req, res) => {
   const packageName = req.params.name;
   console.log(`GET /package/byName/${packageName} enpoint reached`);
-
 });
+
 app.delete("/package/byName/:name", (req, res) => {
   const packageName = req.params.name;
   console.log(`DELETE /package/byName/${packageName} enpoint reached`);

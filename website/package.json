@@ -22,6 +22,7 @@
     "jest-environment-jsdom": "^29.5.0"
   },
   "dependencies": {
+    "browserify-zlib": "^0.2.0",
     "axios": "^1.4.0",
     "cors": "^2.8.5",
     "express": "^4.18.2",
