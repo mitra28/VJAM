@@ -196,14 +196,7 @@ app.post("/packages", async (req, res) => {
 
   // Otherwise, return a success response, list of packages
   else {
-<<<<<<< HEAD
-
-    const packageslist = await post_list();
-    console.log(packageslist);
-    res.status(200).json({packages: packageslist});
-=======
     res.status(200).json({ rows });
->>>>>>> main
   }
 });
 
@@ -533,16 +526,6 @@ app.post("/package/byRegEx", (req, res) => {
   console.log('/package/byRegEx enpoint reached');
   const matching_pkgs = packageRegExGet(packageRegEx);
   // 404 if package doesn't exist
-<<<<<<< HEAD
-  // if (!packageExists(packageRegEx)) {
-  //   res.status(404).json({ error: "No package found under this regex." });
-  // }
-
-  // Otherwise, return a success response, list of packages
-  // else {
-    res.status(200).json({  });
-  // }
-=======
   if (!matching_pkgs) {
     res.status(404).json({ error: "No package found under this regex." });
   }
@@ -551,7 +534,6 @@ app.post("/package/byRegEx", (req, res) => {
   else {
     res.status(200).json({matching_pkgs});
   }
->>>>>>> main
 });
 
 
