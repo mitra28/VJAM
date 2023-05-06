@@ -10,6 +10,7 @@ import PackageForm from './components/PackageForm';
 import PackageRateForm from './components/PackageRateForm';
 import ResultPage from "./components/ResultPage.js";
 import SearchBar from './components/search/SearchBar.js';
+import AuthForm from './components/AuthForm.js';
 import RegistryResetForm from './components/RegistryResetForm';
 
 function App(prop) {
@@ -32,6 +33,7 @@ function App(prop) {
         <Route path="deleteidform" element = {<PackageDeleteIDForm />}/>
         <Route path="putidform" element = {<PackagePutIDForm />}/>
         <Route path="packageform"element = {<PackageForm />}/>
+        <Route path="authenticate"element = {<AuthForm />}/>
 
         <Route path="rateform"element = {<PackageRateForm />}/>
         <Route path="bynamedeleteform"element = {<PackageByNameDeleteForm />}/>
