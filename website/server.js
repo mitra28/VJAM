@@ -1,6 +1,7 @@
 
 const express = require('express');
 const cors = require("cors");
+const pako = require('pako');
 const mysql = require('mysql');
 const multer = require('multer');
 const path = require('path');
@@ -14,6 +15,8 @@ const formidable = require('formidable');
 const PackageData = require ('./backend/models/packagedata');
 // const databaseFunctions = require('../packageDirectory/database.js');
 //const { deleteTable } = require('../packageDirectory/database.js');
+
+
 
 async function main() {
   const databaseFunctions = await import('../packageDirectory/database.js');
@@ -119,7 +122,7 @@ async function getAllTables(name_tag){
 
 const path_to_index = path.join(__dirname, '.', 'react', 'build', 'index.html');
 
-const port = 9090; // process.env.PORT || 8080;
+const port = 9000; // process.env.PORT || 8080;
 const app = express();
 app.use(cors());
 app.use(express.json());
@@ -177,14 +180,22 @@ app.post('/package', (req, res) =>{
     }
   };
   
-
   if (req.body.Content) { 
     if(req.body.URL){
     res.status(400).json({error: "Error: both URL and Content are set. Please only set one field."});
     }
     // private ingest
     console.log("received an unzipped file");
-    res.status(201).json({success: "success"});
+    // uncompress
+    const compresseddata = JSON.stringify(req.body.Content);
+    const compressedObj = JSON.parse(compresseddata);
+    const compressedString = Object.values(compressedObj).join('');
+    
+    
+    console.log(`compressed string received: ${compressedString}`);
+    
+    
+    res.status(424).json({error: "Package is not uploaded due to the disqualified rating." });    
   }
 
   // URL given
@@ -360,8 +371,8 @@ app.get("/package/:id/rate", (req, res) => {
 app.get("/package/byName/:name", (req, res) => {
   const packageName = req.params.name;
   console.log(`GET /package/byName/${packageName} enpoint reached`);
-
 });
+
 app.delete("/package/byName/:name", (req, res) => {
   const packageName = req.params.name;
   console.log(`DELETE /package/byName/${packageName} enpoint reached`);
