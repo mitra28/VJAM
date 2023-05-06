@@ -185,21 +185,16 @@ app.post('/package', (req, res) =>{
     res.status(400).json({error: "Error: both URL and Content are set. Please only set one field."});
     }
     // private ingest
-    console.log("received an unzipped file");
+    const compresseddata = JSON.stringify(req.body.Content);
+    console.log(`received an unzipped file: ${compresseddata}`);
     // uncompress
-    let buffer = [];
+    const compressedBuffer = Buffer.from(compresseddata, 'base64');
+    const uncompressedBuffer = pako.inflate(compressedBuffer);
+    const uncompresseddata = uncompressedBuffer.toString('utf8');    console.log(`uncompressed data: ${uncompresseddata}`);
+    console.log(`uncompressed data: ${uncompresseddata}`);
 
-    req.on('data', chunk => {
-      console.log(`recieved chunk of size ${chunk.length}`);
-      buffer.push(chunk);
-    });
-
-    req.on('end', () => {
-      const compressed = Buffer.concat(buffer);
-      const uncompressed = pako.inflate(compressed);
-      console.log(`uncompressed: ${uncompressed}`);
-      res.status(201).json({success: "success"});
-    });
+    res.status(201).json({success: "success"});
+    
   }
 
   // URL given

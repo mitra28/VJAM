@@ -64,7 +64,7 @@ function PackageForm() {
 
       // compress zip
       const compressed = pako.deflate(zipfile);
-      console.log(compressed);
+      console.log(`compressed data: ${compressed}`);
     // Send Request
     const response = await fetch('/package', {
       method: 'POST',
@@ -75,10 +75,11 @@ function PackageForm() {
     });
 
     //console.log('');
-    console.log(response);
 
     if (response.ok) {
       console.log('Package created successfully!');
+      const res = await response.json();
+      console.log(`response: ${res}`);
     } else {
       console.error('Failed to create package.');
     }
