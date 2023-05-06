@@ -249,28 +249,6 @@ export async function retrieveRepoTable(name_tag) {
   return repoRes[0];
 }
 
-//retrieve all names matching a regex
-export async function retrieveRegEx(regex) {
-  const stmt = `SELECT main_table.name, main_table.version, main_table.name_tag
-                FROM main_table
-                INNER JOIN repo_table
-                ON main_table.repo_id = repo_table.id
-                WHERE main_table.name REGEXP '?'
-                OR repo_table.readme REGEXP '?'`;
-  const [rows] = await pool.query(stmt, [regex, regex]);
-  return rows;
-}
-
-//retrieve all packages from an offset
-export async function retrievePackages(offset) {
-  const stmt = `SELECT main_table.name, main_table.version, main_table.name_tag
-                FROM main_table
-                WHERE id >= ?
-                LIMIT 100`;
-  const [rows] = await pool.query(stmt, [offset]);
-  return rows;
-}
-
 //retrieve all names
 export async function retrieveAllNames() {
   const stmt = `SELECT name FROM main_table`;
@@ -289,13 +267,17 @@ export async function retrieveScoreTable(name_tag) {
   const mainStmt = `SELECT score_id FROM main_table WHERE name_tag = ?`;
   const [mainRes] = await pool.query(mainStmt, [name_tag]);
   if (mainRes.length === 0) {
-    throw new Error(`No rows found for nameTag: ${name_tag}`);
+    //return 404
+    // throw new Error(`No rows found for nameTag: ${name_tag}`);
+    return -404;
   }
+  //we could make this return -1 and if the value returned is -1 we know it doesnt exist in scores
   const score_id = mainRes[0].score_id;
 
   const scoreStmt = `SELECT * FROM score_table WHERE id = ?`;
   const [scoreRes] = await pool.query(scoreStmt, [score_id]);
   if (scoreRes.length === 0) {
+    return -1; // if -1 then rate package
     throw new Error(`No rows found in score_table for scoreID: ${score_id}`);
   }
 
@@ -337,7 +319,7 @@ export async function retrieveAllZip(){
 export async function updateZip(name_tag, newZip) {
   const mainStmt = `SELECT repo_id FROM main_table WHERE name_tag = ?`;
   const [mainRes] = await pool.query(mainStmt, [name_tag]);
-  if (mainRes.length === 0) {
+  if (mainRes.length == 0) {
     throw new Error(`No rows found for nameTag: ${name_tag}`);
   }
   const id = mainRes[0].repo_id;
@@ -363,6 +345,16 @@ export async function retrieveZippedString(name_tag){
   return result[0].zip;
 }
 
+export async function packageCount(name_tag){
+  const stmt = "SELECT COUNT(*) AS count FROM main_table WHERE name_tag = ?";
+  const [result] = await pool.query(stmt, [name_tag]);
+  const count = result[0].count;
+  if(count > 0){
+    return 1;
+  }else{
+    return -404;
+  }
+}
 
 
 
@@ -378,23 +370,18 @@ export async function retrieveZippedString(name_tag){
 await deleteTable("main_table");
 await deleteTable("repo_table");
 await deleteTable("score_table");
-
 await createMainTable();
 await createRepoTable();
 await createScoreTable();
-
-
 await insertALLTable("name", "version", "name_tag", "url", "zip",
   "readme", 0.0,0.1,0.2,0.3,0.4,
   0.5,0.6,0.7);
-
 await insertALLTable("name1", "version1", "name_tag1", "url1", "zip1",
   "readme1", 0.0,0.1,0.2,0.3,0.4,
   0.5,0.6,0.7);
 await insertALLTable("name", "version", "name_tag", "url", "zip",
   "readme", 0.0,0.1,0.2,0.3,0.4,
   0.5,0.6,0.7);
-
 await deleteTable("main_table");
 await deleteTable("repo_table");
 await deleteTable("score_table");*/
@@ -402,7 +389,3 @@ await deleteTable("score_table");*/
 //await deleteID("name_tag");
 //await retrieveAllTables("name_tag");
 //await retrieveAllTables("name_tag");
-
-
-
-
