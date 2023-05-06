@@ -1,4 +1,3 @@
-
 const express = require('express');
 const cors = require("cors");
 const pako = require('pako');
@@ -15,11 +14,16 @@ const formidable = require('formidable');
 const PackageData = require ('./backend/models/packagedata');
 
 
-
-
 async function main() {
   const databaseFunctions = await import('../packageDirectory/database.js');
   return databaseFunctions;
+}
+
+async function packageExist(name_tag){
+  const db = await main();
+  const {packageCount} = db;
+  const result = await packageCount(name_tag);
+  return result;
 }
 
 async function post_url(name, version, name_tag, url, zip, readme, total_score, ramp_up_score, correctness_score, bus_factor, responsiveness_score, license_score, version_score, adherence_score){
@@ -77,28 +81,65 @@ async function updatePackage(name_tag, newZip){
   const {updateZip} = db;
   const zip_content = await updateZip(name_tag, newZip);
 }
+
+async function updateScoreInfo(name_tag,total_score, ramp_up_score, correctness_score, bus_factor, responsiveness_score, license_score, version_score, adherence_score){
+  const db = await main();
+  const {insertScoreTable, AddScoreMain} = db;
+  const score_id = insertScoreTable(total_score, ramp_up_score, correctness_score, bus_factor, responsiveness_score, license_score, version_score, adherence_score);
+  await AddScoreMain(name_tag, score_id);
+}
+
 async function packageRate(name_tag){
   const db = await main();
   const {retrieveScoreTable} = db;
   const result = retrieveScoreTable(name_tag);
   return result;
 }
-async function packageRegExGet(){
+async function packageRegExGet(regex){
   const db = await main();
-  const {retrieveAllNames} = db;
-  const result = retrieveAllNames();
+  const {retrieveRegEx} = db;
+  const result = retrieveRegEx(regex);
   return result;
 
 }
 
-async function reset(string) {
+async function packagesGet(offset){
+  const db = await main();
+  const {retrievePackages} = db;
+  const result = retrievePackages(offset);
+  return result;
+
+}
+async function retrieveMainTable(name_tag){
+  const db = await main();
+  const {retrieveMainTable} = db;
+  const result = await retrieveMainTable(name_tag);
+  return result;
+}
+
+async function retrieveRepoTable(name_tag){
+  const db = await main();
+  const {retrieveRepoTable} = db;
+  const result = await retrieveRepoTable(name_tag);
+  return result;
+}
+
+
+async function getScore(name_tag){
+  const db = await main();
+  const { retrieveScoreTable} = db;
+  const result = await retrieveScoreTable(name_tag);
+  return result;
+}
+
+async function reset() {
   const db = await main();
   const { deleteTable } = db;
   await deleteTable("main_table");
   await deleteTable("score_table");
   await deleteTable("repo_table");
 }
-async function createMainTable() {
+async function createTables() {
   const db = await main();
   const { createMainTable,createRepoTable,createScoreTable} = db;
   await createMainTable();
@@ -140,24 +181,27 @@ app.get('/', (req, res) => {
 });
 
 // /packages
-app.post("/packages", (req, res) => {
+app.post("/packages", async (req, res) => {
   console.log('/packages enpoint reached');
   const offset = req.params.offset;
+  const rows = packagesGet(offset);
 
   // 413 if too many packages returned 
-  if (length > offset) {
-    res.status(404).json({ error: "Too many packages returned." });
+  if (rows.length > 100) {
+    res.status(413).json({ error: "Too many packages returned." });
   }
 
   // Otherwise, return a success response, list of packages
   else {
-    res.status(200).json({  });
+    const packageslist = await post_list();
+    console.log(packageslist);
+    res.status(200).json({packages: packageslist});
   }
 });
 
 
 // /package
-app.post('/package', (req, res) =>{
+app.post('/package', async (req, res) =>{
   console.log('/package endpoint reached');
   //console.log(req);
   //console.log(req.body);
@@ -172,13 +216,14 @@ app.post('/package', (req, res) =>{
   const getReadme = async (url) => {
     try {
       const response = await axios.get(`${url}/raw/master/README.md`);
-      const readme = response.data.split('\n').slice(0, 200).join('\n');
+      const readme = response.data.toString().slice(0, 100);
       return readme;
     } catch (error) {
       console.error(error);
     }
   };
   
+
   if (req.body.Content) { 
     if(req.body.URL){
     res.status(400).json({error: "Error: both URL and Content are set. Please only set one field."});
@@ -273,7 +318,7 @@ app.post('/package', (req, res) =>{
           }
           else {
             console.log(key + "'s score is lower than 0.5");
-            scoreFlag = 0;
+            scoreFlag = 1;
           }
         }
         console.log(`Score flag is ${scoreFlag}`);
@@ -287,7 +332,7 @@ app.post('/package', (req, res) =>{
             scoresObj.NET_SCORE, scoresObj.RAMP_UP_SCORE, scoresObj.CORRECTNESS_SCORE, scoresObj.BUS_FACTOR_SCORE,
             scoresObj.RESPONSIVE_MAINTAINER_SCORE, scoresObj.LICENSE_SCORE, scoresObj.VERSION_PIN_SCORE, scoresObj.ADHERENCE_SCORE);
 
-            res.status(201).json({ success: 'success', name: packageName, version: packageVersion, id: nameTag, URL: url });
+          res.status(201).json({ success: 'success', name: packageName, version: packageVersion, id: nameTag, URL: url });
           
         }       
       });
@@ -311,69 +356,118 @@ app.get('/package/:ID', async (req, res) =>{
   const url = result.repo_row.url;
   console.log(`name: ${name}, version: ${version}, id: ${id}, contents: ${contents}, url: ${url}`);
 
+
   // get id from db
-  const scores = '{"URL":"https://github.com/marcelklehr/nodist", "NET_SCORE":0.48, "RAMP_UP_SCORE":0.78, "CORRECTNESS_SCORE":0.02, "BUS_FACTOR_SCORE":0.21, "RESPONSIVE_MAINTAINER_SCORE":0.18, "LICENSE_SCORE":1.00, "VERSION_PIN_SCORE":0.90, "ADHERENCE_SCORE":0.60}';
+  const value = {'metadata': {'Name': name, 'Version': version, 'ID': id}, 'Data': {'Content': contents}};
   // format data to return
-  const scoresObj = JSON.parse(scores); // if scores is a string json
-  res.status(201).json({ success: 'success', output: scoresObj });
+  res.status(201).json({ success: 'success', output: value });
 
 });
-app.delete('/package/:ID', (req, res) =>{
+
+app.delete('/package/:ID', async (req, res) =>{
   const packageID = req.params.ID;
   // get id from db
   console.log(`Delete package/${packageID} endpoint reached`);
-
-  // 404 if package doesn't exist
-  if (!packageExists(packageId)) {
-    res.status(404).json({ error: "Package Does Not Exist." });
-  }
-
-  // Otherwise, return a success response with the package information
-  else {
-    deleteID(packageID);
-    res.status(200).json({ message : "Package is Deleted." });
-  }
+  await delete_nameTag(packageID);
+  res.status(200).json({ message : "Package is Deleted." });
 });
 app.put('/package/:ID', (req, res) =>{
   const packageID = req.params.ID;
   // get id from db
   console.log(`Put package/${packageID} endpoint reached`);
-
-  // 404 if package doesn't exist
-  if (!packageExists(packageId)) {
-    res.status(404).json({ error: "Package Does Not Exist." });
-  }
-
-  // Otherwise, return a success response with the package information
-  else {
-    retrieveMainTable(packageID);
-    retrieveRepoTable(packageID);
-
-    // return contents from the retrieve functions below
-    res.status(200).json({  });
-  }
+  retrieveMainTable(packageID);
+  retrieveRepoTable(packageID);
+  res.status(200).json({  });
+  
 });
 
 
 // package/{id}/rate endpoint
-app.get("/package/:id/rate", (req, res) => {
-  const packageID = req.params.ID;
+// package/{id}/rate endpoint
+app.get("/package/:packageID/rate", async (req, res) => {
+  const packageID = req.params.packageID;
   console.log(`package/${packageID}/rate endpoint reached`);
+  //check to see if package exists
+  const exist = await packageExist(packageID);
+  console.log("before package exists check");
 
-  // 404 if package doesn't exist
-  if (!packageExists(packageId)) {
+  if(exist != -404){
+    //check to see if score id is -1
+    const mainRow = await retrieveMainTable(packageID);
+    const scoreVar = mainRow.score_id;
+    const result = await retrieveRepoTable(packageID);
+    const urlSearch = result.url;
+    console.log("package exists");
+    if(scoreVar != -1){
+      // if it is not -1 can get score
+      const output = await getScore(packageID);
+      console.log("before after getting score check");
+      const totalscore = output.total_score;
+      const rampupscore = output.ramp_up_score;
+      const correctnessscore = output.correctness_score;
+      const busfactor = output.bus_factor;
+      const responsivescore = output.responsiveness_score;
+      const licensescore = output.license_score;
+      const versionscore = output.version_score;
+      const adherencescore = output.adherence_score;
+
+      allscores = {
+              'NET_SCORE':totalscore,
+              'RAMP_UP_SCORE':rampupscore,
+              'CORRECTNESS_SCORE':correctnessscore,
+              'BUS_FACTOR_SCORE': busfactor,
+              'RESPONSIVE_MAINTAINER_SCORE':responsivescore,
+              'LICENSE_SCORE': licensescore,
+              'VERSION_PIN_SCORE': versionscore,
+              'ADHERENCE_SCORE': adherencescore}
+
+      res.status(200).json({ output: allscores});
+    }
+    if(scoreVar == -1){
+      //if it is -1 calculate score and insert to table
+
+        const url = urlSearch;
+        let scoresObj;
+        const analyzerPath = path.join(__dirname, 'repo_analyzer', 'run'); // Get the path to your Rust program
+        // const url = req.body.URL;
+        // Spawn your analysis process
+        const process = spawn(analyzerPath, [url]);
+
+        process.on('error', (err) => {
+          console.error('Failed to start child process.', err);
+        });
+        
+        process.on('exit', (code, signal) => {
+          console.log(`Child process exited with code ${code} and signal ${signal}`);
+        });
+        
+        let scores = '';
+        process.stdout.on('data', (data) => {
+          console.log(`stdout: ${data}`);
+          scores += data.toString();
+        });
+        
+        process.stderr.on('data', (data) => {
+          console.error(`stderr: ${data}`);
+        }); 
+
+      process.on('close', () => {
+        console.log(`here are the scores: ${scores}`);
+        scoresObj = JSON.parse(scores);
+          
+              
+              // call db function here
+        updateScoreInfo(packageID,scoresObj.NET_SCORE, scoresObj.RAMP_UP_SCORE, scoresObj.CORRECTNESS_SCORE, scoresObj.BUS_FACTOR_SCORE,
+          scoresObj.RESPONSIVE_MAINTAINER_SCORE, scoresObj.LICENSE_SCORE, scoresObj.VERSION_PIN_SCORE, scoresObj.ADHERENCE_SCORE);
+
+          
+      });
+    };
+  }
+  if (exist === -404) {
     res.status(404).json({ error: "Package Does Not Exist." });
   }
-
-  // If the package rating system choked, return a 500 error response
-  else if (packageRatingChoked(packageId)) {
-    res.status(500).json({ error: "The package rating system choked on at least one of the metrics." });
-  }
-
-  // Otherwise, return a success response
-  else {
-    res.status(200).json({ packageId });
-  }
+      //return the score_id and update main_table
 });
 
 
@@ -383,46 +477,41 @@ app.get("/package/byName/:name", (req, res) => {
   console.log(`GET /package/byName/${packageName} enpoint reached`);
 });
 
-app.delete("/package/byName/:name", (req, res) => {
+app.delete("/package/byName/:name", async (req, res) => {
   const packageName = req.params.name;
   console.log(`DELETE /package/byName/${packageName} enpoint reached`);
-  
+  await delete_name(packageName);
+  res.status(200).json({  });
 
-  // 404 if package doesn't exist
-  if (!packageExists(packageName)) {
-    res.status(404).json({ error: "No package found under this name." });
-  }
-
-  // Otherwise, return a success response, list of packages
-  else {
-    res.status(200).json({  });
-  }
 });
 
 
 // /package/byRegEx
 app.post("/package/byRegEx", (req, res) => {
+  const packageRegEx = req.content;
   console.log('/package/byRegEx enpoint reached');
+  const matching_pkgs = packageRegExGet(packageRegEx);
   // 404 if package doesn't exist
-  if (!packageExists(packageRegEx)) {
+  if (!matching_pkgs) {
     res.status(404).json({ error: "No package found under this regex." });
   }
 
   // Otherwise, return a success response, list of packages
   else {
-    res.status(200).json({  });
+    res.status(200).json({matching_pkgs});
   }
 });
 
 
 // reset endpoint
-app.delete("/reset", (req, res) => {
+app.delete("/reset", async (req, res) => {
   // call reset for all 3 tables here
   console.log('/reset enpoint reached');
 
-  deleteTable(repo_table);
-  deleteTable(score_table);
-  deleteTable(main_table);
+  await reset();
+  await createTables();
+  res.status(200).json({ msg: "Registry Reset!" });
+
 });
 
 // authenticate endpoint
