@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 
 function PackageIDForm() {
   const [packageID, setPackageID] = useState(''); // 
-  const [scores, setScores] = useState(null); 
+  const [metadata, setMetadata] = useState(''); 
+  const [data, setData] = useState(''); 
   const [errorMessage, setErrorMessage] = useState('');
 
   const handleSubmit = async (event) => {
@@ -19,18 +20,29 @@ function PackageIDForm() {
     
     if (response.ok) {
       console.log('Package created successfully!');
-      setScores(scores.output);
+      const value = await response.json();
+      
+      setMetadata(value.output.metadata);
+      setData(value.output.Data)
+
+      console.log(value.output.metadata);
+      console.log(value.output.Data);
+      console.log(data);
+      console.log(metadata);
       setErrorMessage('');
     } else {
       console.error('Failed to create package.');
-      setScores(null);
-      setErrorMessage('Failed to create package.');
+      setMetadata(null);
+      setData(null);
+      setErrorMessage('Failed to put package.');
     }
   };
 
   const handleIDChange = (event) => {
     setPackageID(event.target.value);
   }
+
+  
 
   return (
     <form onSubmit={handleSubmit}>
@@ -40,19 +52,14 @@ function PackageIDForm() {
       </div>
       <button type="submit">Get Package</button>
       {errorMessage && <div>{errorMessage}</div>}
-      {scores && (
-        <div>
-          <p>URL: {scores.URL}</p>
-          <p>Overall Score: {scores.NET_SCORE}</p>
-          <p>Ramp Up Score: {scores.RAMP_UP_SCORE}</p>
-          <p>Correctness Score: {scores.CORRECTNESS_SCORE}</p>
-          <p>Bus Factor: {scores.BUS_FACTOR_SCORE}</p>
-          <p>Responsiveness Score: {scores.RESPONSIVE_MAINTAINER_SCORE}</p>
-          <p>License Score: {scores.LICENSE_SCORE}</p>
-          <p>Version Score: {scores.VERSION_PIN_SCORE}</p>
-          <p>Adherence Score: {scores.ADHERENCE_SCORE}</p>
+      {metadata && data && (
+      <div>
+          <p>Name: {metadata.Name}</p>
+          <p>Version: {metadata.Version}</p>
+          <p>ID: {metadata.ID}</p>
+          <p>Content: {data.Content}</p>
         </div>
-      )}
+        )}
     </form>
   );
 }
