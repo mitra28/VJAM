@@ -15,8 +15,6 @@ const formidable = require('formidable');
 const PackageData = require ('./backend/models/packagedata');
 
 
-
-
 async function main() {
   const databaseFunctions = await import('../packageDirectory/database.js');
   return databaseFunctions;
@@ -188,6 +186,7 @@ app.post('/package', (req, res) =>{
     }
   };
   
+
   if (req.body.Content) { 
     if(req.body.URL){
     res.status(400).json({error: "Error: both URL and Content are set. Please only set one field."});
