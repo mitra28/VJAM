@@ -195,8 +195,7 @@ app.post('/package', (req, res) =>{
     console.log(`compressed string received: ${compressedString}`);
     
     
-    res.status(201).json({success: "success"});
-    
+    res.status(424).json({error: "Package is not uploaded due to the disqualified rating." });    
   }
 
   // URL given

@@ -80,6 +80,7 @@ function PackageForm() {
       console.log(`response: ${res}`);
     } else {
       console.error('Failed to create package.');
+      setErrorMessage('Package is not uploaded due to the disqualified rating.');
     }
   };
 
