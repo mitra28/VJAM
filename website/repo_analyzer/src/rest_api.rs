@@ -391,6 +391,50 @@ pub async fn github_get_open_issues(owner: &str, repository: &str,  response_res
 
 }
 
+
+/// Returns the number of watchers of a repository
+///
+pub async fn github_get_size(owner: &str, repository: &str,  response_res: Result<serde_json::Value, String>) -> Result<String, String> {
+    // println!("Getting open issues information for {} / {}", owner, repository);
+    
+    let response = response_res.unwrap();
+
+    let size_res = response.get("watchers_count");
+    if size_res.is_none() {
+        return Err(format!("Failed to get size of {}/{}", owner, repository));
+    }
+
+    let size_val = size_res.unwrap().as_i64();
+    if size_val.is_none() {
+        return Err(format!("Failed to get size of {}/{}", owner, repository));
+    }
+
+    Ok(format!("{}", size_val.unwrap()))
+
+}
+
+/// Returns the number of subscribers of a repository
+///
+pub async fn github_get_subs(owner: &str, repository: &str,  response_res: Result<serde_json::Value, String>) -> Result<String, String> {
+    // println!("Getting open issues information for {} / {}", owner, repository);
+    
+    let response = response_res.unwrap();
+
+    let subs_res = response.get("watchers_count");
+    if subs_res.is_none() {
+        return Err(format!("Failed to get number of subscribers of {}/{}", owner, repository));
+    }
+
+    let subs_val = subs_res.unwrap().as_i64();
+    if subs_val.is_none() {
+        return Err(format!("Failed to get number of subscribers of {}/{}", owner, repository));
+    }
+
+    Ok(format!("{}", subs_val.unwrap()))
+
+}
+
+
 /// Returns the number of total issues of a repository
 ///
 
