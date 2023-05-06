@@ -8,12 +8,10 @@ function PackageForm() {
     const [packageUrl, setPackageUrl] = useState('');
     const  [zipfile, setFile] = useState(null); 
     const [scores, setScores] = useState(null); 
-    // const [id, setID] = useState(null); 
-    // const [name, setName] = useState(null); 
-    // const [version, setVersion] = useState(null); 
-    // const [url, setURL] = useState(null);
-    const [metadata, setMetaData] = useState('');
-    const [data, setData] = useState('');
+    const [id, setID] = useState(null); 
+    const [name, setName] = useState(null); 
+    const [version, setVersion] = useState(null); 
+    const [url, setURL] = useState(null);
     const [errorMessage, setErrorMessage] = useState('');
 
     const unzipFile = async (file) => {
@@ -35,29 +33,19 @@ function PackageForm() {
       });
     
       if (response.ok) {
-        console.log('Package created successfully!');
         const output = await response.json();
-        console.log(output);
-        const val = output.value;
-        // setID(output.id);
-        // setName(output.name);
-        // setVersion(output.version);
-        // setURL(output.URL);
-        setMetaData(val.metadata);
-        console.log(metadata);
-        setData(val.data);
-        console.log(data);
+        setID(output.id);
+        setName(output.name);
+        setVersion(output.version);
+        setURL(output.URL);
         setErrorMessage('');
-        
-        // console.log(`url scores: ${scores.scores.URL}`);
+        console.log('Package created successfully!');
       } else {
-        console.error('Failed to create package.');
-        // setID(null);
-        // setName(null);
-        // setVersion(null);
-        setMetaData('');
-        setData('');
+        setID(null);
+        setName(null);
+        setVersion(null);
         setErrorMessage('Failed to create package.');
+        console.error('Failed to create package.');
       }
   };
 
@@ -75,30 +63,8 @@ function PackageForm() {
       return;
     }
   
-      // unzip file
-      const unzippedData = await unzipFile(zipfile);
-      console.log("unzippedData");
-      console.log(unzippedData);
-
-  
-      const allfiles = unzippedData.files;
-      let allfilesstring = '';
-  
-      for (const filename in unzippedData.files) {
-        const file = unzippedData.files[filename];
-        const text = await file.async('text');
-        allfilesstring += text;
-      }
-    const string_data = encoder.encode(allfilesstring);
-
     let base64 = '';
-    const CHUNK_SIZE = 4096;
-    let content_length = 4; //string_data.length; **************************** CHANGE THIS
-    for (let i = 0; i < content_length; i += CHUNK_SIZE) {
-      const chunk = string_data.slice(i, i + CHUNK_SIZE);
-      base64 += btoa(chunk);
-    }
-
+    
     // Send Request
     const response = await fetch('/package', {
       method: 'POST',
@@ -176,12 +142,12 @@ function PackageForm() {
       <button type="submit">Create Package</button>
 
       {errorMessage && <div>{errorMessage}</div>}
-      {metadata && data && (
+      {name && version && id && (
         <div>
-          <p>Name: {metadata.Name}</p>
-          <p>Version: {metadata.Version}</p>
-          <p>ID: {metadata.ID}</p>
-          <p>URL: {data.URL}</p>
+          <p>Name: {name}</p>
+          <p>Version: {version}</p>
+          <p>ID: {id}</p>
+          <p>URL: {url}</p>
           
         </div>
       )}

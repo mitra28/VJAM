@@ -169,7 +169,7 @@ app.post('/package', (req, res) =>{
   const getReadme = async (url) => {
     try {
       const response = await axios.get(`${url}/raw/master/README.md`);
-      const readme = response.data.split('\n').slice(0, 200);
+      const readme = response.data.toString().slice(0, 100);
       return readme;
     } catch (error) {
       console.error(error);
@@ -218,12 +218,10 @@ app.post('/package', (req, res) =>{
       nameTag = packageName.toLowerCase();
       console.log(`Package name: ${packageName}`);
       console.log(`Package version: ${packageVersion}`);
-
       getReadme(url).then((value) => {
-        readme = value; // Assign the resolved value to the readme variable
-        // console.log(readme); // Log the readme to the console
+        readme = JSON.stringify(value); // Assign the resolved value to the readme variable
       });
-      console.log(typeof readme);
+
 
       const analyzerPath = path.join(__dirname, 'repo_analyzer', 'run'); // Get the path to your Rust program
       // const url = req.body.URL;
@@ -252,24 +250,7 @@ app.post('/package', (req, res) =>{
       process.on('close', () => {
         console.log(`here are the scores: ${scores}`);
         scoresObj = JSON.parse(scores);
-        const netscore = parseFloat(scoresObj.NET_SCORE);
-        // if(netscore > 0.3){
-        //   console.log('score is passing, ingest!');
-        //   // call db function here
-        //   post_url('name', 'version', 'name_tag', scoresObj.URL, 'zip', 'readme',
-        //     scoresObj.NET_SCORE, scoresObj.RAMP_UP_SCORE, scoresObj.CORRECTNESS_SCORE, scoresObj.BUS_FACTOR_SCORE,
-        //     scoresObj.RESPONSIVE_MAINTAINER_SCORE, scoresObj.LICENSE_SCORE, scoresObj.VERSION_PIN_SCORE, scoresObj.ADHERENCE_SCORE);
-        // }
-
-        // ******************************************************************
-        // TO-DO: create package object
-        //const package = create_package();
-        // TO-DO: save scores and url in package object
-        // TO-DO: save to db
-        //if(insert_repo_data(package) == -1){
-        //  res.status(409).json({ error: 'The package exists already'});
-        //}
-        // ******************************************************************
+      
         let scoreFlag;
         for (let key in scoresObj) {
           if (key === "URL" || key === "NET_SCORE") {
@@ -281,47 +262,27 @@ app.post('/package', (req, res) =>{
           }
           else {
             console.log(key + "'s score is lower than 0.5");
-            scoreFlag = 1;
+            scoreFlag = 0;
           }
         }
-        // console.log(`Score flag is ${scoreFlag}`);
-        // if( scoreFlag == 1) {
-        //   res.status(424).json({ error: "Package is not uploaded due to the disqualified rating." });
-        // }
-        // else {
-        //   console.log('score is passing, ingest!');
-        //   // call db function here
-        //   post_url(packageName, packageVersion, nameTag, scoresObj.URL, 'zip', 'readme',
-        //     scoresObj.NET_SCORE, scoresObj.RAMP_UP_SCORE, scoresObj.CORRECTNESS_SCORE, scoresObj.BUS_FACTOR_SCORE,
-        //     scoresObj.RESPONSIVE_MAINTAINER_SCORE, scoresObj.LICENSE_SCORE, scoresObj.VERSION_PIN_SCORE, scoresObj.ADHERENCE_SCORE);
+        console.log(`Score flag is ${scoreFlag}`);
+        if( scoreFlag == 1) {
+          res.status(424).json({ error: "Package is not uploaded due to the disqualified rating." });
+        }
+        else {
+          console.log('score is passing, ingest!');
+          // call db function here
+          post_url(packageName, packageVersion, nameTag, scoresObj.URL, 'zip', readme,
+            scoresObj.NET_SCORE, scoresObj.RAMP_UP_SCORE, scoresObj.CORRECTNESS_SCORE, scoresObj.BUS_FACTOR_SCORE,
+            scoresObj.RESPONSIVE_MAINTAINER_SCORE, scoresObj.LICENSE_SCORE, scoresObj.VERSION_PIN_SCORE, scoresObj.ADHERENCE_SCORE);
 
-        //   // const value = {'metadata': {'Name': packageName, 'Version': packageVersion, 'ID': nameTag}, 'data': {'URL': url}};
-        //   const value = {
-        //     metadata: { Name: packageName, Version: packageVersion, ID: nameTag },
-        //     data: { URL: url }
-        //   };
-        //   console.log(value);
-        //   res.status(201).json({ success: 'success', value: value });
-        // }
-        console.log('score is passing, ingest!');
-        // call db function here
-        post_url(packageName, packageVersion, nameTag, scoresObj.URL, 'zip', 'readme',
-          scoresObj.NET_SCORE, scoresObj.RAMP_UP_SCORE, scoresObj.CORRECTNESS_SCORE, scoresObj.BUS_FACTOR_SCORE,
-          scoresObj.RESPONSIVE_MAINTAINER_SCORE, scoresObj.LICENSE_SCORE, scoresObj.VERSION_PIN_SCORE, scoresObj.ADHERENCE_SCORE);
-
-        // const value = {'metadata': {'Name': packageName, 'Version': packageVersion, 'ID': nameTag}, 'data': {'URL': url}};
-        const value = {
-          metadata: { Name: packageName, Version: packageVersion, ID: nameTag },
-          data: { URL: url }
-        };
-        console.log(value);
-        res.status(201).json({ success: 'success', value: value });
-                
+            res.status(201).json({ success: 'success', name: packageName, version: packageVersion, id: nameTag, URL: url });
+          
+        }       
       });
     });
   }
 });
-
 
 // /package/{ID}
 
