@@ -57,8 +57,14 @@ function PackageForm() {
       return;
     }
   
-    let base64 = '';
-    
+
+      console.log("unzippedData");
+      console.log(zipfile);
+
+      // compress zip
+      const compressed = pako.deflate(zipfile);
+      console.log(`compressed data: ${compressed}`);
+
     // Send Request
     const response = await fetch('/package', {
       method: 'POST',
@@ -150,4 +156,3 @@ function PackageForm() {
 }
 
 export default PackageForm;
-
