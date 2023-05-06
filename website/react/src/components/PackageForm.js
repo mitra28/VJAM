@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import JSZip from 'jszip';
+const pako = require('pako');
 const encoder = new TextEncoder();
 
 // const PackageData = require('../../../backend/models/packagedata');
@@ -14,12 +14,6 @@ function PackageForm() {
     const [url, setURL] = useState(null);
     const [errorMessage, setErrorMessage] = useState('');
 
-    const unzipFile = async (file) => {
-      const zip = new JSZip();
-      const blob = await zip.loadAsync(file);
-      return blob;
-    };
-
   const handleUrlSubmit = async (event) => {
       console.log('Package handle url submit!');
       event.preventDefault();
@@ -33,21 +27,19 @@ function PackageForm() {
       });
     
       if (response.ok) {
-        console.log('Package created successfully!');
         const output = await response.json();
         setID(output.id);
         setName(output.name);
         setVersion(output.version);
         setURL(output.URL);
         setErrorMessage('');
-        
-        // console.log(`url scores: ${scores.scores.URL}`);
+        console.log('Package created successfully!');
       } else {
-        console.error('Failed to create package.');
         setID(null);
         setName(null);
         setVersion(null);
         setErrorMessage('Failed to create package.');
+        console.error('Failed to create package.');
       }
   };
 
@@ -65,52 +57,30 @@ function PackageForm() {
       return;
     }
   
-      // unzip file
-      const unzippedData = await unzipFile(zipfile);
-      console.log("unzippedData");
-      console.log(unzippedData);
-
-  
-      const allfiles = unzippedData.files;
-      let allfilesstring = '';
-  
-      for (const filename in unzippedData.files) {
-        const file = unzippedData.files[filename];
-        const text = await file.async('text');
-        allfilesstring += text;
-      }
-    const string_data = encoder.encode(allfilesstring);
-
     let base64 = '';
-    const CHUNK_SIZE = 4096;
-    let content_length = 4; //string_data.length; **************************** CHANGE THIS
-    for (let i = 0; i < content_length; i += CHUNK_SIZE) {
-      const chunk = string_data.slice(i, i + CHUNK_SIZE);
-      base64 += btoa(chunk);
-    }
-
+    
     // Send Request
     const response = await fetch('/package', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({Content: base64}),
+      body: JSON.stringify({Content: compressed}),
     });
-
-    //console.log('');
-    console.log(response);
 
     if (response.ok) {
       console.log('Package created successfully!');
+      const res = await response.json();
+      console.log(`response: ${res}`);
     } else {
       console.error('Failed to create package.');
+      setErrorMessage('Package is not uploaded due to the disqualified rating.');
     }
   };
 
   // callback for when file is uploaded
-  const handleFileChange = (event) => {
-    setFile(event.target.files[0]);
+  const handleZipChange = (event) => {
+    setFile(event.target.value);
   }
 
   const handleErrorSubmit = async (event) => {
@@ -161,7 +131,7 @@ function PackageForm() {
       </div>
       <div>
         <label htmlFor="file">Choose a zipfile:</label>
-        <input type="file" id="file" name="file" onChange={handleFileChange} />
+        <input type="text" id="file" name="file" onChange={handleZipChange} />
       </div>
       <button type="submit">Create Package</button>
 
@@ -172,6 +142,7 @@ function PackageForm() {
           <p>Version: {version}</p>
           <p>ID: {id}</p>
           <p>URL: {url}</p>
+          
         </div>
       )}
     </form>
