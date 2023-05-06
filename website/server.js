@@ -1,6 +1,7 @@
 
 const express = require('express');
 const cors = require("cors");
+const pako = require('pako');
 const mysql = require('mysql');
 const multer = require('multer');
 const path = require('path');
@@ -118,7 +119,7 @@ async function getAllTables(name_tag){
 
 const path_to_index = path.join(__dirname, '.', 'react', 'build', 'index.html');
 
-const port = 9090; // process.env.PORT || 8080;
+const port = 9000; // process.env.PORT || 8080;
 const app = express();
 app.use(cors());
 app.use(express.json());
@@ -169,7 +170,7 @@ app.post('/package', (req, res) =>{
   const getReadme = async (url) => {
     try {
       const response = await axios.get(`${url}/raw/master/README.md`);
-      const readme = response.data.toString().slice(0, 100);
+      const readme = response.data.split('\n').slice(0, 200).join('\n');
       return readme;
     } catch (error) {
       console.error(error);
@@ -183,7 +184,16 @@ app.post('/package', (req, res) =>{
     }
     // private ingest
     console.log("received an unzipped file");
-    res.status(201).json({success: "success"});
+    // uncompress
+    const compresseddata = JSON.stringify(req.body.Content);
+    const compressedObj = JSON.parse(compresseddata);
+    const compressedString = Object.values(compressedObj).join('');
+    
+    
+    console.log(`compressed string received: ${compressedString}`);
+    
+    
+    res.status(424).json({error: "Package is not uploaded due to the disqualified rating." });    
   }
 
   // URL given
@@ -370,8 +380,8 @@ app.get("/package/:id/rate", (req, res) => {
 app.get("/package/byName/:name", (req, res) => {
   const packageName = req.params.name;
   console.log(`GET /package/byName/${packageName} enpoint reached`);
-
 });
+
 app.delete("/package/byName/:name", (req, res) => {
   const packageName = req.params.name;
   console.log(`DELETE /package/byName/${packageName} enpoint reached`);

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import JSZip from 'jszip';
+const pako = require('pako');
 const encoder = new TextEncoder();
 
 // const PackageData = require('../../../backend/models/packagedata');
@@ -13,12 +13,6 @@ function PackageForm() {
     const [version, setVersion] = useState(null); 
     const [url, setURL] = useState(null);
     const [errorMessage, setErrorMessage] = useState('');
-
-    const unzipFile = async (file) => {
-      const zip = new JSZip();
-      const blob = await zip.loadAsync(file);
-      return blob;
-    };
 
   const handleUrlSubmit = async (event) => {
       console.log('Package handle url submit!');
@@ -71,22 +65,22 @@ function PackageForm() {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({Content: base64}),
+      body: JSON.stringify({Content: compressed}),
     });
-
-    //console.log('');
-    console.log(response);
 
     if (response.ok) {
       console.log('Package created successfully!');
+      const res = await response.json();
+      console.log(`response: ${res}`);
     } else {
       console.error('Failed to create package.');
+      setErrorMessage('Package is not uploaded due to the disqualified rating.');
     }
   };
 
   // callback for when file is uploaded
-  const handleFileChange = (event) => {
-    setFile(event.target.files[0]);
+  const handleZipChange = (event) => {
+    setFile(event.target.value);
   }
 
   const handleErrorSubmit = async (event) => {
@@ -137,7 +131,7 @@ function PackageForm() {
       </div>
       <div>
         <label htmlFor="file">Choose a zipfile:</label>
-        <input type="file" id="file" name="file" onChange={handleFileChange} />
+        <input type="text" id="file" name="file" onChange={handleZipChange} />
       </div>
       <button type="submit">Create Package</button>
 
