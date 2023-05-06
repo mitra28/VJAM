@@ -27,21 +27,19 @@ function PackageForm() {
       });
     
       if (response.ok) {
-        console.log('Package created successfully!');
         const output = await response.json();
         setID(output.id);
         setName(output.name);
         setVersion(output.version);
         setURL(output.URL);
         setErrorMessage('');
-        
-        // console.log(`url scores: ${scores.scores.URL}`);
+        console.log('Package created successfully!');
       } else {
-        console.error('Failed to create package.');
         setID(null);
         setName(null);
         setVersion(null);
         setErrorMessage('Failed to create package.');
+        console.error('Failed to create package.');
       }
   };
 
@@ -59,12 +57,8 @@ function PackageForm() {
       return;
     }
   
-      console.log("unzippedData");
-      console.log(zipfile);
-
-      // compress zip
-      const compressed = pako.deflate(zipfile);
-      console.log(`compressed data: ${compressed}`);
+    let base64 = '';
+    
     // Send Request
     const response = await fetch('/package', {
       method: 'POST',
@@ -148,6 +142,7 @@ function PackageForm() {
           <p>Version: {version}</p>
           <p>ID: {id}</p>
           <p>URL: {url}</p>
+          
         </div>
       )}
     </form>
