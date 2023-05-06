@@ -245,8 +245,14 @@ app.post('/package', async (req, res) =>{
       const response = await axios.get(`${url}/raw/master/README.md`);
       const readme = response.data.toString().slice(0, 100);
       return readme;
-    } catch (error) {
-      console.error(error);
+    } catch (error1) {
+      try {
+        const response = await axios.get(`${url}/raw/main/README.md`);
+        const readme = response.data.toString().slice(0, 100);
+        return readme;
+      } catch (error2) {
+        console.error(error2);
+      }
     }
   };
   
@@ -541,12 +547,29 @@ app.get("/package/:packageID/rate", async (req, res) => {
       process.on('close', () => {
         console.log(`here are the scores: ${scores}`);
         scoresObj = JSON.parse(scores);
+        
+        let scoreFlag;
+        for (let key in scoresObj) {
+          if (key === "URL" || key === "NET_SCORE") {
+            console.log(key + " so skip");
+            continue;
+          }
+          if (scoresObj[key] < 0.0) {
+            console.log(key + "'s score is choked");
+            scoreFlag = 1;
+          }
+        }
+        console.log(`Score flag is ${scoreFlag}`);
+        if( scoreFlag == 1) {
+          res.status(500).json({ error: "The package rating system choked on at least one of the metrics." });
+        }
+        else {
+          console.log('score is passing!');
+          // call db function here
+          updateScoreInfo(packageID,scoresObj.NET_SCORE, scoresObj.RAMP_UP_SCORE, scoresObj.CORRECTNESS_SCORE, scoresObj.BUS_FACTOR_SCORE,
+            scoresObj.RESPONSIVE_MAINTAINER_SCORE, scoresObj.LICENSE_SCORE, scoresObj.VERSION_PIN_SCORE, scoresObj.ADHERENCE_SCORE);
           
-              
-              // call db function here
-        updateScoreInfo(packageID,scoresObj.NET_SCORE, scoresObj.RAMP_UP_SCORE, scoresObj.CORRECTNESS_SCORE, scoresObj.BUS_FACTOR_SCORE,
-          scoresObj.RESPONSIVE_MAINTAINER_SCORE, scoresObj.LICENSE_SCORE, scoresObj.VERSION_PIN_SCORE, scoresObj.ADHERENCE_SCORE);
-
+        }       
           
       });
     };

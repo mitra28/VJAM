@@ -41,16 +41,18 @@ pub fn get_correctness(opened_issues: &str) -> f32 {
         Ok(n) => n,
         Err(_) => -1.0
     };
-    normalize(min(opened_issues, 2000.0), 2000.0)
+    let score = 1.0 - normalize(min(opened_issues, 300.0), 300.0);
+    score as f32
+    
 }
 
 /// Calculates the metric bus factor based on the number of forks a codebase has
-pub fn get_bus_factor(number_of_forks: &str) -> f32 {
-    let number_of_forks = match number_of_forks.parse::<f32>() {
+pub fn get_bus_factor(subscribers: &str) -> f32 {
+    let subscribers = match subscribers.parse::<f32>() {
         Ok(n) => n,
         Err(_) => -1.0
     };
-    normalize(min(number_of_forks, 1000.0), 1000.0)
+    normalize(min(subscribers, 1000.0), 1000.0)
 }
 
 /// Checks to see if license matches any known values
@@ -141,20 +143,12 @@ pub fn get_adherence_score(total_closed: Result<i32, String>, total_reviewers: R
 }
 
 /// Determines the responsive maintainer score
-pub fn get_responsive_maintainer(opened_issues: &str, total_issues: &str) -> f32 {
-    let opened_issues = match opened_issues.parse::<f32>() {
+pub fn get_responsive_maintainer(size: &str) -> f32 {
+    let size = match size.parse::<f32>() {
         Ok(n) => n,
         Err(_) => -1.0
     };
-    let total_issues = match total_issues.parse::<f32>() {
-        Ok(n) => n,
-        Err(_) => -1.0
-    };
-
-    let score = opened_issues/total_issues;
-    if opened_issues == -1.0 {
-        return -1.0;
-    }
+    let score = 1.0 - normalize(min(size, 30000.0), 30000.0);
     score as f32
 }
 
