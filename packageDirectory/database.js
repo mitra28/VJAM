@@ -249,6 +249,28 @@ export async function retrieveRepoTable(name_tag) {
   return repoRes[0];
 }
 
+//retrieve all names matching a regex
+export async function retrieveRegEx(regex) {
+  const stmt = `SELECT main_table.name, main_table.version, main_table.name_tag
+                FROM main_table
+                INNER JOIN repo_table
+                ON main_table.repo_id = repo_table.id
+                WHERE main_table.name REGEXP '?'
+                OR repo_table.readme REGEXP '?'`;
+  const [rows] = await pool.query(stmt, [regex, regex]);
+  return rows;
+}
+
+//retrieve all packages from an offset
+export async function retrievePackages(offset) {
+  const stmt = `SELECT main_table.name, main_table.version, main_table.name_tag
+                FROM main_table
+                WHERE id >= ?
+                LIMIT 100`;
+  const [rows] = await pool.query(stmt, [offset]);
+  return rows;
+}
+
 //retrieve all names
 export async function retrieveAllNames() {
   const stmt = `SELECT name FROM main_table`;

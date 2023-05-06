@@ -81,10 +81,18 @@ async function packageRate(name_tag){
   const result = retrieveScoreTable(name_tag);
   return result;
 }
-async function packageRegExGet(){
+async function packageRegExGet(regex){
   const db = await main();
-  const {retrieveAllNames} = db;
-  const result = retrieveAllNames();
+  const {retrieveRegEx} = db;
+  const result = retrieveRegEx(regex);
+  return result;
+
+}
+
+async function packagesGet(offset){
+  const db = await main();
+  const {retrievePackages} = db;
+  const result = retrievePackages(offset);
   return result;
 
 }
@@ -141,15 +149,16 @@ app.get('/', (req, res) => {
 app.post("/packages", (req, res) => {
   console.log('/packages enpoint reached');
   const offset = req.params.offset;
+  const rows = packagesGet(offset);
 
   // 413 if too many packages returned 
-  if (length > offset) {
-    res.status(404).json({ error: "Too many packages returned." });
+  if (rows.length > 100) {
+    res.status(413).json({ error: "Too many packages returned." });
   }
 
   // Otherwise, return a success response, list of packages
   else {
-    res.status(200).json({  });
+    res.status(200).json({ rows });
   }
 });
 
@@ -401,15 +410,17 @@ app.delete("/package/byName/:name", (req, res) => {
 
 // /package/byRegEx
 app.post("/package/byRegEx", (req, res) => {
+  const packageRegEx = req.content;
   console.log('/package/byRegEx enpoint reached');
+  const matching_pkgs = packageRegExGet(packageRegEx);
   // 404 if package doesn't exist
-  if (!packageExists(packageRegEx)) {
+  if (!matching_pkgs) {
     res.status(404).json({ error: "No package found under this regex." });
   }
 
   // Otherwise, return a success response, list of packages
   else {
-    res.status(200).json({  });
+    res.status(200).json({matching_pkgs});
   }
 });
 
