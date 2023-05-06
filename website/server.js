@@ -383,8 +383,8 @@ app.put('/package/:ID', (req, res) =>{
 
 
 // package/{id}/rate endpoint
-app.get("/package/:id/rate", async (req, res) => {
-  const packageID = req.params.ID;
+app.get("/package/:packageID/rate", async (req, res) => {
+  const packageID = req.params.packageID;
   console.log(`package/${packageID}/rate endpoint reached`);
   //check to see if package exists
   const exist = await packageExist(packageID);
