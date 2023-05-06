@@ -83,6 +83,14 @@ async function updatePackage(name_tag, newZip){
   const {updateZip} = db;
   const zip_content = await updateZip(name_tag, newZip);
 }
+
+async function updateScoreInfo(name_tag,total_score, ramp_up_score, correctness_score, bus_factor, responsiveness_score, license_score, version_score, adherence_score){
+  const db = await main();
+  const {insertScoreTable, AddScoreMain} = db;
+  const score_id = insertScoreTable(total_score, ramp_up_score, correctness_score, bus_factor, responsiveness_score, license_score, version_score, adherence_score);
+  await AddScoreMain(name_tag, score_id);
+}
+
 async function packageRate(name_tag){
   const db = await main();
   const {retrieveScoreTable} = db;
@@ -96,9 +104,24 @@ async function packageRegExGet(){
   return result;
 
 }
+async function retrieveMainTable(name_tag){
+  const db = await main();
+  const {retrieveMainTable} = db;
+  const result = await retrieveMainTable(name_tag);
+  return result;
+}
+
+async function retrieveRepoTable(name_tag){
+  const db = await main();
+  const {retrieveRepoTable} = db;
+  const result = await retrieveRepoTable(name_tag);
+  return result;
+}
+
+
 async function getScore(name_tag){
   const db = await main();
-  const { retrieveScoreTable } = db;
+  const { retrieveScoreTable} = db;
   const result = await retrieveScoreTable(name_tag);
   return result;
 }
@@ -363,9 +386,49 @@ app.put('/package/:ID', (req, res) =>{
 app.get("/package/:id/rate", async (req, res) => {
   const packageID = req.params.ID;
   console.log(`package/${packageID}/rate endpoint reached`);
-  const output = await getScore(packageID);
+  //check to see if package exists
+  const exist = await packageExist(packageID);
+  if(exist != -404){
+    //check to see if score id is -1
+    const mainRow = await retrieveMainTable(packageID);
+    const scoreVar = mainRow.score_id;
+    const result = await retrieveRepoTable(packageID);
+    const urlSearch = result.url;
+    if(scoreVar != -1){
+      // if it is not -1 can get score
+      const output = await getScore(packageID);
+      const totalscore = output.total_score;
+      const rampupscore = output.ramp_up_score;
+      const correctnessscore = output.correctness_score;
+      const busfactor = output.bus_factor;
+      const responsivescore = output.responsiveness_score;
+      const licensescore = output.license_score;
+      const versionscore = output.version_score;
+      const adherencescore = output.ladherence_score;
+
+      allscores = {
+              'NET_SCORE':totalscore,
+              'RAMP_UP_SCORE':rampupscore,
+              'CORRECTNESS_SCORE':correctnessscore,
+              'BUS_FACTOR_SCORE': busfactor,
+              'RESPONSIVE_MAINTAINER_SCORE':responsivescore,
+              'LICENSE_SCORE': licensescore,
+              'VERSION_PIN_SCORE': versionscore,
+              'ADHERENCE_SCORE': adherencescore}
+
+      res.status(200).json({ output: allscores});
+    }
+    if(scoreVar == -1){
+      //if it is -1 calculate score and insert to table
+
+
+      //return the score_id and update main_table
+      updateScoreInfo(packageID,  ); 
+    }
+
+  }
   // 404 if package doesn't exist
-  if (output === -404) {
+  if (exist === -404) {
     res.status(404).json({ error: "Package Does Not Exist." });
   }
 
@@ -380,26 +443,7 @@ app.get("/package/:id/rate", async (req, res) => {
     //}
   }
 
-  const totalscore = output.total_score;
-  const rampupscore = output.ramp_up_score;
-  const correctnessscore = output.correctness_score;
-  const busfactor = output.bus_factor;
-  const responsivescore = output.responsiveness_score;
-  const licensescore = output.license_score;
-  const versionscore = output.version_score;
-  const adherencescore = output.ladherence_score;
-
-  allscores = {
-          'NET_SCORE':totalscore,
-          'RAMP_UP_SCORE':rampupscore,
-          'CORRECTNESS_SCORE':correctnessscore,
-          'BUS_FACTOR_SCORE': busfactor,
-          'RESPONSIVE_MAINTAINER_SCORE':responsivescore,
-          'LICENSE_SCORE': licensescore,
-          'VERSION_PIN_SCORE': versionscore,
-          'ADHERENCE_SCORE': adherencescore}
-
-  res.status(200).json({ output: allscores});
+  
 });
 
 
