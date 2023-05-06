@@ -357,6 +357,19 @@ export async function packageCount(name_tag){
 }
 
 
+export async function updateScore(name_tag, total_score, ramp_up_score, correctness_score, bus_factor, responsiveness_score, license_score, version_score, adherence_score){
+  const mainStmt = `SELECT score_id FROM main_table WHERE name_tag = ?`;
+  const [mainRes] = await pool.query(mainStmt, [name_tag]);
+  if (mainRes.length == 0) {
+    throw new Error(`No rows found for nameTag: ${name_tag}`);
+  }
+  const id = mainRes[0].score_id;
+  const stmt = `UPDATE score_table SET total_score = ?, ramp_up_score = ?, correctness_score = ?, bus_factor = ?, responsiveness_score = ?, license_score = ?, version_score = ?, adherence_score = ? WHERE id = ?`;
+  const [result] = await pool.query(stmt, [total_score, ramp_up_score, correctness_score, bus_factor, responsiveness_score, license_score, version_score, adherence_score, id]);
+  console.log(`Updated total_score, ramp_up_score, correctness_score, bus_factor, responsiveness_score, license_score, version_score, adherence_score for id=${id} in score_table`);
+}
+
+
 
 //await createRepoTable();
 //const textValue = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. ".repeat(100);
