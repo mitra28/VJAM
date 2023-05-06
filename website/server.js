@@ -92,6 +92,12 @@ async function updateScoreInfo(name_tag,total_score, ramp_up_score, correctness_
   await AddScoreMain(name_tag, score_id);
 }
 
+async function updateScore(name_tag,total_score, ramp_up_score, correctness_score, bus_factor, responsiveness_score, license_score, version_score, adherence_score){
+  const db = await main();
+  const {updateScore} = db;
+  await updateScore(name_tag, total_score, ramp_up_score, correctness_score, bus_factor, responsiveness_score, license_score, version_score, adherence_score);
+}
+
 async function packageRate(name_tag){
   const db = await main();
   const {retrieveScoreTable} = db;
@@ -379,20 +385,58 @@ app.delete('/package/:ID', async (req, res) =>{
     res.status(200).json({ message : "Package is Deleted." });
   //}
 });
-app.put('/package/:ID', (req, res) =>{
+
+
+// Update
+app.put('/package/:ID', async (req, res) =>{
   const packageID = req.params.ID;
   // get id from db
   console.log(`Put package/${packageID} endpoint reached`);
 
-  // 404 if package doesn't exist
-  // if (!packageExists(packageId)) {
-  //   res.status(404).json({ error: "Package Does Not Exist." });
-  // }
+  const exist = await packageExist(packageID);
+  console.log("before package exists check");
+  if(exist != -404){//if package exists
+    //check to see if score id is -1
+    const result = await retrieveRepoTable(packageID);
+    const url = result.url;
+    let scoresObj;
+    const analyzerPath = path.join(__dirname, 'repo_analyzer', 'run'); // Get the path to your Rust program
+    // const url = req.body.URL;
+    // Spawn your analysis process
+    const process = spawn(analyzerPath, [url]);
 
-  // Otherwise, return a success response with the package information
-  // else {
-    retrieveMainTable(packageID);
-    retrieveRepoTable(packageID);
+    process.on('error', (err) => {
+      console.error('Failed to start child process.', err);
+    });
+    
+    process.on('exit', (code, signal) => {
+      console.log(`Child process exited with code ${code} and signal ${signal}`);
+    });
+    
+    let scores = '';
+    process.stdout.on('data', (data) => {
+      console.log(`stdout: ${data}`);
+      scores += data.toString();
+    });
+    
+    process.stderr.on('data', (data) => {
+      console.error(`stderr: ${data}`);
+    }); 
+
+  process.on('close', () => {
+    console.log(`here are the scores: ${scores}`);
+    scoresObj = JSON.parse(scores);
+      
+          
+          // call db function here
+          updateScore(packageID,scoresObj.NET_SCORE, scoresObj.RAMP_UP_SCORE, scoresObj.CORRECTNESS_SCORE, scoresObj.BUS_FACTOR_SCORE,
+      scoresObj.RESPONSIVE_MAINTAINER_SCORE, scoresObj.LICENSE_SCORE, scoresObj.VERSION_PIN_SCORE, scoresObj.ADHERENCE_SCORE);
+  });
+
+  } 
+  if (exist === -404) {
+    res.status(404).json({ error: "Package Does Not Exist." });
+  }
 
     // return contents from the retrieve functions below
     res.status(200).json({  });
