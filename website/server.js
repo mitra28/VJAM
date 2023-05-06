@@ -438,6 +438,101 @@ app.get("/package/:packageID/rate", async (req, res) => {
     if(scoreVar == -1){
       //if it is -1 calculate score and insert to table
 
+    console.log("received an url");
+
+    //////////////////////////////////////  CHECK IF PACKAGE EXISTS //////////////////////////////////////////////////////
+
+
+
+    const { exec } = require('child_process');
+
+    const url = urlSearch;
+    let packageName;
+    let packageVersion;
+    let scoresObj;
+    let nameTag;
+    let readme;
+
+    exec(`npm view ${url} --json name version`, (error, stdout, stderr) => {
+      if (error) {
+        console.error(`Error running command: ${error.message}`);
+        return;
+      }
+      if (stderr) {
+        console.error(`Command stderr: ${stderr}`);
+        return;
+      }
+      const packageInfo = JSON.parse(stdout);
+      packageName = packageInfo.name;
+      packageVersion = packageInfo.version;
+      nameTag = packageName.toLowerCase();
+      console.log(`Package name: ${packageName}`);
+      console.log(`Package version: ${packageVersion}`);
+      getReadme(url).then((value) => {
+        readme = JSON.stringify(value); // Assign the resolved value to the readme variable
+      });
+
+
+      const analyzerPath = path.join(__dirname, 'repo_analyzer', 'run'); // Get the path to your Rust program
+      // const url = req.body.URL;
+      // Spawn your analysis process
+      const process = spawn(analyzerPath, [url]);
+
+      process.on('error', (err) => {
+        console.error('Failed to start child process.', err);
+      });
+      
+      process.on('exit', (code, signal) => {
+        console.log(`Child process exited with code ${code} and signal ${signal}`);
+      });
+      
+      let scores = '';
+      process.stdout.on('data', (data) => {
+        console.log(`stdout: ${data}`);
+        scores += data.toString();
+      });
+      
+      process.stderr.on('data', (data) => {
+        console.error(`stderr: ${data}`);
+      }); 
+
+      
+      process.on('close', () => {
+        console.log(`here are the scores: ${scores}`);
+        scoresObj = JSON.parse(scores);
+      
+        let scoreFlag;
+        for (let key in scoresObj) {
+          if (key === "URL" || key === "NET_SCORE") {
+            console.log(key + " so skip");
+            continue;
+          }
+          if (scoresObj[key] >= 0.5) {
+            console.log(key + "'s score is higher than 0.5");
+          }
+          else {
+            console.log(key + "'s score is lower than 0.5");
+            scoreFlag = 0;
+          }
+        }
+        console.log(`Score flag is ${scoreFlag}`);
+        if( scoreFlag == 1) {
+          res.status(424).json({ error: "Package is not uploaded due to the disqualified rating." });
+        }
+        else {
+          console.log('score is passing, ingest!');
+          // call db function here
+          post_url(packageName, packageVersion, nameTag, scoresObj.URL, 'zip', readme,
+            scoresObj.NET_SCORE, scoresObj.RAMP_UP_SCORE, scoresObj.CORRECTNESS_SCORE, scoresObj.BUS_FACTOR_SCORE,
+            scoresObj.RESPONSIVE_MAINTAINER_SCORE, scoresObj.LICENSE_SCORE, scoresObj.VERSION_PIN_SCORE, scoresObj.ADHERENCE_SCORE);
+
+            res.status(201).json({ success: 'success', name: packageName, version: packageVersion, id: nameTag, URL: url });
+          
+        }       
+      });
+    });
+  }
+
 
       //return the score_id and update main_table
       updateScoreInfo(packageID,  ); 
@@ -470,7 +565,7 @@ app.get("/package/byName/:name", (req, res) => {
   console.log(`GET /package/byName/${packageName} enpoint reached`);
 });
 
-app.delete("/package/byName/:name", (req, res) => {
+app.delete("/package/byName/:name", async (req, res) => {
   const packageName = req.params.name;
   console.log(`DELETE /package/byName/${packageName} enpoint reached`);
   
