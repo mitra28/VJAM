@@ -126,6 +126,21 @@ async function retrieveRepoTable(name_tag){
   const result = await retrieveRepoTable(name_tag);
   return result;
 }
+async function retrieveMainTable(name_tag){
+  const db = await main();
+  const {retrieveMainTable} = db;
+  const result = await retrieveMainTable(name_tag);
+  return result;
+}
+
+
+async function retrieveRepoTable(name_tag){
+  const db = await main();
+  const {retrieveRepoTable} = db;
+  const result = await retrieveRepoTable(name_tag);
+  return result;
+}
+
 
 
 async function getScore(name_tag){
@@ -196,7 +211,12 @@ app.post("/packages", async (req, res) => {
 
   // Otherwise, return a success response, list of packages
   else {
-    res.status(200).json({ rows });
+
+
+    const packageslist = await post_list();
+    console.log(packageslist);
+    res.status(200).json({packages: packageslist});
+
   }
 });
 
@@ -217,7 +237,7 @@ app.post('/package', async (req, res) =>{
   const getReadme = async (url) => {
     try {
       const response = await axios.get(`${url}/raw/master/README.md`);
-      const readme = response.data.split('\n').slice(0, 200).join('\n');
+      const readme = response.data.toString().slice(0, 100);
       return readme;
     } catch (error) {
       console.error(error);
@@ -324,7 +344,7 @@ app.post('/package', async (req, res) =>{
           }
           else {
             console.log(key + "'s score is lower than 0.5");
-            scoreFlag = 0;
+            scoreFlag = 1;
           }
         }
         console.log(`Score flag is ${scoreFlag}`);
@@ -526,14 +546,16 @@ app.post("/package/byRegEx", (req, res) => {
   console.log('/package/byRegEx enpoint reached');
   const matching_pkgs = packageRegExGet(packageRegEx);
   // 404 if package doesn't exist
-  if (!matching_pkgs) {
-    res.status(404).json({ error: "No package found under this regex." });
-  }
+
+  // if (!packageExists(packageRegEx)) {
+  //   res.status(404).json({ error: "No package found under this regex." });
+  // }
 
   // Otherwise, return a success response, list of packages
-  else {
-    res.status(200).json({matching_pkgs});
-  }
+  // else {
+    res.status(200).json({  });
+  // }
+
 });
 
 
