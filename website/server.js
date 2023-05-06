@@ -406,15 +406,19 @@ app.get("/package/:packageID/rate", async (req, res) => {
   console.log(`package/${packageID}/rate endpoint reached`);
   //check to see if package exists
   const exist = await packageExist(packageID);
+  console.log("before package exists check");
+
   if(exist != -404){
     //check to see if score id is -1
     const mainRow = await retrieveMainTable(packageID);
     const scoreVar = mainRow.score_id;
     const result = await retrieveRepoTable(packageID);
     const urlSearch = result.url;
+    console.log("package exists");
     if(scoreVar != -1){
       // if it is not -1 can get score
       const output = await getScore(packageID);
+      console.log("before after getting score check");
       const totalscore = output.total_score;
       const rampupscore = output.ramp_up_score;
       const correctnessscore = output.correctness_score;
@@ -422,7 +426,7 @@ app.get("/package/:packageID/rate", async (req, res) => {
       const responsivescore = output.responsiveness_score;
       const licensescore = output.license_score;
       const versionscore = output.version_score;
-      const adherencescore = output.ladherence_score;
+      const adherencescore = output.adherence_score;
 
       allscores = {
               'NET_SCORE':totalscore,
@@ -439,124 +443,50 @@ app.get("/package/:packageID/rate", async (req, res) => {
     if(scoreVar == -1){
       //if it is -1 calculate score and insert to table
 
-    console.log("received an url");
+        const url = urlSearch;
+        let scoresObj;
+        const analyzerPath = path.join(__dirname, 'repo_analyzer', 'run'); // Get the path to your Rust program
+        // const url = req.body.URL;
+        // Spawn your analysis process
+        const process = spawn(analyzerPath, [url]);
 
-    //////////////////////////////////////  CHECK IF PACKAGE EXISTS //////////////////////////////////////////////////////
+        process.on('error', (err) => {
+          console.error('Failed to start child process.', err);
+        });
+        
+        process.on('exit', (code, signal) => {
+          console.log(`Child process exited with code ${code} and signal ${signal}`);
+        });
+        
+        let scores = '';
+        process.stdout.on('data', (data) => {
+          console.log(`stdout: ${data}`);
+          scores += data.toString();
+        });
+        
+        process.stderr.on('data', (data) => {
+          console.error(`stderr: ${data}`);
+        }); 
 
-
-
-    const { exec } = require('child_process');
-
-    const url = urlSearch;
-    let packageName;
-    let packageVersion;
-    let scoresObj;
-    let nameTag;
-    let readme;
-
-    exec(`npm view ${url} --json name version`, (error, stdout, stderr) => {
-      if (error) {
-        console.error(`Error running command: ${error.message}`);
-        return;
-      }
-      if (stderr) {
-        console.error(`Command stderr: ${stderr}`);
-        return;
-      }
-      const packageInfo = JSON.parse(stdout);
-      packageName = packageInfo.name;
-      packageVersion = packageInfo.version;
-      nameTag = packageName.toLowerCase();
-      console.log(`Package name: ${packageName}`);
-      console.log(`Package version: ${packageVersion}`);
-      getReadme(url).then((value) => {
-        readme = JSON.stringify(value); // Assign the resolved value to the readme variable
-      });
-
-
-      const analyzerPath = path.join(__dirname, 'repo_analyzer', 'run'); // Get the path to your Rust program
-      // const url = req.body.URL;
-      // Spawn your analysis process
-      const process = spawn(analyzerPath, [url]);
-
-      process.on('error', (err) => {
-        console.error('Failed to start child process.', err);
-      });
-      
-      process.on('exit', (code, signal) => {
-        console.log(`Child process exited with code ${code} and signal ${signal}`);
-      });
-      
-      let scores = '';
-      process.stdout.on('data', (data) => {
-        console.log(`stdout: ${data}`);
-        scores += data.toString();
-      });
-      
-      process.stderr.on('data', (data) => {
-        console.error(`stderr: ${data}`);
-      }); 
-
-      
       process.on('close', () => {
         console.log(`here are the scores: ${scores}`);
         scoresObj = JSON.parse(scores);
-      
-        let scoreFlag;
-        for (let key in scoresObj) {
-          if (key === "URL" || key === "NET_SCORE") {
-            console.log(key + " so skip");
-            continue;
-          }
-          if (scoresObj[key] >= 0.5) {
-            console.log(key + "'s score is higher than 0.5");
-          }
-          else {
-            console.log(key + "'s score is lower than 0.5");
-            scoreFlag = 0;
-          }
-        }
-        console.log(`Score flag is ${scoreFlag}`);
-        if( scoreFlag == 1) {
-          res.status(424).json({ error: "Package is not uploaded due to the disqualified rating." });
-        }
-        else {
-          console.log('score is passing, ingest!');
-          // call db function here
-          post_url(packageName, packageVersion, nameTag, scoresObj.URL, 'zip', readme,
-            scoresObj.NET_SCORE, scoresObj.RAMP_UP_SCORE, scoresObj.CORRECTNESS_SCORE, scoresObj.BUS_FACTOR_SCORE,
-            scoresObj.RESPONSIVE_MAINTAINER_SCORE, scoresObj.LICENSE_SCORE, scoresObj.VERSION_PIN_SCORE, scoresObj.ADHERENCE_SCORE);
-
-            res.status(201).json({ success: 'success', name: packageName, version: packageVersion, id: nameTag, URL: url });
           
-        }       
+              
+              // call db function here
+        updateScoreInfo(packageID,scoresObj.NET_SCORE, scoresObj.RAMP_UP_SCORE, scoresObj.CORRECTNESS_SCORE, scoresObj.BUS_FACTOR_SCORE,
+          scoresObj.RESPONSIVE_MAINTAINER_SCORE, scoresObj.LICENSE_SCORE, scoresObj.VERSION_PIN_SCORE, scoresObj.ADHERENCE_SCORE);
+
+          
       });
-    });
+    };
   }
-
-
-      //return the score_id and update main_table
-      updateScoreInfo(packageID,  ); 
-    }
-
-  }
-  // 404 if package doesn't exist
   if (exist === -404) {
     res.status(404).json({ error: "Package Does Not Exist." });
   }
 
-  
 
-  // rate package if there is not scored for it
-  if (output === -1){
-    console.log('package does not have scores set. calculating...');
-    // If the package rating system choked, return a 500 error response
-    //if (packageRatingChoked(packageId)) {
-    //  res.status(500).json({ error: "The package rating system choked on at least one of the metrics." });
-    //}
-  }
-
-  
+      //return the score_id and update main_table
 });
 
 

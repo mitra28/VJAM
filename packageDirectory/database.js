@@ -346,7 +346,7 @@ export async function retrieveZippedString(name_tag){
 }
 
 export async function packageCount(name_tag){
-  const stmt = "SELECT COUNT(*) AS count FROM main_table WHERE nametag = ?";
+  const stmt = "SELECT COUNT(*) AS count FROM main_table WHERE name_tag = ?";
   const [result] = await pool.query(stmt, [name_tag]);
   const count = result[0].count;
   if(count > 0){
