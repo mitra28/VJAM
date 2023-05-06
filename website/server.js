@@ -98,10 +98,18 @@ async function packageRate(name_tag){
   const result = retrieveScoreTable(name_tag);
   return result;
 }
-async function packageRegExGet(){
+async function packageRegExGet(regex){
   const db = await main();
-  const {retrieveAllNames} = db;
-  const result = retrieveAllNames();
+  const {retrieveRegEx} = db;
+  const result = retrieveRegEx(regex);
+  return result;
+
+}
+
+async function packagesGet(offset){
+  const db = await main();
+  const {retrievePackages} = db;
+  const result = retrievePackages(offset);
   return result;
 
 }
@@ -118,6 +126,21 @@ async function retrieveRepoTable(name_tag){
   const result = await retrieveRepoTable(name_tag);
   return result;
 }
+async function retrieveMainTable(name_tag){
+  const db = await main();
+  const {retrieveMainTable} = db;
+  const result = await retrieveMainTable(name_tag);
+  return result;
+}
+
+
+async function retrieveRepoTable(name_tag){
+  const db = await main();
+  const {retrieveRepoTable} = db;
+  const result = await retrieveRepoTable(name_tag);
+  return result;
+}
+
 
 
 async function getScore(name_tag){
@@ -179,18 +202,21 @@ app.get('/', (req, res) => {
 app.post("/packages", async (req, res) => {
   console.log('/packages enpoint reached');
   const offset = req.params.offset;
+  const rows = packagesGet(offset);
 
   // 413 if too many packages returned 
-  if (length > offset) {
-    res.status(404).json({ error: "Too many packages returned." });
+  if (rows.length > 100) {
+    res.status(413).json({ error: "Too many packages returned." });
   }
 
   // Otherwise, return a success response, list of packages
   else {
 
+
     const packageslist = await post_list();
     console.log(packageslist);
     res.status(200).json({packages: packageslist});
+
   }
 });
 
@@ -516,8 +542,11 @@ app.delete("/package/byName/:name", async (req, res) => {
 
 // /package/byRegEx ************ JASON ****************************
 app.post("/package/byRegEx", (req, res) => {
+  const packageRegEx = req.content;
   console.log('/package/byRegEx enpoint reached');
+  const matching_pkgs = packageRegExGet(packageRegEx);
   // 404 if package doesn't exist
+
   // if (!packageExists(packageRegEx)) {
   //   res.status(404).json({ error: "No package found under this regex." });
   // }
@@ -526,6 +555,7 @@ app.post("/package/byRegEx", (req, res) => {
   // else {
     res.status(200).json({  });
   // }
+
 });
 
 
