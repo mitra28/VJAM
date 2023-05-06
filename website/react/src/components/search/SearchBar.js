@@ -17,23 +17,21 @@ function SearchBar() {
   ]
 
   const [value, setValue] = useState('');
-  const [checked, setChecked] = useState(false);
   const [results, setResults] = useState([]);
 
   
   useEffect(() => {
-  }, [checked]);
+  }, []);
 
-  const getResults = (event) =>{
+  const getResults = async (event) =>{
     event.preventDefault();
-    if(checked){
-      console.log(`Searching for regex: '${value}'!`);
-      setResults(regex_results);
-    }
-    else{
-      console.log(`Searching for name: '${value}'!`);
-      setResults(name_results);
-    }
+    const response = await fetch(`/package/byRegex`, { // use fetch API to make a POST request to /api/packages endpoint
+      method: 'POST',
+      body: {
+        'content': {value}
+      },
+    });
+    setResults(response);
   }
 
   return (
@@ -49,10 +47,6 @@ function SearchBar() {
             }}
           />
         </label>
-        <input type="checkbox"
-        onChange={(newCheck) => {
-          setChecked(newCheck.target.checked)
-        }}></input>
         <input type="submit"></input>
       </form>
       <div>
