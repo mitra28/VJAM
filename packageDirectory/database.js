@@ -224,12 +224,12 @@ export async function deleteID_name(name){
 
 //retrieve all names matching a regex
 export async function retrieveRegEx(regex) {
-  const stmt = `SELECT main_table.name, main_table.version, main_table.name_tag
+  const stmt = `SELECT main_table.name, main_table.version
                 FROM main_table
                 INNER JOIN repo_table
                 ON main_table.repo_id = repo_table.id
-                WHERE main_table.name REGEXP '?'
-                OR repo_table.readme REGEXP '?'`;
+                WHERE main_table.name REGEXP ?
+                OR repo_table.readme REGEXP ?`;
   const [rows] = await pool.query(stmt, [regex, regex]);
   return rows;
 }

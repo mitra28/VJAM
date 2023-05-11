@@ -26,7 +26,7 @@ function App(prop) {
     <BrowserRouter>
       <Routes>
         <Route path="/" element = {<Layout />}>
-        <Route path="search" element={<SearchBar />} />
+        <Route path="package/byRegEx" element={<SearchBar />} />
         <Route path="package" element={<ResultPage package={NaN}/>} />
         <Route path="resetform" element = {<RegistryResetForm />}/>
         <Route path="idform" element = {<PackageIDForm />}/>

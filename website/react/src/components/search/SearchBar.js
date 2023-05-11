@@ -4,19 +4,11 @@ import ResultPage from '../ResultPage';
 
 
 function SearchBar() {
-  const name_results = [
-    {name: "Hello"},
-    {name: "Name"},
-    {name: "Search"},
+  const fail_results = [
+    {name: "NO RESULTS FOUND", version: "NA"},
   ]
   
-  const regex_results = [
-    {name: "Hello"},
-    {name: "Regex"},
-    {name: "Search"},
-  ]
-
-  const [value, setValue] = useState('');
+  const [value, setValue] = useState('.*');
   const [results, setResults] = useState([]);
 
   
@@ -25,13 +17,28 @@ function SearchBar() {
 
   const getResults = async (event) =>{
     event.preventDefault();
+    console.log(value);
+    const temp_value = JSON.stringify({content: value});
+    console.log(temp_value);
     const response = await fetch(`/package/byRegex`, { // use fetch API to make a POST request to /api/packages endpoint
       method: 'POST',
-      body: {
-        'content': {value}
+      headers: {
+        'Content-Type': 'application/json',
       },
+      body: temp_value,
     });
-    setResults(response);
+    const response_json = await response.json();
+    console.log(response);
+    console.log(response_json);
+    if(response.status == 200){
+      setResults(response_json.content);
+    }
+    else if(response.status == 404){
+      setResults(fail_results);
+    }  
+    else{
+      console.log("Response failed entirely");
+    }
   }
 
   return (
@@ -52,7 +59,7 @@ function SearchBar() {
       <div>
         <h1>Results:</h1>
         <ul>
-          {results.map((result) => {
+          {results && results.map((result) => {
             return <ResultPage package={result}></ResultPage>
           })}
         </ul>

@@ -211,13 +211,12 @@ app.post("/packages", async (req, res) => {
   const rows = packagesGet(offset);
 
   // 413 if too many packages returned 
-  if (rows.length > 100) {
+  if (rows.length && rows.length > 100) {
     res.status(413).json({ error: "Too many packages returned." });
   }
 
   // Otherwise, return a success response, list of packages
   else {
-
 
     const packageslist = await post_list();
     console.log(packageslist);
@@ -585,18 +584,24 @@ app.delete("/package/byName/:name", async (req, res) => {
 
 
 // /package/byRegEx
-app.post("/package/byRegEx", (req, res) => {
-  const packageRegEx = req.content;
-  console.log('/package/byRegEx enpoint reached');
-  const matching_pkgs = packageRegExGet(packageRegEx);
+app.post("/package/byRegEx", async (req, res) => {
+  console.log(req.body);
+  const packageRegEx = req.body.content;
+  if(packageRegEx == ''){
+    res.status(404).json({ error: "No package found under this regex." });
+    return;
+  }
+  console.log('/package/byRegEx endpoint reached');
+  const matching_pkgs = await packageRegExGet(packageRegEx);
+  console.log(matching_pkgs);
   // 404 if package doesn't exist
-  if (!matching_pkgs) {
+  if (matching_pkgs.length == 0) {
     res.status(404).json({ error: "No package found under this regex." });
   }
-
   // Otherwise, return a success response, list of packages
   else {
-    res.status(200).json({matching_pkgs});
+    console.log(JSON.stringify(matching_pkgs));
+    res.status(200).json({content: matching_pkgs});
   }
 });
 

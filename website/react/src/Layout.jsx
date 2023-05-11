@@ -5,7 +5,7 @@ const Layout = () => {
   return (
     <div>
       <h1>Welcome to Our Website</h1>
-      <div><Link to="search">Search</Link></div>
+      <div><Link to="package/byRegEx">Search</Link></div>
       <div><Link to="resetform">Registry Reset</Link></div>
       <div><Link to="idform">Package Retrieve</Link></div>
       <div><Link to="putidform">Package Update</Link></div>
