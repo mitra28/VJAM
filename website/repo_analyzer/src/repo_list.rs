@@ -81,6 +81,7 @@ impl RepoList {
         }
     }
 
+    /// Helps format the output (scores + URL) for the website to use
     pub fn formatoutput(&self) -> String {
         let mut output = String::new();
         for repo in &self.repos {

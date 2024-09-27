@@ -14,7 +14,7 @@ pub mod logging;
 
 
 use crate::rest_api::github_get_response;
-use crate::rest_api::github_get_issue_response;
+// use crate::rest_api::github_get_issue_response;
 use crate::rest_api::get_closed_pr_comments_count;
 use crate::rest_api::get_closed_pr_count;
 use crate::rest_api::get_closed_pr_reviews_count;
@@ -95,8 +95,10 @@ async fn run_url(repo_url: &str) {
     let response = github_get_response(&owner, &package, None).await;
     let response1 = response.clone();
     let response2 = response.clone();
+    let response3 = response.clone();
+    let response4 = response.clone();
 
-    let _r2 = github_get_issue_response(&owner, &package, None).await;
+    // let _r2 = github_get_issue_response(&owner, &package, None).await;
     let _dependencies = get_repo_info(&owner, &package, None).await;
    
     let mut total_pull_req = match get_closed_pr_count(&owner, &package).await {
@@ -134,16 +136,35 @@ async fn run_url(repo_url: &str) {
             "0.0".to_owned()
         }
     };
-    // println!("open issues: {}", opened_issues);
 
-    let total_issues = match rest_api::github_get_total_issues(&owner , &package, _r2).await {
-        Ok(total_issues) => total_issues,
+    let size = match rest_api::github_get_size(&owner , &package, response3).await {
+        Ok(watchers) => watchers,
         Err(_e) => {
             debug!("{}", _e);
             "0.0".to_owned()
         }
     };
-    // println!("total issues: {}", total_issues);
+
+
+    let subscribers = match rest_api::github_get_size(&owner , &package, response4).await {
+        Ok(subscribers) => subscribers,
+        Err(_e) => {
+            debug!("{}", _e);
+            "0.0".to_owned()
+        }
+    };
+
+
+    // println!("open issues: {}", opened_issues);
+
+    // let total_issues = match rest_api::github_get_total_issues(&owner , &package, _r2).await {
+    //     Ok(total_issues) => total_issues,
+    //     Err(_e) => {
+    //         debug!("{}", _e);
+    //         "0.0".to_owned()
+    //     }
+    // };
+    // // println!("total issues: {}", total_issues);
 
 
     let license =  rest_api::github_get_license(&owner , &package, response1); //.await {
@@ -157,37 +178,40 @@ async fn run_url(repo_url: &str) {
     };
     // println!("number_of_forks: {}", number_of_forks);
 
-    let mut version_score = metric_calculations::version_pin(_dependencies);
+
+
+
+    let version_score = metric_calculations::version_pin(_dependencies);
     // if version_score == -1.0 {
     //     version_score = 0.0;
     //     error!("Failed to get version score from {}/{}", &owner, &package);
     // }
-    let mut adherence_score = metric_calculations::get_adherence_score(Ok(total_pull_req),Ok(total_pull_req_reviewers ));
+    let adherence_score = metric_calculations::get_adherence_score(Ok(total_pull_req),Ok(total_pull_req_reviewers ));
     // if adherence_score == -1.0 {
     //     adherence_score = 0.0;
     //     error!("Failed to get adherence score from {}/{}", &owner, &package);
     // }
-    let mut ru = metric_calculations::get_ramp_up_time(&opened_issues, &number_of_forks);
+    let ru = metric_calculations::get_ramp_up_time(&opened_issues, &number_of_forks);
     // if ru == -1.0 {
     //     ru = 0.0;
     //     error!("Failed to get ramp up time from {}/{}", &owner, &package);
     // }
-    let mut c = metric_calculations::get_correctness(&opened_issues);
+    let c = metric_calculations::get_correctness(&opened_issues);
     // if c == -1.0 {
     //     c = 0.0;
     //     error!("Failed to get number of open issues from {}/{}", &owner, &package);
     // }
-    let mut bf = metric_calculations::get_bus_factor(&number_of_forks);
+    let bf = metric_calculations::get_bus_factor(&subscribers);
     // if bf == -1.0 {
     //     bf =  0.0;
     //     error!("Failed to get number of forks from {}/{}", &owner, &package);
     // }
-    let mut l = metric_calculations::get_license(license.await);
+    let l = metric_calculations::get_license(license.await);
     // if l == -1.0 {
     //     l =  0.0;
     //     error!("Failed to get license from {}/{}", &owner, &package);
     // }
-    let mut rm = metric_calculations::get_responsive_maintainer(&opened_issues, &total_issues);
+    let rm = metric_calculations::get_responsive_maintainer(&size);
     // if rm == -1.0 {
     //     rm = 0.0;
     //     error!("Failed to responsiveness from {}/{}", &owner, &package);
